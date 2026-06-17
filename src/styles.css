@@ -1,0 +1,52 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@theme {
+  --font-outfit: "Outfit", sans-serif;
+  --font-work-sans: "Work Sans", sans-serif;
+
+  --color-cafe-bg: #FFF7F5;
+  --color-cafe-surface: #FFFFFF;
+  --color-cafe-footer: #2D2422;
+  --color-cafe-primary: #E67E6B;
+  --color-cafe-primary-hover: #D96C5A;
+  --color-cafe-primary-light: #FDE4DD;
+  --color-cafe-heading: #2D2422;
+  --color-cafe-body: #6B5C58;
+  --color-cafe-muted: #A3938F;
+  --color-cafe-border: #F5EBE9;
+  --color-cafe-open-bg: #E8F5E9;
+  --color-cafe-open-text: #2E7D32;
+}
+
+@theme inline {
+  --color-background: var(--color-cafe-bg);
+  --color-foreground: var(--color-cafe-heading);
+  --color-border: var(--color-cafe-border);
+}
+
+@layer base {
+  html, body {
+    background-color: var(--color-cafe-bg);
+    color: var(--color-cafe-body);
+    font-family: var(--font-work-sans);
+  }
+  * { border-color: var(--color-cafe-border); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
+}
