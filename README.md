@@ -1,1 +1,1 @@
-# indie_cafe_hub
+# indie_coffee_hub

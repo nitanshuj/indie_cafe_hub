@@ -7,10 +7,10 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth-context";
 
 function NotFoundComponent() {
@@ -38,9 +38,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -78,11 +75,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Indie Cafe Hub — Bengaluru's best independent cafes" },
-      { name: "description", content: "A curated directory of independent, specialty coffee cafes in Bengaluru for digital nomads and coffee lovers." },
-      { name: "author", content: "Indie Cafe Hub" },
-      { property: "og:title", content: "Indie Cafe Hub — Bengaluru" },
-      { property: "og:description", content: "Find laptop-friendly, specialty coffee cafes across Bengaluru." },
+      { title: "Indie Coffee Hub — Bengaluru's best independent cafes" },
+      {
+        name: "description",
+        content:
+          "A curated directory of independent, specialty coffee cafes in Bengaluru for digital nomads and coffee lovers.",
+      },
+      { name: "author", content: "Indie Coffee Hub" },
+      { property: "og:title", content: "Indie Coffee Hub — Bengaluru" },
+      {
+        property: "og:description",
+        content: "Find laptop-friendly, specialty coffee cafes across Bengaluru.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -90,7 +94,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -119,8 +126,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <Toaster position="top-right" closeButton richColors />
       </AuthProvider>
     </QueryClientProvider>
   );

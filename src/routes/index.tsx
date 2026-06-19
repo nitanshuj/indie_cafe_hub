@@ -2,25 +2,46 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Search, ArrowRight } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CafeCard } from "@/components/cafe-card";
-import { cafes } from "@/lib/cafes";
+import { fetchCafes } from "@/lib/cafes";
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const cafes = await fetchCafes();
+    return { featured: cafes.slice(0, 5) };
+  },
   head: () => ({
     meta: [
-      { title: "Indie Cafe Hub — Bengaluru's best independent cafes" },
-      { name: "description", content: "A curated directory of independent specialty coffee cafes in Bengaluru, hand-picked for nomads and coffee lovers." },
-      { property: "og:title", content: "Indie Cafe Hub — Bengaluru" },
-      { property: "og:description", content: "Find laptop-friendly, specialty coffee cafes across Bengaluru." },
-      { property: "og:image", content: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1200&q=80" },
+      { title: "Indie Coffee Hub — Bengaluru's best independent cafes" },
+      {
+        name: "description",
+        content:
+          "A curated directory of independent specialty coffee cafes in Bengaluru, hand-picked for nomads and coffee lovers.",
+      },
+      { property: "og:title", content: "Indie Coffee Hub — Bengaluru" },
+      {
+        property: "og:description",
+        content: "Find laptop-friendly, specialty coffee cafes across Bengaluru.",
+      },
+      {
+        property: "og:image",
+        content: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1200&q=80",
+      },
     ],
   }),
   component: Index,
 });
 
-const marqueeItems = ["LAPTOP FRIENDLY", "SPECIALTY COFFEE", "LOCAL BAKERY", "FAST WIFI", "INDEPENDENT", "BENGALURU"];
+const marqueeItems = [
+  "LAPTOP FRIENDLY",
+  "SPECIALTY COFFEE",
+  "LOCAL BAKERY",
+  "FAST WIFI",
+  "INDEPENDENT",
+  "BENGALURU",
+];
 
 function Index() {
-  const featured = cafes.slice(0, 5);
+  const { featured } = Route.useLoaderData();
 
   return (
     <div className="min-h-screen bg-[#FFF7F5]">
@@ -35,7 +56,8 @@ function Index() {
             Your city's best indie cafes, found.
           </h1>
           <p className="mt-6 text-base leading-relaxed text-[#6B5C58] font-work-sans max-w-xl mx-auto">
-            Hand-picked corners of Bengaluru for specialty coffee, slow mornings, and focused work — no chains, no clutter.
+            Hand-picked corners of Bengaluru for specialty coffee, slow mornings, and focused work —
+            no chains, no clutter.
           </p>
 
           <form
@@ -43,7 +65,11 @@ function Index() {
             onSubmit={(e) => e.preventDefault()}
           >
             <div className="relative flex-1">
-              <Search size={18} strokeWidth={1.5} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3938F]" />
+              <Search
+                size={18}
+                strokeWidth={1.5}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3938F]"
+              />
               <input
                 type="search"
                 placeholder="Search by name or neighborhood…"
@@ -64,7 +90,10 @@ function Index() {
         <div className="relative border-y border-[#F5EBE9] bg-white/40 overflow-hidden py-4">
           <div className="flex animate-marquee whitespace-nowrap">
             {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
-              <span key={i} className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] mx-8 font-work-sans">
+              <span
+                key={i}
+                className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] mx-8 font-work-sans"
+              >
                 {item} •
               </span>
             ))}
@@ -75,7 +104,9 @@ function Index() {
       <section className="max-w-7xl mx-auto px-6 py-20 sm:py-28">
         <div className="flex items-end justify-between flex-wrap gap-4 mb-12">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">Featured this month</p>
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">
+              Featured this month
+            </p>
             <h2 className="mt-3 text-3xl sm:text-4xl tracking-tight font-medium text-[#2D2422] font-outfit">
               Where Bengaluru is going right now
             </h2>
@@ -90,11 +121,25 @@ function Index() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-6">
-          <CafeCard cafe={featured[0]} className="md:col-span-8 lg:col-span-8" imageHeightClass="h-80" />
-          <CafeCard cafe={featured[1]} className="md:col-span-8 lg:col-span-4" imageHeightClass="h-80" />
-          <CafeCard cafe={featured[2]} className="md:col-span-4 lg:col-span-4" imageHeightClass="h-56" />
-          <CafeCard cafe={featured[3]} className="md:col-span-4 lg:col-span-4" imageHeightClass="h-56" />
-          <CafeCard cafe={featured[4]} className="md:col-span-8 lg:col-span-4" imageHeightClass="h-56" />
+          {featured.map((cafe, i) => {
+            let colSpan = "md:col-span-8 lg:col-span-4";
+            let heightClass = "h-56";
+            if (i === 0) {
+              colSpan = "md:col-span-8 lg:col-span-8";
+              heightClass = "h-80";
+            } else if (i === 1) {
+              colSpan = "md:col-span-8 lg:col-span-4";
+              heightClass = "h-80";
+            }
+            return (
+              <CafeCard
+                key={cafe.id}
+                cafe={cafe}
+                className={colSpan}
+                imageHeightClass={heightClass}
+              />
+            );
+          })}
         </div>
       </section>
 

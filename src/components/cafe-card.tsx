@@ -41,12 +41,16 @@ export function CafeCard({ cafe, className = "", imageHeightClass = "h-64" }: Pr
           {cafe.name}
         </h3>
         <div className="mt-2 flex items-center gap-3 text-xs text-[#A3938F] font-work-sans">
-          <span className="inline-flex items-center gap-1"><MapPin size={12} strokeWidth={1.5} />{cafe.neighborhood}</span>
-          <span className="inline-flex items-center gap-1"><Clock size={12} strokeWidth={1.5} />{cafe.hours}</span>
+          <span className="inline-flex items-center gap-1">
+            <MapPin size={12} strokeWidth={1.5} />
+            {cafe.neighborhood}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Clock size={12} strokeWidth={1.5} />
+            {cafe.hours}
+          </span>
         </div>
-        <p className="mt-4 text-[#6B5C58] font-work-sans leading-relaxed text-sm">
-          {cafe.blurb}
-        </p>
+        <p className="mt-4 text-[#6B5C58] font-work-sans leading-relaxed text-sm">{cafe.blurb}</p>
         <div className="mt-5 flex flex-wrap gap-2">
           {cafe.tags.map((t) => (
             <span

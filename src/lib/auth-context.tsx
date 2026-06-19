@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { supabase } from "./supabase";
 
 export type AuthUser = {
   email: string;
@@ -8,60 +9,117 @@ export type AuthUser = {
 
 type AuthContextValue = {
   user: AuthUser | null;
-  signIn: (email: string, _password: string) => Promise<AuthUser>;
-  signUp: (email: string, _password: string, name?: string) => Promise<AuthUser>;
-  signOut: () => void;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<AuthUser>;
+  signUp: (email: string, password: string, name?: string) => Promise<AuthUser>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const STORAGE_KEY = "indie-cafe-user";
+
+async function fetchProfile(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("full_name, is_admin")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error("Error fetching profile:", err);
+    return null;
+  }
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleSession = async (session: any) => {
+    if (session?.user) {
+      const profile = await fetchProfile(session.user.id);
+      setUser({
+        email: session.user.email || "",
+        name:
+          profile?.full_name ||
+          session.user.user_metadata?.full_name ||
+          session.user.email?.split("@")[0] ||
+          "Friend",
+        isAdmin: profile?.is_admin || session.user.email?.toLowerCase().includes("admin") || false,
+      });
+    } else {
+      setUser(null);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
-  }, []);
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      void handleSession(session);
+    });
 
-  const persist = (u: AuthUser) => {
-    setUser(u);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-    } catch {
-      /* ignore */
-    }
-    return u;
-  };
+    // Listen for changes on auth state (logged in, signed out, etc.)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      void handleSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const value: AuthContextValue = {
     user,
-    signIn: async (email) => {
-      const name = email.split("@")[0] || "Friend";
-      return persist({ email, name, isAdmin: email.toLowerCase().includes("admin") });
+    loading,
+    signIn: async (email, password) => {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      const profile = await fetchProfile(data.user.id);
+      const u = {
+        email: data.user.email || "",
+        name:
+          profile?.full_name ||
+          data.user.user_metadata?.full_name ||
+          data.user.email?.split("@")[0] ||
+          "Friend",
+        isAdmin: profile?.is_admin || data.user.email?.toLowerCase().includes("admin") || false,
+      };
+      return u;
     },
-    signUp: async (email, _password, name) => {
-      return persist({
+    signUp: async (email, password, name) => {
+      const { data, error } = await supabase.auth.signUp({
         email,
-        name: name || email.split("@")[0] || "Friend",
-        isAdmin: email.toLowerCase().includes("admin"),
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
       });
+      if (error) throw error;
+      if (!data.user) throw new Error("No user returned from signup");
+
+      const profile = await fetchProfile(data.user.id);
+      const u = {
+        email: data.user.email || "",
+        name:
+          profile?.full_name ||
+          data.user.user_metadata?.full_name ||
+          data.user.email?.split("@")[0] ||
+          "Friend",
+        isAdmin: profile?.is_admin || data.user.email?.toLowerCase().includes("admin") || false,
+      };
+      return u;
     },
-    signOut: () => {
+    signOut: async () => {
+      await supabase.auth.signOut();
       setUser(null);
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
     },
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
