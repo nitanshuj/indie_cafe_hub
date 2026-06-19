@@ -759,7 +759,7 @@ function Admin() {
                               alt={`Gallery view ${idx}`}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 bg-black/35 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center z-20">
+                            <div className="absolute inset-0 bg-black/35 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center z-20 gap-2">
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -769,6 +769,16 @@ function Admin() {
                                 className="bg-white/90 hover:bg-white text-[#2D2422] rounded-lg p-1.5 cursor-pointer shadow transition-all"
                               >
                                 <ZoomIn size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setGallery(g => g.filter((_, i) => i !== idx));
+                                }}
+                                className="bg-red-500/90 hover:bg-red-600 text-white rounded-lg p-1.5 cursor-pointer shadow transition-all"
+                              >
+                                <Trash2 size={12} />
                               </button>
                             </div>
                             {gallery.length > 4 && idx === 3 && (

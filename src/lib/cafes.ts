@@ -84,12 +84,12 @@ export async function fetchCafes(): Promise<Cafe[]> {
   }
 
   const cafes = (data || []).map(mapDbCafeToUiCafe);
-  
+
   // Save cache state for ISR simulation
   if (typeof window !== "undefined") {
     setIsrCache(cafes);
   }
-  
+
   return cafes;
 }
 

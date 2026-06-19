@@ -22,10 +22,6 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Find laptop-friendly, specialty coffee cafes across Bengaluru.",
       },
-      {
-        property: "og:image",
-        content: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1200&q=80",
-      },
     ],
   }),
   component: Index,

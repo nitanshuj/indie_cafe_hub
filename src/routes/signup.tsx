@@ -40,13 +40,7 @@ function SignUp() {
     <div className="min-h-screen bg-[#FFF7F5] grid lg:grid-cols-2">
       <div className="hidden lg:block relative p-6">
         <div
-          className="h-full w-full rounded-[2rem] overflow-hidden"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1613274554329-70f997f5789f?w=1600&q=80')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
+          className="h-full w-full rounded-[2rem] overflow-hidden bg-[#FDE4DD]"
         >
           <div className="h-full w-full bg-gradient-to-tr from-[#2D2422]/45 via-transparent to-transparent p-10 flex flex-col justify-end">
             <Link
