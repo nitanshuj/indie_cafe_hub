@@ -180,10 +180,14 @@ function Admin() {
     cityId: "",
     specialtyFocus: "",
     noiseLevel: "moderate" as "quiet" | "moderate" | "bustling",
-    seatingCapacity: "",
-    latitude: "",
-    longitude: "",
     googleMapsUrl: "",
+    hoursMonday: "",
+    hoursTuesday: "",
+    hoursWednesday: "",
+    hoursThursday: "",
+    hoursFriday: "",
+    hoursSaturday: "",
+    hoursSunday: "",
   });
 
   const loadCafes = async () => {
@@ -320,6 +324,21 @@ function Admin() {
 
   const startEdit = (cafe: Cafe) => {
     setEditingCafe(cafe);
+    const oph = cafe.opening_hours;
+    let hw = "";
+    let hsa = "";
+    let hsu = "";
+    if (oph && typeof oph === "object") {
+      const o = oph as any;
+      hw = o.weekday || o.mon_fri || "";
+      hsa = o.saturday || "";
+      hsu = o.sunday || "";
+    } else if (typeof oph === "string") {
+      hw = oph;
+    } else if (typeof cafe.hours === "string") {
+      hw = cafe.hours;
+    }
+
     setForm({
       name: cafe.name,
       neighborhood: cafe.neighborhood,
@@ -332,10 +351,14 @@ function Admin() {
       cityId: cafe.city_id || (cities.length > 0 ? cities[0].id : ""),
       specialtyFocus: cafe.specialty_focus || "",
       noiseLevel: cafe.noise_level || "moderate",
-      seatingCapacity: cafe.seating_capacity ? String(cafe.seating_capacity) : "",
-      latitude: cafe.latitude ? String(cafe.latitude) : "",
-      longitude: cafe.longitude ? String(cafe.longitude) : "",
       googleMapsUrl: cafe.google_maps_url || "",
+      hoursMonday: cafe.opening_hours?.monday || "",
+      hoursTuesday: cafe.opening_hours?.tuesday || "",
+      hoursWednesday: cafe.opening_hours?.wednesday || "",
+      hoursThursday: cafe.opening_hours?.thursday || "",
+      hoursFriday: cafe.opening_hours?.friday || "",
+      hoursSaturday: cafe.opening_hours?.saturday || "",
+      hoursSunday: cafe.opening_hours?.sunday || "",
     });
     setPreview(cafe.image);
     setGallery(cafe.gallery || []);
@@ -365,10 +388,14 @@ function Admin() {
       cityId: cities.length > 0 ? cities[0].id : "",
       specialtyFocus: "",
       noiseLevel: "moderate",
-      seatingCapacity: "",
-      latitude: "",
-      longitude: "",
       googleMapsUrl: "",
+      hoursMonday: "",
+      hoursTuesday: "",
+      hoursWednesday: "",
+      hoursThursday: "",
+      hoursFriday: "",
+      hoursSaturday: "",
+      hoursSunday: "",
     });
     setPreview(null);
     setGallery([]);
@@ -441,10 +468,16 @@ function Admin() {
         city_id: form.cityId,
         specialty_focus: form.specialtyFocus || null,
         noise_level: form.noiseLevel || null,
-        seating_capacity: form.seatingCapacity ? parseInt(form.seatingCapacity) : null,
-        latitude: form.latitude ? parseFloat(form.latitude) : null,
-        longitude: form.longitude ? parseFloat(form.longitude) : null,
         google_maps_url: form.googleMapsUrl || null,
+        opening_hours: {
+          monday: form.hoursMonday || null,
+          tuesday: form.hoursTuesday || null,
+          wednesday: form.hoursWednesday || null,
+          thursday: form.hoursThursday || null,
+          friday: form.hoursFriday || null,
+          saturday: form.hoursSaturday || null,
+          sunday: form.hoursSunday || null,
+        },
       };
 
       if (editingCafe) {
@@ -767,6 +800,34 @@ function Admin() {
                     placeholder="https://maps.google.com/..."
                     className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
                   />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <p className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-3">Opening Hours</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { label: "Monday", key: "hoursMonday" },
+                      { label: "Tuesday", key: "hoursTuesday" },
+                      { label: "Wednesday", key: "hoursWednesday" },
+                      { label: "Thursday", key: "hoursThursday" },
+                      { label: "Friday", key: "hoursFriday" },
+                      { label: "Saturday", key: "hoursSaturday" },
+                      { label: "Sunday", key: "hoursSunday" },
+                    ].map(({ label, key }) => (
+                      <div key={key}>
+                        <label className="block text-[10px] uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-1.5">
+                          {label}
+                        </label>
+                        <input
+                          type="text"
+                          value={(form as any)[key]}
+                          onChange={(e) => setForm((s) => ({ ...s, [key]: e.target.value }))}
+                          placeholder="e.g. 9am – 9pm"
+                          className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-3 py-2 outline-none font-work-sans text-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="sm:col-span-2">

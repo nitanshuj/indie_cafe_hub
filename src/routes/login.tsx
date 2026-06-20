@@ -7,7 +7,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign In — Indie Coffee Hub" },
-      { name: "description", content: "Sign in to save your favorite Bengaluru cafes." },
+      { name: "description", content: "Sign in to save your favorite cafes." },
     ],
   }),
   component: Login,
@@ -16,10 +16,13 @@ export const Route = createFileRoute("/login")({
 function AuthSplit({ side, children }: { side: "left" | "right"; children: React.ReactNode }) {
   const Image = (
     <div className="hidden lg:block relative p-6">
-      <div
-        className="h-full w-full rounded-[2rem] overflow-hidden bg-[#FDE4DD]"
-      >
-        <div className="h-full w-full bg-gradient-to-tr from-[#2D2422]/40 via-transparent to-transparent p-10 flex flex-col justify-end">
+      <div className="h-full w-full rounded-[2rem] overflow-hidden relative">
+        <img
+          src="https://res.cloudinary.com/daon1coiv/image/upload/v1781927933/Cover_Image_1_sh6d4g.png"
+          alt="Indie Coffee Hub cover"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-cafe-footer/70 via-cafe-footer/20 to-transparent p-10 flex flex-col justify-end">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-white font-outfit text-xl font-medium"
@@ -35,7 +38,7 @@ function AuthSplit({ side, children }: { side: "left" | "right"; children: React
   );
 
   return (
-    <div className="min-h-screen bg-[#FFF7F5] grid lg:grid-cols-2">
+    <div className="min-h-screen bg-cafe-bg grid lg:grid-cols-2">
       {side === "left" ? Image : null}
       <div className="flex items-center justify-center px-6 py-16">
         <div className="flex items-center justify-center px-6 py-16 w-full">
@@ -78,17 +81,17 @@ function Login() {
     <AuthSplit side="left">
       <Link
         to="/"
-        className="lg:hidden inline-flex items-center gap-2 text-[#2D2422] font-outfit text-xl font-medium mb-8"
+        className="lg:hidden inline-flex items-center gap-2 text-cafe-heading font-outfit text-xl font-medium mb-8"
       >
-        <Coffee strokeWidth={1.5} className="text-[#E67E6B]" /> Indie Coffee Hub
+        <Coffee strokeWidth={1.5} className="text-cafe-primary" /> Indie Coffee Hub
       </Link>
-      <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">
+      <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
         Welcome back
       </p>
-      <h1 className="mt-3 text-4xl tracking-tight font-light text-[#2D2422] font-outfit">
+      <h1 className="mt-3 text-4xl tracking-tight font-light text-cafe-heading font-outfit">
         Sign in
       </h1>
-      <p className="mt-3 text-[#6B5C58] font-work-sans">Pick up where you left off.</p>
+      <p className="mt-3 text-cafe-body font-work-sans">Pick up where you left off.</p>
 
       {error && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-work-sans">
@@ -98,7 +101,7 @@ function Login() {
 
       <form className="mt-10 space-y-5" onSubmit={submit} data-testid="login-form">
         <div>
-          <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+          <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-cafe-body font-work-sans mb-2">
             Email
           </label>
           <input
@@ -108,11 +111,11 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             data-testid="login-email-input"
-            className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-3 outline-none font-work-sans"
+            className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted px-4 py-3 outline-none font-work-sans"
           />
         </div>
         <div>
-          <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+          <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-cafe-body font-work-sans mb-2">
             Password
           </label>
           <input
@@ -122,14 +125,14 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             data-testid="login-password-input"
-            className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-3 outline-none font-work-sans"
+            className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted px-4 py-3 outline-none font-work-sans"
           />
         </div>
         <button
           type="submit"
           disabled={busy}
           data-testid="login-submit-button"
-          className="w-full bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-work-sans font-medium inline-flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full bg-cafe-primary text-white hover:bg-cafe-primary-hover disabled:opacity-60 px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-work-sans font-medium inline-flex items-center justify-center gap-2 cursor-pointer"
         >
           {busy ? (
             "Signing in…"
@@ -141,11 +144,11 @@ function Login() {
         </button>
       </form>
 
-      <p className="mt-8 text-sm text-[#6B5C58] font-work-sans">
+      <p className="mt-8 text-sm text-cafe-body font-work-sans">
         New here?{" "}
         <Link
           to="/signup"
-          className="text-[#E67E6B] hover:text-[#D96C5A] font-medium"
+          className="text-cafe-primary hover:text-cafe-primary-hover font-medium"
           data-testid="login-to-signup-link"
         >
           Create an account

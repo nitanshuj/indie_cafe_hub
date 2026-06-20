@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Coffee, MapPin, User, LayoutDashboard, LogOut, Zap, Globe, RefreshCw, Layers, Compass, Eye, EyeOff, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
@@ -24,7 +25,7 @@ function AuthArea() {
         <Link
           to="/login"
           data-testid="header-signin-link"
-          className="text-sm text-[#6B5C58] hover:text-[#2D2422] px-3 py-2 rounded-xl transition-colors font-work-sans"
+          className="text-sm text-cafe-body hover:text-cafe-heading px-3 py-2 rounded-xl transition-colors font-work-sans"
         >
           Sign In
         </Link>
@@ -55,21 +56,21 @@ function AuthArea() {
       </button>
       {open && (
         <div
-          className="absolute right-0 mt-2 w-56 bg-white border border-[#F5EBE9] rounded-2xl shadow-[0_12px_40px_rgba(230,126,107,0.08)] py-2 z-50 animate-fade-in"
+          className="absolute right-0 mt-2 w-56 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_var(--cafe-primary-alpha-08)] py-2 z-50 animate-fade-in"
           data-testid="header-avatar-menu"
         >
-          <div className="px-4 py-2 border-b border-[#F5EBE9]">
+          <div className="px-4 py-2 border-b border-cafe-border">
             {user.isAdmin && (
               <p className="text-xs font-bold text-cafe-primary mb-1 font-outfit" data-testid="menu-welcome-admin">
                 Welcome Admin
               </p>
             )}
-            <p className="text-sm font-medium text-[#2D2422] font-outfit truncate">{user.name}</p>
-            <p className="text-xs text-[#A3938F] font-work-sans truncate">{user.email}</p>
+            <p className="text-sm font-medium text-cafe-heading font-outfit truncate">{user.name}</p>
+            <p className="text-xs text-cafe-muted font-work-sans truncate">{user.email}</p>
           </div>
           <button
             type="button"
-            className="w-full text-left px-4 py-2 text-sm text-[#6B5C58] hover:bg-[#FFF7F5] font-work-sans inline-flex items-center gap-2 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans inline-flex items-center gap-2 cursor-pointer"
           >
             <User size={14} strokeWidth={1.5} /> Profile
           </button>
@@ -78,7 +79,7 @@ function AuthArea() {
               to="/admin"
               onClick={() => setOpen(false)}
               data-testid="header-admin-link"
-              className="block px-4 py-2 text-sm text-[#6B5C58] hover:bg-[#FFF7F5] font-work-sans"
+              className="block px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans"
             >
               <span className="inline-flex items-center gap-2">
                 <LayoutDashboard size={14} strokeWidth={1.5} /> Admin Dashboard
@@ -92,7 +93,7 @@ function AuthArea() {
               setOpen(false);
             }}
             data-testid="header-signout-button"
-            className="w-full text-left px-4 py-2 text-sm text-[#6B5C58] hover:bg-[#FFF7F5] font-work-sans inline-flex items-center gap-2 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans inline-flex items-center gap-2 cursor-pointer"
           >
             <LogOut size={14} strokeWidth={1.5} /> Sign Out
           </button>
@@ -333,13 +334,13 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-[#F5EBE9] backdrop-saturate-150 shadow-sm"
+      className="sticky top-0 z-50 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150 shadow-sm"
       data-testid="site-header"
     >
       {/* Geolocation first-visit prompt bar */}
       {showLocationPrompt && (
-        <div className="bg-cafe-bg border-b border-[#F5EBE9] py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-sm z-[110] relative">
-          <div className="flex items-center gap-2 text-[#2D2422] font-work-sans">
+        <div className="bg-cafe-bg border-b border-cafe-border py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-sm z-[110] relative">
+          <div className="flex items-center gap-2 text-cafe-heading font-work-sans">
             <Compass className="text-cafe-primary w-4 h-4 animate-pulse" />
             <span>Would you like to auto-detect your nearest city directory?</span>
           </div>
@@ -353,7 +354,7 @@ export function Header() {
             </button>
             <button
               onClick={dismissPrompt}
-              className="text-[#6B5C58] hover:text-[#2D2422] border border-[#F5EBE9] px-4 py-1.5 rounded-xl text-xs bg-white transition-colors"
+              className="text-cafe-body hover:text-cafe-heading border border-cafe-border px-4 py-1.5 rounded-xl text-xs bg-cafe-surface transition-colors"
             >
               No thanks
             </button>
@@ -372,7 +373,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link
           to="/"
-          className="flex items-center gap-2 text-[#2D2422] font-outfit text-xl font-medium"
+          className="flex items-center gap-2 text-cafe-heading font-outfit text-xl font-medium"
           data-testid="header-logo-link"
         >
           <Coffee strokeWidth={1.5} className="text-cafe-primary" />
@@ -407,19 +408,19 @@ export function Header() {
               
               <button
                 onClick={() => setShowExplanation(!showExplanation)}
-                className="text-[#A3938F] hover:text-[#2D2422] p-1 rounded-full text-xs font-semibold cursor-pointer border border-[#F5EBE9] h-5 w-5 inline-flex items-center justify-center"
+                className="text-cafe-muted hover:text-cafe-heading p-1 rounded-full text-xs font-semibold cursor-pointer border border-cafe-border h-5 w-5 inline-flex items-center justify-center"
                 title="What is this?"
               >
                 ?
               </button>
 
               {showExplanation && (
-                <div className="absolute right-0 top-10 mt-1 w-80 bg-white border border-[#F5EBE9] rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-4 z-[999] text-[#2D2422] animate-fade-up">
-                  <h3 className="font-outfit font-medium text-sm border-b border-[#F5EBE9] pb-2 mb-2 flex items-center justify-between">
+                <div className="absolute right-0 top-10 mt-1 w-80 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-4 z-[999] text-cafe-heading animate-fade-up">
+                  <h3 className="font-outfit font-medium text-sm border-b border-cafe-border pb-2 mb-2 flex items-center justify-between">
                     <span>Data Strategy Simulator</span>
-                    <button onClick={() => setShowExplanation(false)} className="text-xs text-[#A3938F] hover:text-[#2D2422]">Close</button>
+                    <button onClick={() => setShowExplanation(false)} className="text-xs text-cafe-muted hover:text-cafe-heading">Close</button>
                   </h3>
-                  <div className="space-y-3 text-xs font-work-sans text-[#6B5C58]">
+                  <div className="space-y-3 text-xs font-work-sans text-cafe-body">
                     <div>
                       <span className="font-semibold text-emerald-700">🟢 Dynamic SSR:</span>
                       <p className="mt-0.5">Queries live database on every single page load. Extremely fresh, but hits the database each time.</p>
@@ -438,20 +439,20 @@ export function Header() {
           <div className="relative" ref={cityRef}>
             <button
               onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#F5EBE9] bg-white/50 text-[#2D2422] hover:bg-white text-xs font-semibold font-work-sans transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cafe-border bg-cafe-surface/50 text-cafe-heading hover:bg-cafe-surface text-xs font-semibold font-work-sans transition-all cursor-pointer"
             >
               <MapPin size={14} className="text-cafe-primary" />
               <span>{activeCity ? activeCity.name : "Select City"}</span>
             </button>
 
             {cityDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-[#F5EBE9] rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-2 z-50 animate-fade-in">
+              <div className="absolute right-0 mt-2 w-64 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-2 z-50 animate-fade-in">
                 <input
                   type="text"
                   placeholder="Search cities..."
                   value={citySearchQuery}
                   onChange={(e) => setCitySearchQuery(e.target.value)}
-                  className="w-full bg-[#FFF7F5] border border-[#F5EBE9] rounded-xl px-3 py-1.5 text-xs outline-none mb-2 font-work-sans text-[#2D2422]"
+                  className="w-full bg-cafe-bg border border-cafe-border rounded-xl px-3 py-1.5 text-xs outline-none mb-2 font-work-sans text-cafe-heading"
                 />
                 <button
                   onClick={() => {
@@ -463,10 +464,10 @@ export function Header() {
                   <Compass size={13} />
                   <span>Auto-Detect Nearest City</span>
                 </button>
-                <div className="border-t border-[#F5EBE9]/75 my-1.5" />
+                <div className="border-t border-cafe-border/75 my-1.5" />
                 <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
                   {Object.keys(groupedCities).length === 0 ? (
-                    <p className="text-[10px] text-[#A3938F] text-center py-2 font-work-sans">No cities found</p>
+                    <p className="text-[10px] text-cafe-muted text-center py-2 font-work-sans">No cities found</p>
                   ) : (
                     Object.entries(groupedCities).map(([countryName, countryCities]) => (
                       <div key={countryName} className="space-y-0.5">
@@ -480,7 +481,7 @@ export function Header() {
                             className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium font-work-sans transition-colors cursor-pointer flex justify-between items-center ${
                               activeCity?.id === city.id
                                 ? "bg-cafe-bg text-cafe-primary font-semibold"
-                                : "text-[#6B5C58] hover:bg-gray-50 hover:text-[#2D2422]"
+                                : "text-cafe-body hover:bg-cafe-bg/60 hover:text-cafe-heading"
                             }`}
                           >
                             <span>{city.name}</span>
@@ -496,8 +497,8 @@ export function Header() {
 
           {/* Color-Blind Accessibility Palette Slider */}
           <div className="relative">
-            <div className="flex flex-col items-center gap-1.5 px-3 py-1.5 border border-[#F5EBE9] bg-white/50 rounded-xl max-w-[150px]">
-              <div className="flex items-center justify-between w-full text-[9px] font-semibold text-[#6B5C58] font-work-sans">
+            <div className="flex flex-col items-center gap-1.5 px-3 py-1.5 border border-cafe-border bg-cafe-surface/50 rounded-xl max-w-[150px]">
+              <div className="flex items-center justify-between w-full text-[9px] font-semibold text-cafe-body font-work-sans">
                 <span className="truncate">
                   {accessibilityMode === "default"
                     ? "Standard Theme"
@@ -528,8 +529,8 @@ export function Header() {
               />
             </div>
             {showTooltip && (
-              <div className="absolute right-0 top-full mt-2.5 w-60 bg-white border border-[#F5EBE9] rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-[#6B5C58]">
-                <div className="font-bold text-[#2D2422] mb-1 font-outfit flex items-center gap-1">
+              <div className="absolute right-0 top-full mt-2.5 w-60 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-cafe-body">
+                <div className="font-bold text-cafe-heading mb-1 font-outfit flex items-center gap-1">
                   <Sparkles size={14} className="text-cafe-primary animate-pulse" />
                   <span>Choose Your Theme</span>
                 </div>
@@ -543,15 +544,15 @@ export function Header() {
                   Got it
                 </button>
                 {/* Tooltip caret pointing up */}
-                <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-[#F5EBE9] rotate-45" />
+                <div className="absolute -top-1.5 right-6 w-3 h-3 bg-cafe-surface border-t border-l border-cafe-border rotate-45" />
               </div>
             )}
           </div>
 
           <Link
             to="/"
-            className="hidden sm:inline text-[#6B5C58] hover:text-[#2D2422] transition-colors"
-            activeProps={{ className: "text-[#2D2422] font-medium" }}
+            className="hidden sm:inline text-cafe-body hover:text-cafe-heading transition-colors"
+            activeProps={{ className: "text-cafe-heading font-medium" }}
             activeOptions={{ exact: true }}
             data-testid="nav-home-link"
           >
@@ -559,13 +560,13 @@ export function Header() {
           </Link>
           <Link
             to="/directory"
-            className="text-[#6B5C58] hover:text-[#2D2422] transition-colors"
-            activeProps={{ className: "text-[#2D2422] font-medium" }}
+            className="text-cafe-body hover:text-cafe-heading transition-colors"
+            activeProps={{ className: "text-cafe-heading font-medium" }}
             data-testid="nav-directory-link"
           >
             Directory
           </Link>
-          <span className="hidden sm:inline-block w-px h-5 bg-[#F5EBE9]" />
+          <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
           <AuthArea />
         </nav>
       </div>
@@ -586,11 +587,19 @@ export function Footer() {
             A small, hand-picked directory of independent speciality cafes across the world.
           </p>
         </div>
-        <div className="text-sm font-work-sans">
-          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary">About</p>
-          <p className="mt-4 text-white/60 leading-relaxed">
-            Built with care for nomads, freelancers, and the people who keep these places running.
-          </p>
+        <div className="text-sm font-work-sans flex flex-col gap-3 md:text-right md:items-end">
+          <Link
+            to="/about"
+            className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary hover:text-cafe-primary-hover transition-colors block"
+          >
+            About
+          </Link>
+          <Link
+            to="/contact"
+            className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary hover:text-cafe-primary-hover transition-colors block"
+          >
+            Contact Us
+          </Link>
         </div>
       </div>
       <div className="border-t border-white/10">

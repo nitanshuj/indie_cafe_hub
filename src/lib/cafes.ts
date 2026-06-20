@@ -32,15 +32,24 @@ export type Cafe = {
   has_plug_points?: boolean;
   has_ac?: boolean;
   is_pet_friendly?: boolean;
-  
+
+  // Creator attribution
+  created_by_name?: string;
+
   // Nomad & Expansion fields
   city_id?: string;
   specialty_focus?: string;
   noise_level?: "quiet" | "moderate" | "bustling";
-  seating_capacity?: number;
-  latitude?: number;
-  longitude?: number;
   google_maps_url?: string;
+  opening_hours?: {
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
+  };
 };
 
 export const neighborhoods = [
@@ -79,22 +88,37 @@ export function mapDbCafeToUiCafe(dbCafe: any): Cafe {
     hours: dbCafe.opening_hours
       ? typeof dbCafe.opening_hours === "string"
         ? dbCafe.opening_hours
-        : dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || "9am – 9pm"
+        : dbCafe.opening_hours.monday || dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || "9am – 9pm"
       : "9am – 9pm",
     address: dbCafe.address,
     has_wifi: dbCafe.has_wifi,
     has_plug_points: dbCafe.has_plug_points,
     has_ac: dbCafe.has_ac,
     is_pet_friendly: dbCafe.is_pet_friendly,
-    
+
+    // Creator attribution — populated when profiles is joined
+    created_by_name: dbCafe.profiles?.full_name
+      || dbCafe.profiles?.display_name
+      || dbCafe.profiles?.username
+      || dbCafe.profiles?.email
+      || undefined,
+
     // Mapped new fields
     city_id: dbCafe.city_id,
     specialty_focus: dbCafe.specialty_focus,
     noise_level: dbCafe.noise_level,
-    seating_capacity: dbCafe.seating_capacity,
-    latitude: dbCafe.latitude,
-    longitude: dbCafe.longitude,
     google_maps_url: dbCafe.google_maps_url,
+    opening_hours: dbCafe.opening_hours
+      ? {
+        monday: dbCafe.opening_hours.monday || dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || undefined,
+        tuesday: dbCafe.opening_hours.tuesday || dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || undefined,
+        wednesday: dbCafe.opening_hours.wednesday || dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || undefined,
+        thursday: dbCafe.opening_hours.thursday || dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || undefined,
+        friday: dbCafe.opening_hours.friday || dbCafe.opening_hours.weekday || dbCafe.opening_hours.mon_fri || undefined,
+        saturday: dbCafe.opening_hours.saturday || undefined,
+        sunday: dbCafe.opening_hours.sunday || undefined,
+      }
+      : undefined,
   };
 }
 
@@ -220,19 +244,23 @@ export async function fetchCafesByCity(cityId: string): Promise<Cafe[]> {
   return (data || []).map(mapDbCafeToUiCafe);
 }
 
-export async function fetchCafeByIdOrSlug(idOrSlug: string): Promise<Cafe | null> {
-  if (typeof window !== "undefined" && getDeliveryStrategy() === "isr") {
-    const cached = getIsrCache();
-    if (cached) {
-      const match = cached.find((c) => c.id === idOrSlug || c.dbId === idOrSlug);
-      if (match) return match;
-    }
-  }
 
-  let { data, error } = await supabase.from("cafes").select("*").eq("slug", idOrSlug).maybeSingle();
+export async function fetchCafeByIdOrSlug(idOrSlug: string): Promise<Cafe | null> {
+  // Intentionally skip ISR cache: the list cache (from fetchCafes with select("*"))
+  // has no creator info, so created_by_name would always be undefined from cache.
+
+  let { data, error } = await supabase
+    .from("cafes")
+    .select("*")
+    .eq("slug", idOrSlug)
+    .maybeSingle();
 
   if (!data && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug)) {
-    const res = await supabase.from("cafes").select("*").eq("id", idOrSlug).maybeSingle();
+    const res = await supabase
+      .from("cafes")
+      .select("*")
+      .eq("id", idOrSlug)
+      .maybeSingle();
     data = res.data;
     error = res.error;
   }
@@ -241,7 +269,25 @@ export async function fetchCafeByIdOrSlug(idOrSlug: string): Promise<Cafe | null
     console.error("Error fetching cafe details:", error);
     throw error;
   }
-  return data ? mapDbCafeToUiCafe(data) : null;
+
+  if (!data) return null;
+
+  // Separately fetch the creator's name from profiles (same pattern as auth-context.tsx)
+  if (data.created_by) {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", data.created_by)
+        .maybeSingle();
+      // Attach so mapDbCafeToUiCafe can read it
+      data = { ...data, profiles: profile ?? null };
+    } catch {
+      // Non-critical — silently skip if profile fetch fails
+    }
+  }
+
+  return mapDbCafeToUiCafe(data);
 }
 
 

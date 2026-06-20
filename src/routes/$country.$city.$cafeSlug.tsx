@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { MapPin, Clock, Wifi, ArrowLeft, X, ZoomIn, Plug, Snowflake, ShieldCheck, Compass, Info, MessageSquare } from "lucide-react";
+import { MapPin, Clock, Wifi, ArrowLeft, X, ZoomIn, Plug, Snowflake, ShieldCheck, Compass, Info, MessageSquare, UserCheck } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CommentsSection } from "@/components/comments-section";
 import { fetchCafeByIdOrSlug } from "@/lib/cafes";
@@ -141,7 +141,7 @@ function CafeDetailGlobal() {
       <article className="max-w-4xl mx-auto px-6 py-12">
         <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
           <Link
-            to={`/${city.country?.code?.toLowerCase()}/${city.slug}`}
+            to={`/${city.country?.code?.toLowerCase()}/${city.slug}` as any}
             className="inline-flex items-center gap-2 text-sm text-[#6B5C58] hover:text-[#2D2422] font-work-sans"
           >
             <ArrowLeft size={14} strokeWidth={1.5} /> Back to {city.name} list
@@ -188,7 +188,7 @@ function CafeDetailGlobal() {
               </span>
               {cafe.wifi && (
                 <span className="bg-[#FDE4DD] text-[#E67E6B] rounded-full px-3 py-1 text-xs font-semibold font-work-sans inline-flex items-center gap-1">
-                  <Wifi size={12} /> Wifi Speed: {cafe.wifi_speed_estimate || "Fast"}
+                  <Wifi size={12} /> Fast WiFi
                 </span>
               )}
             </div>
@@ -207,6 +207,15 @@ function CafeDetailGlobal() {
               </div>
             )}
 
+            {cafe.created_by_name && (
+              <div className="mt-3 inline-flex items-center gap-1.5 bg-[#FFF7F5] border border-[#F5EBE9] rounded-full px-3 py-1">
+                <UserCheck size={12} className="text-[#E67E6B]" />
+                <span className="text-[11px] font-work-sans text-[#6B5C58]">
+                  Listed by <span className="font-semibold text-[#2D2422]">{cafe.created_by_name}</span>
+                </span>
+              </div>
+            )}
+
             <p className="mt-6 text-base text-[#6B5C58] font-work-sans leading-relaxed">
               {cafe.blurb}
             </p>
@@ -220,7 +229,6 @@ function CafeDetailGlobal() {
                 <div>
                   <h4 className="text-xs uppercase font-bold tracking-wider text-[#A3938F]">Internet access</h4>
                   <p className="text-sm font-semibold text-[#2D2422] mt-0.5">{cafe.wifi ? "WiFi Available" : "No WiFi"}</p>
-                  {cafe.wifi_speed_estimate && <p className="text-xs text-[#6B5C58] mt-0.5">Est. {cafe.wifi_speed_estimate}</p>}
                 </div>
               </div>
 
@@ -301,11 +309,67 @@ function CafeDetailGlobal() {
                 </div>
 
                 <div>
-                  <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F]">Opening Hours</h4>
-                  <div className="flex items-center gap-1.5 mt-1 text-sm text-[#2D2422] font-semibold">
-                    <Clock size={14} className="text-[#E67E6B]" />
-                    <span>{cafe.hours}</span>
-                  </div>
+                  <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F] mb-2">Opening Hours</h4>
+                  {(() => {
+                    const oph = cafe.opening_hours as any;
+                    const weekdayFallback = oph?.weekday || oph?.mon_fri || null;
+
+                    if (oph) {
+                      const monFriValue =
+                        oph.mon_fri ??
+                        oph.weekday ??
+                        oph.monday ??
+                        weekdayFallback;
+
+                      // Check if Mon–Fri all share the same hours so we can group them
+                      const weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
+                      const weekdayValues = weekdays.map((d) => oph[d] ?? weekdayFallback);
+                      const allSame =
+                        weekdayValues.every((v) => v) &&
+                        weekdayValues.every((v) => v === weekdayValues[0]);
+
+                      const groupedRows: { day: string; value: string }[] = [];
+
+                      if (allSame && weekdayValues[0]) {
+                        groupedRows.push({ day: "Monday – Friday", value: weekdayValues[0] });
+                      } else {
+                        // Fall back to listing each weekday individually
+                        const labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+                        weekdays.forEach((d, i) => {
+                          const v = oph[d] ?? weekdayFallback;
+                          if (v) groupedRows.push({ day: labels[i], value: v });
+                        });
+                      }
+
+                      if (oph.saturday) groupedRows.push({ day: "Saturday", value: oph.saturday });
+                      if (oph.sunday)   groupedRows.push({ day: "Sunday",   value: oph.sunday });
+
+                      if (groupedRows.length > 0) {
+                        return (
+                          <div className="divide-y divide-[#F5EBE9]">
+                            {groupedRows.map(({ day, value }) => (
+                              <div key={day} className="flex items-center justify-between py-1.5">
+                                <span className="text-xs font-medium text-[#6B5C58] font-work-sans">{day}</span>
+                                <span className={`text-xs font-semibold font-work-sans ${
+                                  String(value).toLowerCase() === "closed"
+                                    ? "text-red-500"
+                                    : "text-[#2D2422]"
+                                }`}>{value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                    }
+
+                    // Ultimate fallback – plain hours string
+                    return (
+                      <div className="flex items-center gap-1.5 mt-1 text-sm text-[#2D2422] font-semibold">
+                        <Clock size={14} className="text-[#E67E6B]" />
+                        <span>{cafe.hours}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {noiseInfo && (
@@ -318,19 +382,20 @@ function CafeDetailGlobal() {
                   </div>
                 )}
 
-                {cafe.seating_capacity && (
-                  <div>
-                    <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F]">Seating Capacity</h4>
-                    <div className="mt-1 text-sm font-semibold text-[#2D2422]">
-                      🧑‍💻 Approx. {cafe.seating_capacity} seats
-                    </div>
-                  </div>
-                )}
-
                 {cafe.address && (
                   <div>
                     <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F]">Physical Address</h4>
                     <p className="text-xs text-[#6B5C58] mt-1 leading-relaxed">{cafe.address}</p>
+                  </div>
+                )}
+
+                {cafe.created_by_name && (
+                  <div className="pt-3 border-t border-[#F5EBE9]">
+                    <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F]">Listed By</h4>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <UserCheck size={13} className="text-[#E67E6B]" />
+                      <span className="text-xs font-semibold text-[#2D2422]">{cafe.created_by_name}</span>
+                    </div>
                   </div>
                 )}
 
@@ -347,21 +412,6 @@ function CafeDetailGlobal() {
                 )}
               </div>
             </div>
-            
-            {/* Geo Info Card if coordinates exist */}
-            {cafe.latitude && cafe.longitude && (
-              <div className="bg-[#FFF7F5] border border-[#FDE4DD] rounded-[2rem] p-6 shadow-inner text-xs text-[#6B5C58] font-work-sans">
-                <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#E67E6B] mb-2">Geospatial Coordinates</h4>
-                <div className="flex justify-between border-b border-[#FDE4DD] pb-1.5 mb-1.5">
-                  <span>Latitude</span>
-                  <span className="font-semibold text-[#2D2422]">{cafe.latitude.toFixed(6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Longitude</span>
-                  <span className="font-semibold text-[#2D2422]">{cafe.longitude.toFixed(6)}</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { Search, Wifi, ChevronDown, Coffee } from "lucide-react";
+import { Search, Wifi, ChevronDown, Coffee, Globe, MapPin } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CafeCard } from "@/components/cafe-card";
-import { fetchCafes, neighborhoods } from "@/lib/cafes";
+import { fetchCafes, fetchCities } from "@/lib/cafes";
 import { getDeliveryStrategy } from "@/lib/cache";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/directory")({
   loader: async () => {
-    const cafes = await fetchCafes();
-    return { cafes };
+    const [cafes, cities] = await Promise.all([fetchCafes(), fetchCities()]);
+    return { cafes, cities };
   },
   head: () => ({
     meta: [
@@ -18,10 +18,10 @@ export const Route = createFileRoute("/directory")({
       {
         name: "description",
         content:
-          "Browse every independent cafe in our Bengaluru directory. Filter by neighborhood and WiFi friendliness.",
+          "Browse every independent cafe in our directory. Filter by country, city, and WiFi friendliness.",
       },
       { property: "og:title", content: "Cafe Directory — Indie Coffee Hub" },
-      { property: "og:description", content: "Browse and filter Bengaluru's independent cafes." },
+      { property: "og:description", content: "Browse and filter global independent cafes." },
     ],
   }),
   component: Directory,
@@ -29,11 +29,12 @@ export const Route = createFileRoute("/directory")({
 
 function Directory() {
   const { user } = useAuth();
-  const { cafes: initialCafes } = Route.useLoaderData();
+  const { cafes: initialCafes, cities } = Route.useLoaderData();
   const [cafes, setCafes] = useState(initialCafes);
   const [strategy, setStrategy] = useState("dynamic");
   const [query, setQuery] = useState("");
-  const [hood, setHood] = useState<(typeof neighborhoods)[number]>("All neighborhoods");
+  const [selectedCountry, setSelectedCountry] = useState("All countries");
+  const [selectedCity, setSelectedCity] = useState("All cities");
   const [wifiOnly, setWifiOnly] = useState(false);
 
   const reloadData = async () => {
@@ -52,9 +53,35 @@ function Directory() {
     };
   }, []);
 
+  // Compute unique countries from loaded cities
+  const countriesList = useMemo(() => {
+    const countriesMap = new Map<string, string>(); // country_id -> country_name
+    cities.forEach((city) => {
+      if (city.country) {
+        countriesMap.set(city.country.id, city.country.name);
+      }
+    });
+    return Array.from(countriesMap.entries()).map(([id, name]) => ({ id, name }));
+  }, [cities]);
+
+  // Compute cities filtered by selected country
+  const filteredCitiesList = useMemo(() => {
+    if (selectedCountry === "All countries") {
+      return cities;
+    }
+    return cities.filter((city) => city.country_id === selectedCountry);
+  }, [cities, selectedCountry]);
+
   const filtered = useMemo(() => {
     return cafes.filter((c) => {
-      if (hood !== "All neighborhoods" && c.neighborhood !== hood) return false;
+      // Country filter
+      if (selectedCountry !== "All countries") {
+        const cafeCity = cities.find((city) => city.id === c.city_id);
+        if (!cafeCity || cafeCity.country_id !== selectedCountry) return false;
+      }
+      // City filter
+      if (selectedCity !== "All cities" && c.city_id !== selectedCity) return false;
+
       if (wifiOnly && !c.wifi) return false;
       if (
         query &&
@@ -63,20 +90,21 @@ function Directory() {
         return false;
       return true;
     });
-  }, [cafes, query, hood, wifiOnly]);
+  }, [cafes, query, selectedCountry, selectedCity, wifiOnly, cities]);
 
   const clearAll = () => {
     setQuery("");
-    setHood("All neighborhoods");
+    setSelectedCountry("All countries");
+    setSelectedCity("All cities");
     setWifiOnly(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF7F5]">
+    <div className="min-h-screen bg-cafe-bg">
       <Header />
 
       <div
-        className="sticky top-[73px] z-40 bg-white/70 backdrop-blur-xl border-b border-[#F5EBE9] backdrop-saturate-150"
+        className="sticky top-[73px] z-40 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150"
         data-testid="directory-filter-bar"
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -84,7 +112,7 @@ function Directory() {
             <Search
               size={18}
               strokeWidth={1.5}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3938F]"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-cafe-muted"
             />
             <input
               type="search"
@@ -92,26 +120,63 @@ function Directory() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search cafes…"
               data-testid="filter-search-input"
-              className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] pl-11 pr-4 py-2 outline-none font-work-sans"
+              className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted pl-11 pr-4 py-2 outline-none font-work-sans"
             />
           </div>
+          {/* Country Select Dropdown */}
           <div className="relative">
             <select
-              value={hood}
-              onChange={(e) => setHood(e.target.value as typeof hood)}
-              data-testid="filter-neighborhood-select"
-              className="appearance-none bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] text-[#2D2422] pl-4 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto"
+              value={selectedCountry}
+              onChange={(e) => {
+                setSelectedCountry(e.target.value);
+                setSelectedCity("All cities");
+              }}
+              data-testid="filter-country-select"
+              className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
             >
-              {neighborhoods.map((n) => (
-                <option key={n} value={n}>
-                  {n}
+              <option value="All countries">All Countries</option>
+              {countriesList.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
+            <Globe
+              size={16}
+              strokeWidth={1.5}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+            />
             <ChevronDown
               size={16}
               strokeWidth={1.5}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A3938F] pointer-events-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+            />
+          </div>
+
+          {/* City Select Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              data-testid="filter-city-select"
+              className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+            >
+              <option value="All cities">All Cities</option>
+              {filteredCitiesList.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <MapPin
+              size={16}
+              strokeWidth={1.5}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+            />
+            <ChevronDown
+              size={16}
+              strokeWidth={1.5}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
             />
           </div>
           <button
@@ -121,8 +186,8 @@ function Directory() {
             aria-pressed={wifiOnly}
             className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 font-work-sans text-sm ${
               wifiOnly
-                ? "bg-[#E67E6B] text-white border-[#E67E6B] hover:bg-[#D96C5A]"
-                : "bg-white text-[#6B5C58] border-[#F5EBE9] hover:border-[#E67E6B]/40"
+                ? "bg-cafe-primary text-white border-cafe-primary hover:bg-cafe-primary-hover"
+                : "bg-cafe-surface text-cafe-body border-cafe-border hover:border-cafe-primary/40"
             }`}
           >
             <Wifi size={16} strokeWidth={1.5} /> WiFi Friendly
@@ -133,10 +198,10 @@ function Directory() {
       <section className="max-w-7xl mx-auto px-6 py-16">
         <div className="mb-10 flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
               {filtered.length} {filtered.length === 1 ? "cafe" : "cafes"}
             </p>
-            <h1 className="mt-3 text-5xl sm:text-6xl tracking-tight font-light text-[#2D2422] font-outfit">
+            <h1 className="mt-3 text-5xl sm:text-6xl tracking-tight font-light text-cafe-heading font-outfit">
               The directory
             </h1>
           </div>
@@ -154,20 +219,20 @@ function Directory() {
 
         {filtered.length === 0 ? (
           <div className="text-center py-24 max-w-md mx-auto" data-testid="directory-empty-state">
-            <div className="inline-flex w-16 h-16 rounded-full bg-[#FDE4DD] items-center justify-center text-[#E67E6B]">
+            <div className="inline-flex w-16 h-16 rounded-full bg-cafe-primary-light items-center justify-center text-cafe-primary">
               <Coffee strokeWidth={1.5} />
             </div>
-            <h2 className="mt-6 text-3xl tracking-tight font-medium text-[#2D2422] font-outfit">
+            <h2 className="mt-6 text-3xl tracking-tight font-medium text-cafe-heading font-outfit">
               No cafes match — yet.
             </h2>
-            <p className="mt-3 text-[#6B5C58] font-work-sans leading-relaxed">
+            <p className="mt-3 text-cafe-body font-work-sans leading-relaxed">
               Try widening your search, or have a look at the whole directory.
             </p>
             <button
               type="button"
               onClick={clearAll}
               data-testid="empty-clear-filters-button"
-              className="mt-6 text-[#E67E6B] hover:text-[#D96C5A] font-work-sans font-medium"
+              className="mt-6 text-cafe-primary hover:text-cafe-primary-hover font-work-sans font-medium"
             >
               Clear all filters
             </button>

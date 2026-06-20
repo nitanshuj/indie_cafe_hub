@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { MapPin, Clock, Wifi, ArrowLeft, X, ZoomIn } from "lucide-react";
+import { MapPin, Clock, Wifi, ArrowLeft, X, ZoomIn, UserCheck } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CommentsSection } from "@/components/comments-section";
 import { fetchCafeByIdOrSlug } from "@/lib/cafes";
@@ -165,16 +165,73 @@ function CafeDetail() {
           <h1 className="text-5xl tracking-tight font-light text-[#2D2422] font-outfit">
             {cafe.name}
           </h1>
-          <div className="mt-3 flex items-center gap-4 text-sm text-[#A3938F] font-work-sans">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin size={14} strokeWidth={1.5} />
-              {cafe.neighborhood}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={14} strokeWidth={1.5} />
-              {cafe.hours}
-            </span>
+          <div className="mt-3 flex items-center gap-1.5 text-sm text-[#A3938F] font-work-sans">
+            <MapPin size={14} strokeWidth={1.5} />
+            <span>{cafe.neighborhood}</span>
           </div>
+          {/* Opening Hours – grouped */}
+          <div className="mt-2 text-sm text-[#A3938F] font-work-sans">
+            {(() => {
+              const oph = cafe.opening_hours as any;
+              const weekdayFallback = oph?.weekday || oph?.mon_fri || null;
+
+              if (oph) {
+                const weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
+                const weekdayValues = weekdays.map((d) => oph[d] ?? weekdayFallback);
+                const allSame =
+                  weekdayValues.every((v) => v) &&
+                  weekdayValues.every((v) => v === weekdayValues[0]);
+
+                const rows: { day: string; value: string }[] = [];
+                if (allSame && weekdayValues[0]) {
+                  rows.push({ day: "Monday – Friday", value: weekdayValues[0] });
+                } else {
+                  const labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+                  weekdays.forEach((d, i) => {
+                    const v = oph[d] ?? weekdayFallback;
+                    if (v) rows.push({ day: labels[i], value: v });
+                  });
+                }
+                if (oph.saturday) rows.push({ day: "Saturday", value: oph.saturday });
+                if (oph.sunday)   rows.push({ day: "Sunday",   value: oph.sunday });
+
+                if (rows.length > 0) {
+                  return (
+                    <div className="divide-y divide-[#F5EBE9] mt-1">
+                      {rows.map(({ day, value }) => (
+                        <div key={day} className="flex items-center justify-between py-1.5">
+                          <span className="inline-flex items-center gap-1.5">
+                            {day === rows[0].day && <Clock size={14} strokeWidth={1.5} />}
+                            {day !== rows[0].day && <span className="w-[14px]" />}
+                            {day}
+                          </span>
+                          <span className={`font-semibold ${
+                            String(value).toLowerCase() === "closed" ? "text-red-500" : "text-[#2D2422]"
+                          }`}>{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+              }
+
+              // Fallback to plain hours string
+              return (
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock size={14} strokeWidth={1.5} />
+                  {cafe.hours}
+                </span>
+              );
+            })()}
+          </div>
+          {cafe.created_by_name && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-[#FFF7F5] border border-[#F5EBE9] rounded-full px-3 py-1">
+              <UserCheck size={12} className="text-[#E67E6B]" />
+              <span className="text-[11px] font-work-sans text-[#6B5C58]">
+                Listed by <span className="font-semibold text-[#2D2422]">{cafe.created_by_name}</span>
+              </span>
+            </div>
+          )}
           <p className="mt-6 text-lg text-[#6B5C58] font-work-sans leading-relaxed max-w-2xl">
             {cafe.blurb}
           </p>
