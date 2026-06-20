@@ -6,16 +6,12 @@ type Props = {
   cafe: Cafe;
   className?: string;
   imageHeightClass?: string;
+  to?: string;
 };
 
-export function CafeCard({ cafe, className = "", imageHeightClass = "h-64" }: Props) {
-  return (
-    <Link
-      to="/cafes/$cafeId"
-      params={{ cafeId: cafe.id }}
-      data-testid={`cafe-card-link-${cafe.id}`}
-      className={`group block bg-white border border-[#F5EBE9] shadow-[0_8px_30px_rgba(230,126,107,0.04)] rounded-[2rem] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(230,126,107,0.08)] hover:-translate-y-1 ${className}`}
-    >
+export function CafeCard({ cafe, className = "", imageHeightClass = "h-64", to }: Props) {
+  const cardContent = (
+    <>
       <div className={`overflow-hidden ${imageHeightClass}`}>
         <img
           src={cafe.image}
@@ -62,6 +58,29 @@ export function CafeCard({ cafe, className = "", imageHeightClass = "h-64" }: Pr
           ))}
         </div>
       </div>
+    </>
+  );
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        data-testid={`cafe-card-link-${cafe.id}`}
+        className={`group block bg-white border border-[#F5EBE9] shadow-[0_8px_30px_rgba(230,126,107,0.04)] rounded-[2rem] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(230,126,107,0.08)] hover:-translate-y-1 ${className}`}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/cafes/$cafeId"
+      params={{ cafeId: cafe.id }}
+      data-testid={`cafe-card-link-${cafe.id}`}
+      className={`group block bg-white border border-[#F5EBE9] shadow-[0_8px_30px_rgba(230,126,107,0.04)] rounded-[2rem] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(230,126,107,0.08)] hover:-translate-y-1 ${className}`}
+    >
+      {cardContent}
     </Link>
   );
 }

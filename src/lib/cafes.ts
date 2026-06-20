@@ -1,6 +1,20 @@
 import { supabase } from "./supabase";
 import { getDeliveryStrategy, getIsrCache, setIsrCache } from "./cache";
 
+export type Country = {
+  id: string;
+  name: string;
+  code: string;
+};
+
+export type City = {
+  id: string;
+  name: string;
+  slug: string;
+  country_id: string;
+  country?: Country;
+};
+
 export type Cafe = {
   id: string;
   dbId: string;
@@ -18,6 +32,15 @@ export type Cafe = {
   has_plug_points?: boolean;
   has_ac?: boolean;
   is_pet_friendly?: boolean;
+  
+  // Nomad & Expansion fields
+  city_id?: string;
+  specialty_focus?: string;
+  noise_level?: "quiet" | "moderate" | "bustling";
+  seating_capacity?: number;
+  latitude?: number;
+  longitude?: number;
+  google_maps_url?: string;
 };
 
 export const neighborhoods = [
@@ -49,6 +72,7 @@ export function mapDbCafeToUiCafe(dbCafe: any): Cafe {
       dbCafe.has_plug_points ? "Laptop Friendly" : "",
       dbCafe.has_ac ? "AC" : "",
       dbCafe.is_pet_friendly ? "Pet Friendly" : "",
+      dbCafe.specialty_focus ? dbCafe.specialty_focus : "",
     ].filter(Boolean),
     wifi: dbCafe.has_wifi,
     open: true,
@@ -62,7 +86,97 @@ export function mapDbCafeToUiCafe(dbCafe: any): Cafe {
     has_plug_points: dbCafe.has_plug_points,
     has_ac: dbCafe.has_ac,
     is_pet_friendly: dbCafe.is_pet_friendly,
+    
+    // Mapped new fields
+    city_id: dbCafe.city_id,
+    specialty_focus: dbCafe.specialty_focus,
+    noise_level: dbCafe.noise_level,
+    seating_capacity: dbCafe.seating_capacity,
+    latitude: dbCafe.latitude,
+    longitude: dbCafe.longitude,
+    google_maps_url: dbCafe.google_maps_url,
   };
+}
+
+export async function fetchCountries(): Promise<Country[]> {
+  const { data, error } = await supabase.from("countries").select("*").order("name");
+  if (error) {
+    console.error("Error fetching countries:", error);
+    throw error;
+  }
+  return data || [];
+}
+
+const fallbackCities: City[] = [
+  {
+    id: "bengaluru-id-placeholder",
+    name: "Bengaluru",
+    slug: "bengaluru",
+    country_id: "india-id-placeholder",
+    country: { id: "india-id-placeholder", name: "India", code: "in" }
+  },
+  {
+    id: "haldwani-id-placeholder",
+    name: "Haldwani",
+    slug: "haldwani",
+    country_id: "india-id-placeholder",
+    country: { id: "india-id-placeholder", name: "India", code: "in" }
+  },
+  {
+    id: "seattle-id-placeholder",
+    name: "Seattle, WA",
+    slug: "seattle",
+    country_id: "usa-id-placeholder",
+    country: { id: "usa-id-placeholder", name: "USA", code: "us" }
+  },
+  {
+    id: "san-jose-id-placeholder",
+    name: "San Jose, CA",
+    slug: "san-jose",
+    country_id: "usa-id-placeholder",
+    country: { id: "usa-id-placeholder", name: "USA", code: "us" }
+  },
+  {
+    id: "san-francisco-id-placeholder",
+    name: "San Francisco, CA",
+    slug: "san-francisco",
+    country_id: "usa-id-placeholder",
+    country: { id: "usa-id-placeholder", name: "USA", code: "us" }
+  },
+  {
+    id: "bloomington-id-placeholder",
+    name: "Bloomington, IN",
+    slug: "bloomington",
+    country_id: "usa-id-placeholder",
+    country: { id: "usa-id-placeholder", name: "USA", code: "us" }
+  }
+];
+
+export async function fetchCities(): Promise<City[]> {
+  try {
+    const { data, error } = await supabase.from("cities").select("*, countries(*)").order("name");
+    if (error) {
+      console.warn("Using fallback cities due to database fetch error:", error.message);
+      return fallbackCities;
+    }
+    if (!data || data.length === 0) {
+      return fallbackCities;
+    }
+    return data.map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      country_id: c.country_id,
+      country: c.countries ? {
+        id: c.countries.id,
+        name: c.countries.name,
+        code: c.countries.code
+      } : { id: c.country_id, name: "India", code: "in" }
+    }));
+  } catch (err) {
+    console.warn("Using fallback cities due to crash:", err);
+    return fallbackCities;
+  }
 }
 
 export async function fetchCafes(): Promise<Cafe[]> {
@@ -93,6 +207,19 @@ export async function fetchCafes(): Promise<Cafe[]> {
   return cafes;
 }
 
+export async function fetchCafesByCity(cityId: string): Promise<Cafe[]> {
+  const { data, error } = await supabase
+    .from("cafes")
+    .select("*")
+    .eq("city_id", cityId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Error fetching cafes by city:", error);
+    throw error;
+  }
+  return (data || []).map(mapDbCafeToUiCafe);
+}
+
 export async function fetchCafeByIdOrSlug(idOrSlug: string): Promise<Cafe | null> {
   if (typeof window !== "undefined" && getDeliveryStrategy() === "isr") {
     const cached = getIsrCache();
@@ -116,4 +243,5 @@ export async function fetchCafeByIdOrSlug(idOrSlug: string): Promise<Cafe | null
   }
   return data ? mapDbCafeToUiCafe(data) : null;
 }
+
 

@@ -21,7 +21,7 @@ import { Header, Footer } from "@/components/site-chrome";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { Cafe, fetchCafes, neighborhoods } from "@/lib/cafes";
+import { Cafe, fetchCafes, neighborhoods, City, fetchCities, Country, fetchCountries } from "@/lib/cafes";
 import { getDeliveryStrategy, getIsrCache, setIsrCache, clearIsrCache } from "@/lib/cache";
 
 
@@ -117,6 +117,14 @@ function Admin() {
   const [cafes, setCafes] = useState<Cafe[]>([]);
   const [loadingCafes, setLoadingCafes] = useState(true);
 
+  // Cities List State
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+
+  // Countries List State
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+
   // Form State
   const [editingCafe, setEditingCafe] = useState<Cafe | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -124,6 +132,21 @@ function Admin() {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Country & City creation form state
+  const [countryForm, setCountryForm] = useState({
+    name: "",
+    code: "",
+  });
+
+  const [cityForm, setCityForm] = useState({
+    name: "",
+    slug: "",
+    countryId: "",
+  });
+
+  const [busyCountry, setBusyCountry] = useState(false);
+  const [busyCity, setBusyCity] = useState(false);
 
   // Image Upload Compression Stats State
   const [heroCompression, setHeroCompression] = useState<{ original: string; compressed: string; percent: string } | null>(null);
@@ -154,6 +177,13 @@ function Admin() {
     plugs: true,
     ac: false,
     petFriendly: false,
+    cityId: "",
+    specialtyFocus: "",
+    noiseLevel: "moderate" as "quiet" | "moderate" | "bustling",
+    seatingCapacity: "",
+    latitude: "",
+    longitude: "",
+    googleMapsUrl: "",
   });
 
   const loadCafes = async () => {
@@ -168,9 +198,41 @@ function Admin() {
     }
   };
 
+  const loadCities = async () => {
+    try {
+      setLoadingCities(true);
+      const list = await fetchCities();
+      setCities(list);
+      if (list.length > 0) {
+        setForm((s) => ({ ...s, cityId: s.cityId || list[0].id }));
+      }
+    } catch (err: any) {
+      toast.error("Failed to load cities list");
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  const loadCountries = async () => {
+    try {
+      setLoadingCountries(true);
+      const list = await fetchCountries();
+      setCountries(list);
+      if (list.length > 0) {
+        setCityForm((s) => ({ ...s, countryId: s.countryId || list[0].id }));
+      }
+    } catch (err: any) {
+      toast.error("Failed to load countries list");
+    } finally {
+      setLoadingCountries(false);
+    }
+  };
+
   useEffect(() => {
     if (user && user.isAdmin) {
       void loadCafes();
+      void loadCities();
+      void loadCountries();
     }
   }, [user]);
 
@@ -267,6 +329,13 @@ function Admin() {
       plugs: cafe.has_plug_points || false,
       ac: cafe.has_ac || false,
       petFriendly: cafe.is_pet_friendly || false,
+      cityId: cafe.city_id || (cities.length > 0 ? cities[0].id : ""),
+      specialtyFocus: cafe.specialty_focus || "",
+      noiseLevel: cafe.noise_level || "moderate",
+      seatingCapacity: cafe.seating_capacity ? String(cafe.seating_capacity) : "",
+      latitude: cafe.latitude ? String(cafe.latitude) : "",
+      longitude: cafe.longitude ? String(cafe.longitude) : "",
+      googleMapsUrl: cafe.google_maps_url || "",
     });
     setPreview(cafe.image);
     setGallery(cafe.gallery || []);
@@ -293,6 +362,13 @@ function Admin() {
       plugs: true,
       ac: false,
       petFriendly: false,
+      cityId: cities.length > 0 ? cities[0].id : "",
+      specialtyFocus: "",
+      noiseLevel: "moderate",
+      seatingCapacity: "",
+      latitude: "",
+      longitude: "",
+      googleMapsUrl: "",
     });
     setPreview(null);
     setGallery([]);
@@ -327,8 +403,8 @@ function Admin() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.neighborhood || !form.address) {
-      toast.error("Please fill in Name, Neighborhood, and Address.");
+    if (!form.name || !form.neighborhood || !form.address || !form.cityId) {
+      toast.error("Please fill in Name, Neighborhood, Address, and Select City.");
       return;
     }
 
@@ -360,6 +436,15 @@ function Admin() {
         hero_image_url: preview,
         gallery_image_urls: gallery,
         updated_at: new Date().toISOString(),
+        
+        // New global & nomad fields
+        city_id: form.cityId,
+        specialty_focus: form.specialtyFocus || null,
+        noise_level: form.noiseLevel || null,
+        seating_capacity: form.seatingCapacity ? parseInt(form.seatingCapacity) : null,
+        latitude: form.latitude ? parseFloat(form.latitude) : null,
+        longitude: form.longitude ? parseFloat(form.longitude) : null,
+        google_maps_url: form.googleMapsUrl || null,
       };
 
       if (editingCafe) {
@@ -422,6 +507,61 @@ function Admin() {
       setPipelineStage(0);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const submitCountry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!countryForm.name || !countryForm.code) {
+      toast.error("Please fill in Country Name and Country Code.");
+      return;
+    }
+    setBusyCountry(true);
+    try {
+      const { error: insertError } = await supabase
+        .from("countries")
+        .insert({
+          name: countryForm.name,
+          code: countryForm.code.toLowerCase().trim(),
+        });
+      if (insertError) throw insertError;
+      
+      toast.success(`Country "${countryForm.name}" created successfully!`);
+      setCountryForm({ name: "", code: "" });
+      void loadCountries();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to create country: " + err.message);
+    } finally {
+      setBusyCountry(false);
+    }
+  };
+
+  const submitCity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cityForm.name || !cityForm.slug || !cityForm.countryId) {
+      toast.error("Please fill in City Name, Slug, and select a Country.");
+      return;
+    }
+    setBusyCity(true);
+    try {
+      const { error: insertError } = await supabase
+        .from("cities")
+        .insert({
+          name: cityForm.name,
+          slug: slugify(cityForm.slug),
+          country_id: cityForm.countryId,
+        });
+      if (insertError) throw insertError;
+      
+      toast.success(`City "${cityForm.name}" created successfully!`);
+      setCityForm({ name: "", slug: "", countryId: countries.length > 0 ? countries[0].id : "" });
+      void loadCities();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to create city: " + err.message);
+    } finally {
+      setBusyCity(false);
     }
   };
 
@@ -555,20 +695,78 @@ function Admin() {
 
                 <div>
                   <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
-                    Neighborhood
+                    Select Active City
                   </label>
                   <select
-                    value={form.neighborhood}
-                    onChange={(e) => setForm((s) => ({ ...s, neighborhood: e.target.value }))}
-                    data-testid="admin-select-neighborhood"
+                    value={form.cityId}
+                    onChange={(e) => setForm((s) => ({ ...s, cityId: e.target.value }))}
                     className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
                   >
-                    {neighborhoods.filter(n => n !== "All neighborhoods").map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
+                    {loadingCities ? (
+                      <option>Loading cities...</option>
+                    ) : (
+                      cities.map((city) => (
+                        <option key={city.id} value={city.id}>
+                          {city.name} ({city.country?.name})
+                        </option>
+                      ))
+                    )}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                    Neighborhood
+                  </label>
+                  <input
+                    type="text"
+                    value={form.neighborhood}
+                    onChange={(e) => setForm((s) => ({ ...s, neighborhood: e.target.value }))}
+                    placeholder="e.g. Indiranagar, Capitol Hill"
+                    className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                    Specialty Focus
+                  </label>
+                  <input
+                    type="text"
+                    value={form.specialtyFocus}
+                    onChange={(e) => setForm((s) => ({ ...s, specialtyFocus: e.target.value }))}
+                    placeholder="e.g., In-House Roastery, Single-Origin Filters"
+                    className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                    Noise Level
+                  </label>
+                  <select
+                    value={form.noiseLevel}
+                    onChange={(e) => setForm((s) => ({ ...s, noiseLevel: e.target.value as any }))}
+                    className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                  >
+                    <option value="quiet">🤫 Quiet (Silent Work)</option>
+                    <option value="moderate">☕ Moderate (Ambient buzz)</option>
+                    <option value="bustling">⚡ Bustling (Startup Energy)</option>
+                  </select>
+                </div>
+
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                    Google Maps URL
+                  </label>
+                  <input
+                    type="url"
+                    value={form.googleMapsUrl}
+                    onChange={(e) => setForm((s) => ({ ...s, googleMapsUrl: e.target.value }))}
+                    placeholder="https://maps.google.com/..."
+                    className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
+                  />
                 </div>
 
                 <div className="sm:col-span-2">
@@ -987,6 +1185,132 @@ function Admin() {
           </div>
 
         </div>
+
+        {/* Geographic Directory Management Section */}
+        <div className="mt-16 border-t border-[#F5EBE9] pt-12">
+          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">
+            Global Hierarchy
+          </p>
+          <h2 className="mt-2 text-3xl tracking-tight font-light text-[#2D2422] font-outfit">
+            Geographic Directory Management
+          </h2>
+          <p className="mt-1 text-sm text-[#6B5C58] font-work-sans mb-8">
+            Add countries and cities to support listings in new regions.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Add Country Card */}
+            <form
+              onSubmit={submitCountry}
+              className="bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm flex flex-col justify-between"
+            >
+              <div>
+                <h3 className="text-xl font-outfit font-semibold text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-6">
+                  🏳️ Add Country
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                      Country Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Canada, Germany"
+                      value={countryForm.name}
+                      onChange={(e) => setCountryForm((s) => ({ ...s, name: e.target.value }))}
+                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                      Country Code
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. ca, de"
+                      value={countryForm.code}
+                      onChange={(e) => setCountryForm((s) => ({ ...s, code: e.target.value }))}
+                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={busyCountry}
+                className="mt-8 bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 px-6 py-2.5 rounded-xl font-work-sans font-medium transition-all shadow-sm align-self-start"
+              >
+                {busyCountry ? "Creating..." : "Add Country"}
+              </button>
+            </form>
+
+            {/* Add City Card */}
+            <form
+              onSubmit={submitCity}
+              className="bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm flex flex-col justify-between"
+            >
+              <div>
+                <h3 className="text-xl font-outfit font-semibold text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-6">
+                  🏙️ Add City
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                      Select Country
+                    </label>
+                    <select
+                      value={cityForm.countryId}
+                      onChange={(e) => setCityForm((s) => ({ ...s, countryId: e.target.value }))}
+                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                    >
+                      {loadingCountries ? (
+                        <option>Loading countries...</option>
+                      ) : (
+                        countries.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.code.toUpperCase()})
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                      City Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Toronto, Berlin"
+                      value={cityForm.name}
+                      onChange={(e) => setCityForm((s) => ({ ...s, name: e.target.value }))}
+                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                      City Slug
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. toronto, berlin"
+                      value={cityForm.slug}
+                      onChange={(e) => setCityForm((s) => ({ ...s, slug: e.target.value }))}
+                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={busyCity}
+                className="mt-8 bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 px-6 py-2.5 rounded-xl font-work-sans font-medium transition-all shadow-sm align-self-start"
+              >
+                {busyCity ? "Creating..." : "Add City"}
+              </button>
+            </form>
+          </div>
+        </div>
+
       </div>
       <Footer />
     </div>

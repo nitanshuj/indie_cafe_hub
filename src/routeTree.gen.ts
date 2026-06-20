@@ -15,6 +15,8 @@ import { Route as DirectoryRouteImport } from './routes/directory'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CafesCafeIdRouteImport } from './routes/cafes.$cafeId'
+import { Route as CountryCityRouteImport } from './routes/$country.$city'
+import { Route as CountryCityCafeSlugRouteImport } from './routes/$country.$city.$cafeSlug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -46,6 +48,16 @@ const CafesCafeIdRoute = CafesCafeIdRouteImport.update({
   path: '/cafes/$cafeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CountryCityRoute = CountryCityRouteImport.update({
+  id: '/$country/$city',
+  path: '/$country/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CountryCityCafeSlugRoute = CountryCityCafeSlugRouteImport.update({
+  id: '/$cafeSlug',
+  path: '/$cafeSlug',
+  getParentRoute: () => CountryCityRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,7 +65,9 @@ export interface FileRoutesByFullPath {
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/$country/$city': typeof CountryCityRouteWithChildren
   '/cafes/$cafeId': typeof CafesCafeIdRoute
+  '/$country/$city/$cafeSlug': typeof CountryCityCafeSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +75,9 @@ export interface FileRoutesByTo {
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/$country/$city': typeof CountryCityRouteWithChildren
   '/cafes/$cafeId': typeof CafesCafeIdRoute
+  '/$country/$city/$cafeSlug': typeof CountryCityCafeSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,7 +86,9 @@ export interface FileRoutesById {
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/$country/$city': typeof CountryCityRouteWithChildren
   '/cafes/$cafeId': typeof CafesCafeIdRoute
+  '/$country/$city/$cafeSlug': typeof CountryCityCafeSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,9 +98,19 @@ export interface FileRouteTypes {
     | '/directory'
     | '/login'
     | '/signup'
+    | '/$country/$city'
     | '/cafes/$cafeId'
+    | '/$country/$city/$cafeSlug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/directory' | '/login' | '/signup' | '/cafes/$cafeId'
+  to:
+    | '/'
+    | '/admin'
+    | '/directory'
+    | '/login'
+    | '/signup'
+    | '/$country/$city'
+    | '/cafes/$cafeId'
+    | '/$country/$city/$cafeSlug'
   id:
     | '__root__'
     | '/'
@@ -90,7 +118,9 @@ export interface FileRouteTypes {
     | '/directory'
     | '/login'
     | '/signup'
+    | '/$country/$city'
     | '/cafes/$cafeId'
+    | '/$country/$city/$cafeSlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -99,6 +129,7 @@ export interface RootRouteChildren {
   DirectoryRoute: typeof DirectoryRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  CountryCityRoute: typeof CountryCityRouteWithChildren
   CafesCafeIdRoute: typeof CafesCafeIdRoute
 }
 
@@ -146,8 +177,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CafesCafeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$country/$city': {
+      id: '/$country/$city'
+      path: '/$country/$city'
+      fullPath: '/$country/$city'
+      preLoaderRoute: typeof CountryCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$country/$city/$cafeSlug': {
+      id: '/$country/$city/$cafeSlug'
+      path: '/$cafeSlug'
+      fullPath: '/$country/$city/$cafeSlug'
+      preLoaderRoute: typeof CountryCityCafeSlugRouteImport
+      parentRoute: typeof CountryCityRoute
+    }
   }
 }
+
+interface CountryCityRouteChildren {
+  CountryCityCafeSlugRoute: typeof CountryCityCafeSlugRoute
+}
+
+const CountryCityRouteChildren: CountryCityRouteChildren = {
+  CountryCityCafeSlugRoute: CountryCityCafeSlugRoute,
+}
+
+const CountryCityRouteWithChildren = CountryCityRoute._addFileChildren(
+  CountryCityRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -155,6 +212,7 @@ const rootRouteChildren: RootRouteChildren = {
   DirectoryRoute: DirectoryRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  CountryCityRoute: CountryCityRouteWithChildren,
   CafesCafeIdRoute: CafesCafeIdRoute,
 }
 export const routeTree = rootRouteImport

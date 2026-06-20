@@ -1,6 +1,6 @@
 # Indie Coffee Hub
 
-Indie Coffee Hub is a premium, beautifully curated web directory designed specifically for remote workers, digital nomads, and specialty coffee enthusiasts in Bengaluru. The platform showcases independent specialty coffee shops, highlighting the essential amenities required for focused, productive work sessions.
+Indie Coffee Hub is a premium, beautifully curated web directory designed specifically for remote workers, digital nomads, and specialty coffee enthusiasts worldwide. The platform showcases independent specialty coffee shops, highlighting the essential amenities required for focused, productive work sessions.
 
 
 ---
@@ -8,7 +8,7 @@ Indie Coffee Hub is a premium, beautifully curated web directory designed specif
 ## What the Website Does
 
 ### ☕ Curated Cafe Directory
-* **Specialty Coffee Discovery:** Highlights the best independent roasters and coffee spots across Bengaluru's primary neighborhoods (Indiranagar, Koramangala, Jayanagar, HSR Layout, and MG Road).
+* **Specialty Coffee Discovery:** Highlights the best independent roasters and coffee spots across global neighborhoods and major cities (e.g. Seattle, San Francisco, Bengaluru, Haldwani, and Bloomington).
 * **Nomad-Centric Amenities:** Filters and displays key information critical to remote work, including:
   * Reliable, fast WiFi (with speed estimates)
   * Power plug accessibility at tables
