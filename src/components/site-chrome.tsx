@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Coffee, MapPin, User, LayoutDashboard, LogOut, Zap, Globe, RefreshCw, Layers, Compass } from "lucide-react";
+import { Coffee, MapPin, User, LayoutDashboard, LogOut, Zap, Globe, RefreshCw, Layers, Compass, Eye, EyeOff, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getDeliveryStrategy, setDeliveryStrategy, DeliveryStrategy } from "@/lib/cache";
+import { useAccessibility } from "./accessibility-context";
 
 function AuthArea() {
   const { user, signOut } = useAuth();
@@ -30,7 +31,7 @@ function AuthArea() {
         <Link
           to="/signup"
           data-testid="header-signup-link"
-          className="text-sm bg-[#E67E6B] text-white hover:bg-[#D96C5A] px-4 py-2 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-work-sans font-medium"
+          className="text-sm bg-cafe-primary text-white hover:bg-cafe-primary-hover px-4 py-2 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-work-sans font-medium"
         >
           Join Free
         </Link>
@@ -46,7 +47,7 @@ function AuthArea() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         data-testid="header-avatar-button"
-        className="w-9 h-9 rounded-full bg-[#FDE4DD] text-[#E67E6B] inline-flex items-center justify-center font-medium font-work-sans hover:ring-2 hover:ring-[#E67E6B]/30 transition-all cursor-pointer"
+        className="w-9 h-9 rounded-full bg-cafe-primary-light text-cafe-primary inline-flex items-center justify-center font-medium font-work-sans hover:ring-2 hover:ring-cafe-primary/30 transition-all cursor-pointer"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -59,7 +60,7 @@ function AuthArea() {
         >
           <div className="px-4 py-2 border-b border-[#F5EBE9]">
             {user.isAdmin && (
-              <p className="text-xs font-bold text-[#E67E6B] mb-1 font-outfit" data-testid="menu-welcome-admin">
+              <p className="text-xs font-bold text-cafe-primary mb-1 font-outfit" data-testid="menu-welcome-admin">
                 Welcome Admin
               </p>
             )}
@@ -107,6 +108,7 @@ import { fetchCities, City } from "@/lib/cafes";
 export function Header() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { accessibilityMode, setAccessibilityMode } = useAccessibility();
   const [strategy, setStrategy] = useState<DeliveryStrategy>("dynamic");
   const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -121,6 +123,21 @@ export function Header() {
   // Auto-detect prompt state
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [detecting, setDetecting] = useState(false);
+
+  // Onboarding tooltip state
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("has-seen-accessibility-tooltip");
+    if (!hasSeen) {
+      setShowTooltip(true);
+    }
+  }, []);
+
+  const dismissTooltip = () => {
+    setShowTooltip(false);
+    localStorage.setItem("has-seen-accessibility-tooltip", "true");
+  };
 
   // Pre-configured coordinates for seeded cities to calculate distance
   const cityCenters: Record<string, { lat: number; lng: number }> = {
@@ -321,16 +338,16 @@ export function Header() {
     >
       {/* Geolocation first-visit prompt bar */}
       {showLocationPrompt && (
-        <div className="bg-[#FFF7F5] border-b border-[#F5EBE9] py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-sm z-[110] relative">
+        <div className="bg-cafe-bg border-b border-[#F5EBE9] py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-sm z-[110] relative">
           <div className="flex items-center gap-2 text-[#2D2422] font-work-sans">
-            <Compass className="text-[#E67E6B] w-4 h-4 animate-pulse" />
+            <Compass className="text-cafe-primary w-4 h-4 animate-pulse" />
             <span>Would you like to auto-detect your nearest city directory?</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleAutoDetect()}
               disabled={detecting}
-              className="bg-[#E67E6B] text-white hover:bg-[#D96C5A] px-4 py-1.5 rounded-xl font-medium text-xs transition-colors"
+              className="bg-cafe-primary text-white hover:bg-cafe-primary-hover px-4 py-1.5 rounded-xl font-medium text-xs transition-colors"
             >
               {detecting ? "Locating..." : "Use My Location"}
             </button>
@@ -346,7 +363,7 @@ export function Header() {
 
       {/* Webhook Simulator Notification Bar */}
       {webhookStatus && (
-        <div className="bg-[#E67E6B] text-white py-2.5 px-6 text-center text-xs font-semibold font-work-sans animate-fade-in flex items-center justify-center gap-2.5 z-[100] relative">
+        <div className="bg-cafe-primary text-white py-2.5 px-6 text-center text-xs font-semibold font-work-sans animate-fade-in flex items-center justify-center gap-2.5 z-[100] relative">
           <RefreshCw size={14} className="animate-spin text-white" />
           <span>{webhookStatus}</span>
         </div>
@@ -358,7 +375,7 @@ export function Header() {
           className="flex items-center gap-2 text-[#2D2422] font-outfit text-xl font-medium"
           data-testid="header-logo-link"
         >
-          <Coffee strokeWidth={1.5} className="text-[#E67E6B]" />
+          <Coffee strokeWidth={1.5} className="text-cafe-primary" />
           <span>Indie Coffee Hub</span>
         </Link>
 
@@ -423,7 +440,7 @@ export function Header() {
               onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#F5EBE9] bg-white/50 text-[#2D2422] hover:bg-white text-xs font-semibold font-work-sans transition-all cursor-pointer"
             >
-              <MapPin size={14} className="text-[#E67E6B]" />
+              <MapPin size={14} className="text-cafe-primary" />
               <span>{activeCity ? activeCity.name : "Select City"}</span>
             </button>
 
@@ -441,7 +458,7 @@ export function Header() {
                     setCityDropdownOpen(false);
                     handleAutoDetect();
                   }}
-                  className="w-full text-left px-3 py-2 text-xs font-semibold text-[#E67E6B] hover:bg-[#FFF7F5] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-cafe-primary hover:bg-cafe-bg rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Compass size={13} />
                   <span>Auto-Detect Nearest City</span>
@@ -453,7 +470,7 @@ export function Header() {
                   ) : (
                     Object.entries(groupedCities).map(([countryName, countryCities]) => (
                       <div key={countryName} className="space-y-0.5">
-                        <div className="text-[10px] font-bold text-[#E67E6B] tracking-wider uppercase px-3 pt-1.5 font-outfit">
+                        <div className="text-[10px] font-bold text-cafe-primary tracking-wider uppercase px-3 pt-1.5 font-outfit">
                           {countryName}
                         </div>
                         {countryCities.map((city) => (
@@ -462,7 +479,7 @@ export function Header() {
                             onClick={() => handleCitySelect(city)}
                             className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium font-work-sans transition-colors cursor-pointer flex justify-between items-center ${
                               activeCity?.id === city.id
-                                ? "bg-[#FFF7F5] text-[#E67E6B] font-semibold"
+                                ? "bg-cafe-bg text-cafe-primary font-semibold"
                                 : "text-[#6B5C58] hover:bg-gray-50 hover:text-[#2D2422]"
                             }`}
                           >
@@ -473,6 +490,60 @@ export function Header() {
                     ))
                   )}
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Color-Blind Accessibility Palette Slider */}
+          <div className="relative">
+            <div className="flex flex-col items-center gap-1.5 px-3 py-1.5 border border-[#F5EBE9] bg-white/50 rounded-xl max-w-[150px]">
+              <div className="flex items-center justify-between w-full text-[9px] font-semibold text-[#6B5C58] font-work-sans">
+                <span className="truncate">
+                  {accessibilityMode === "default"
+                    ? "Standard Theme"
+                    : accessibilityMode === "deuteranopia"
+                    ? "Deuteranopia"
+                    : accessibilityMode === "tritanopia"
+                    ? "Tritanopia"
+                    : "Achromatopsia"}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="3"
+                value={["default", "deuteranopia", "tritanopia", "monochromacy"].indexOf(accessibilityMode)}
+                onChange={(e) => {
+                  const modes: ("default" | "deuteranopia" | "tritanopia" | "monochromacy")[] = [
+                    "default",
+                    "deuteranopia",
+                    "tritanopia",
+                    "monochromacy",
+                  ];
+                  setAccessibilityMode(modes[parseInt(e.target.value)]);
+                }}
+                className="w-24 h-1.5 bg-[#F5EBE9] rounded-lg appearance-none cursor-pointer accent-cafe-primary"
+                style={{ outline: "none" }}
+                title="Slide to switch accessibility themes (Default -> Red/Green -> Blue/Yellow -> Grayscale)"
+              />
+            </div>
+            {showTooltip && (
+              <div className="absolute right-0 top-full mt-2.5 w-60 bg-white border border-[#F5EBE9] rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-[#6B5C58]">
+                <div className="font-bold text-[#2D2422] mb-1 font-outfit flex items-center gap-1">
+                  <Sparkles size={14} className="text-cafe-primary animate-pulse" />
+                  <span>Choose Your Theme</span>
+                </div>
+                <p className="leading-relaxed">
+                  Drag this slider to choose a color-blind friendly theme (Deuteranopia, Tritanopia, or Achromatopsia).
+                </p>
+                <button
+                  onClick={dismissTooltip}
+                  className="mt-2.5 w-full bg-cafe-primary text-white hover:bg-cafe-primary-hover py-1.5 rounded-xl text-[10px] font-semibold transition-colors cursor-pointer"
+                >
+                  Got it
+                </button>
+                {/* Tooltip caret pointing up */}
+                <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-t border-l border-[#F5EBE9] rotate-45" />
               </div>
             )}
           </div>
@@ -508,7 +579,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-16 grid gap-10 md:grid-cols-2">
         <div>
           <div className="flex items-center gap-2 text-white font-outfit text-xl font-medium">
-            <Coffee strokeWidth={1.5} className="text-[#E67E6B]" />
+            <Coffee strokeWidth={1.5} className="text-cafe-primary" />
             <span>Indie Coffee Hub</span>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-white/60 max-w-xs font-work-sans">
@@ -516,7 +587,7 @@ export function Footer() {
           </p>
         </div>
         <div className="text-sm font-work-sans">
-          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B]">About</p>
+          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary">About</p>
           <p className="mt-4 text-white/60 leading-relaxed">
             Built with care for nomads, freelancers, and the people who keep these places running.
           </p>

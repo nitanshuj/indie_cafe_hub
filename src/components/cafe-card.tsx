@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Wifi, Clock, MapPin } from "lucide-react";
+import { Wifi, Clock, MapPin, Check } from "lucide-react";
 import type { Cafe } from "@/lib/cafes";
 
 type Props = {
@@ -23,17 +23,17 @@ export function CafeCard({ cafe, className = "", imageHeightClass = "h-64", to }
       <div className="p-6 sm:p-8">
         <div className="flex items-center gap-2 flex-wrap mb-4">
           {cafe.open && (
-            <span className="bg-[#E8F5E9] text-[#2E7D32] rounded-full px-3 py-1 text-xs font-medium font-work-sans">
-              Open now
+            <span className="bg-cafe-open-bg text-cafe-open-text rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
+              <Check size={12} strokeWidth={1.5} /> Open now
             </span>
           )}
           {cafe.wifi && (
-            <span className="bg-[#FDE4DD] text-[#E67E6B] rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
+            <span className="bg-cafe-primary-light text-cafe-primary rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
               <Wifi size={12} strokeWidth={1.5} /> WiFi
             </span>
           )}
         </div>
-        <h3 className="font-outfit text-2xl font-medium text-[#2D2422] tracking-tight">
+        <h3 className="font-outfit text-2xl font-medium text-cafe-heading tracking-tight">
           {cafe.name}
         </h3>
         <div className="mt-2 flex items-center gap-3 text-xs text-[#A3938F] font-work-sans">

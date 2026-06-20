@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "../lib/auth-context";
+import { AccessibilityProvider } from "../components/accessibility-context";
 
 function NotFoundComponent() {
   return (
@@ -125,10 +126,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Outlet />
-        <Toaster position="top-right" closeButton richColors />
-      </AuthProvider>
+      <AccessibilityProvider>
+        <AuthProvider>
+          <Outlet />
+          <Toaster position="top-right" closeButton richColors />
+        </AuthProvider>
+      </AccessibilityProvider>
     </QueryClientProvider>
   );
 }

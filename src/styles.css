@@ -2,22 +2,71 @@
 @source "../src";
 @import "tw-animate-css";
 
+:root {
+  --cafe-bg: #fff7f5;
+  --cafe-surface: #ffffff;
+  --cafe-footer: #2d2422;
+  --cafe-primary: #e67e6b;
+  --cafe-primary-hover: #d96c5a;
+  --cafe-primary-light: #fde4dd;
+  --cafe-heading: #2d2422;
+  --cafe-body: #6b5c58;
+  --cafe-muted: #a3938f;
+  --cafe-border: #f5ebe9;
+  --cafe-open-bg: #e8f5e9;
+  --cafe-open-text: #2e7d32;
+  --cafe-negative-bg: #f5ebe9;
+  --cafe-negative-text: #a3938f;
+}
+
+[data-accessibility="deuteranopia"] {
+  --cafe-primary: #2563eb;
+  --cafe-primary-hover: #1d4ed8;
+  --cafe-primary-light: #dbeafe;
+  --cafe-open-bg: #dbeafe;
+  --cafe-open-text: #1e40af;
+  --cafe-negative-bg: #fef3c7;
+  --cafe-negative-text: #b45309;
+}
+
+[data-accessibility="tritanopia"] {
+  --cafe-primary: #db2777;
+  --cafe-primary-hover: #be185d;
+  --cafe-primary-light: #fce7f3;
+  --cafe-open-bg: #e0f2fe;
+  --cafe-open-text: #0369a1;
+  --cafe-negative-bg: #fee2e2;
+  --cafe-negative-text: #b91c1c;
+}
+
+[data-accessibility="monochromacy"] {
+  --cafe-primary: #1f2937;
+  --cafe-primary-hover: #111827;
+  --cafe-primary-light: #f3f4f6;
+  --cafe-open-bg: #e5e7eb;
+  --cafe-open-text: #374151;
+  --cafe-negative-bg: #f3f4f6;
+  --cafe-negative-text: #4b5563;
+}
+
 @theme {
   --font-outfit: "Outfit", sans-serif;
   --font-work-sans: "Work Sans", sans-serif;
 
-  --color-cafe-bg: #fff7f5;
-  --color-cafe-surface: #ffffff;
-  --color-cafe-footer: #2d2422;
-  --color-cafe-primary: #e67e6b;
-  --color-cafe-primary-hover: #d96c5a;
-  --color-cafe-primary-light: #fde4dd;
-  --color-cafe-heading: #2d2422;
-  --color-cafe-body: #6b5c58;
-  --color-cafe-muted: #a3938f;
-  --color-cafe-border: #f5ebe9;
-  --color-cafe-open-bg: #e8f5e9;
-  --color-cafe-open-text: #2e7d32;
+  --color-cafe-bg: var(--cafe-bg);
+  --color-cafe-surface: var(--cafe-surface);
+  --color-cafe-footer: var(--cafe-footer);
+  --color-cafe-primary: var(--cafe-primary);
+  --color-cafe-primary-hover: var(--cafe-primary-hover);
+  --color-cafe-primary-light: var(--cafe-primary-light);
+  --color-cafe-heading: var(--cafe-heading);
+  --color-cafe-body: var(--cafe-body);
+  --color-cafe-muted: var(--cafe-muted);
+  --color-cafe-border: var(--cafe-border);
+  --color-cafe-open-bg: var(--cafe-open-bg);
+  --color-cafe-open-text: var(--cafe-open-text);
+  --color-cafe-negative-bg: var(--cafe-negative-bg);
+  --color-cafe-negative-text: var(--cafe-negative-text);
 }
 
 @theme inline {
