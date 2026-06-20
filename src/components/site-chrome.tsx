@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Coffee, MapPin, User, LayoutDashboard, LogOut, Zap, Globe, RefreshCw, Layers, Compass, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Coffee, MapPin, User, LayoutDashboard, LogOut, Zap, Globe, RefreshCw, Layers, Compass, Eye, EyeOff, Sparkles, Menu, X, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getDeliveryStrategy, setDeliveryStrategy, DeliveryStrategy } from "@/lib/cache";
@@ -107,7 +107,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { fetchCities, City } from "@/lib/cafes";
 
 export function Header() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { accessibilityMode, setAccessibilityMode } = useAccessibility();
   const [strategy, setStrategy] = useState<DeliveryStrategy>("dynamic");
@@ -332,6 +333,62 @@ export function Header() {
   }, [filteredDropdownCities]);
 
 
+  const mobileAuth = user ? (
+    <div className="border-t border-cafe-border pt-4">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-9 h-9 rounded-full bg-cafe-primary-light text-cafe-primary inline-flex items-center justify-center font-medium font-work-sans">
+          {(user.name || user.email).charAt(0).toUpperCase()}
+        </div>
+        <div>
+          {user.isAdmin && (
+            <p className="text-[10px] font-bold text-cafe-primary tracking-wider uppercase font-outfit" data-testid="menu-welcome-admin">
+              Admin
+            </p>
+          )}
+          <p className="text-xs font-semibold text-cafe-heading font-outfit">{user.name}</p>
+          <p className="text-[10px] text-cafe-muted font-work-sans truncate max-w-[160px]">{user.email}</p>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {user.isAdmin && (
+          <Link
+            to="/admin"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-heading py-1 font-medium font-work-sans"
+          >
+            <LayoutDashboard size={13} strokeWidth={1.5} /> Admin Dashboard
+          </Link>
+        )}
+        <button
+          onClick={() => {
+            signOut();
+            setIsMobileMenuOpen(false);
+          }}
+          className="flex items-center gap-2 text-xs text-rose-600 py-1 font-semibold font-work-sans w-full text-left cursor-pointer"
+        >
+          <LogOut size={13} strokeWidth={1.5} /> Sign Out
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div className="flex flex-col gap-2 pt-4 border-t border-cafe-border">
+      <Link
+        to="/login"
+        onClick={() => setIsMobileMenuOpen(false)}
+        className="w-full text-center py-2 rounded-xl border border-cafe-border text-cafe-heading hover:bg-cafe-bg font-medium text-xs font-work-sans transition-colors"
+      >
+        Sign In
+      </Link>
+      <Link
+        to="/signup"
+        onClick={() => setIsMobileMenuOpen(false)}
+        className="w-full text-center py-2 rounded-xl bg-cafe-primary text-white hover:bg-cafe-primary-hover font-medium text-xs font-work-sans transition-all duration-200"
+      >
+        Join Free
+      </Link>
+    </div>
+  );
+
   return (
     <header
       className="sticky top-0 z-50 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150 shadow-sm"
@@ -380,7 +437,8 @@ export function Header() {
           <span>Indie Coffee Hub</span>
         </Link>
 
-        <nav className="flex items-center gap-2 sm:gap-4 text-sm font-work-sans">
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-2 sm:gap-4 text-sm font-work-sans">
           {/* Strategy Toggle - Admin Only */}
           {user && user.isAdmin && (
             <div className="relative flex items-center gap-1.5 mr-2">
@@ -569,7 +627,205 @@ export function Header() {
           <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
           <AuthArea />
         </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="lg:hidden p-2 rounded-xl text-cafe-heading hover:bg-cafe-bg transition-colors border border-cafe-border flex items-center justify-center cursor-pointer"
+          aria-label="Toggle Menu"
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-cafe-surface border-t border-cafe-border p-6 space-y-6 animate-fade-in z-40 relative">
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-cafe-body hover:text-cafe-heading transition-colors py-1 text-sm font-medium font-work-sans"
+              activeProps={{ className: "text-cafe-primary font-semibold" }}
+              activeOptions={{ exact: true }}
+            >
+              Home
+            </Link>
+            <Link
+              to="/directory"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-cafe-body hover:text-cafe-heading transition-colors py-1 text-sm font-medium font-work-sans"
+              activeProps={{ className: "text-cafe-primary font-semibold" }}
+            >
+              Directory
+            </Link>
+          </div>
+
+          <div className="border-t border-cafe-border/70 my-3" />
+
+          {/* Controls & Dropdowns */}
+          <div className="space-y-4">
+            {/* City Selection */}
+            <div>
+              <label className="text-[10px] font-bold text-cafe-primary uppercase tracking-wider block mb-1.5 font-outfit">Active City</label>
+              <div className="relative" ref={cityRef}>
+                <button
+                  onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
+                  className="flex items-center justify-between w-full px-3 py-2 rounded-xl border border-cafe-border bg-cafe-surface/50 text-cafe-heading hover:bg-cafe-surface text-xs font-semibold font-work-sans transition-all cursor-pointer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <MapPin size={14} className="text-cafe-primary" />
+                    <span>{activeCity ? activeCity.name : "Select City"}</span>
+                  </span>
+                  <ChevronDown size={14} className="text-cafe-muted" />
+                </button>
+
+                {cityDropdownOpen && (
+                  <div className="absolute left-0 right-0 mt-2 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-2 z-50 animate-fade-in max-w-full">
+                    <input
+                      type="text"
+                      placeholder="Search cities..."
+                      value={citySearchQuery}
+                      onChange={(e) => setCitySearchQuery(e.target.value)}
+                      className="w-full bg-cafe-bg border border-cafe-border rounded-xl px-3 py-1.5 text-xs outline-none mb-2 font-work-sans text-cafe-heading"
+                    />
+                    <button
+                      onClick={() => {
+                        setCityDropdownOpen(false);
+                        setIsMobileMenuOpen(false);
+                        handleAutoDetect();
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs font-semibold text-cafe-primary hover:bg-cafe-bg rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Compass size={13} />
+                      <span>Auto-Detect Nearest City</span>
+                    </button>
+                    <div className="border-t border-cafe-border/75 my-1.5" />
+                    <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                      {Object.keys(groupedCities).length === 0 ? (
+                        <p className="text-[10px] text-cafe-muted text-center py-2 font-work-sans">No cities found</p>
+                      ) : (
+                        Object.entries(groupedCities).map(([countryName, countryCities]) => (
+                          <div key={countryName} className="space-y-0.5">
+                            <div className="text-[10px] font-bold text-cafe-primary tracking-wider uppercase px-3 pt-1.5 font-outfit">
+                              {countryName}
+                            </div>
+                            {countryCities.map((city) => (
+                              <button
+                                key={city.id}
+                                onClick={() => {
+                                  handleCitySelect(city);
+                                  setIsMobileMenuOpen(false);
+                                }}
+                                className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium font-work-sans transition-colors cursor-pointer flex justify-between items-center ${
+                                  activeCity?.id === city.id
+                                    ? "bg-cafe-bg text-cafe-primary font-semibold"
+                                    : "text-cafe-body hover:bg-cafe-bg/60 hover:text-cafe-heading"
+                                }`}
+                              >
+                                <span>{city.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Accessibility Slider */}
+            <div>
+              <label className="text-[10px] font-bold text-cafe-primary uppercase tracking-wider block mb-1.5 font-outfit">Accessibility Theme</label>
+              <div className="flex flex-col items-center gap-2 p-3 border border-cafe-border bg-cafe-surface/50 rounded-xl">
+                <div className="flex items-center justify-between w-full text-[11px] font-semibold text-cafe-body font-work-sans">
+                  <span>
+                    {accessibilityMode === "default"
+                      ? "Standard Theme"
+                      : accessibilityMode === "deuteranopia"
+                      ? "Deuteranopia"
+                      : accessibilityMode === "tritanopia"
+                      ? "Tritanopia"
+                      : "Achromatopsia"}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="3"
+                  value={["default", "deuteranopia", "tritanopia", "monochromacy"].indexOf(accessibilityMode)}
+                  onChange={(e) => {
+                    const modes: ("default" | "deuteranopia" | "tritanopia" | "monochromacy")[] = [
+                      "default",
+                      "deuteranopia",
+                      "tritanopia",
+                      "monochromacy",
+                    ];
+                    setAccessibilityMode(modes[parseInt(e.target.value)]);
+                  }}
+                  className="w-full h-1.5 bg-[#F5EBE9] rounded-lg appearance-none cursor-pointer accent-cafe-primary animate-fade-in"
+                  style={{ outline: "none" }}
+                  title="Slide to switch accessibility themes (Default -> Red/Green -> Blue/Yellow -> Grayscale)"
+                />
+              </div>
+            </div>
+
+            {/* Strategy Toggle - Admin Only */}
+            {user && user.isAdmin && (
+              <div>
+                <label className="text-[10px] font-bold text-cafe-primary uppercase tracking-wider block mb-1.5 font-outfit">Delivery Strategy</label>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={toggleStrategy}
+                    title="Toggle Delivery Strategy"
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold font-work-sans transition-all cursor-pointer ${
+                      strategy === "isr"
+                        ? "bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                    }`}
+                  >
+                    {strategy === "isr" ? (
+                      <>
+                        <Layers size={13} className="text-purple-600 animate-pulse" />
+                        <span>On-Demand ISR</span>
+                      </>
+                    ) : (
+                      <>
+                        <Globe size={13} className="text-emerald-600 animate-pulse" />
+                        <span>Dynamic SSR</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowExplanation(!showExplanation)}
+                    className="text-cafe-muted hover:text-cafe-heading p-2 rounded-xl text-xs font-semibold cursor-pointer border border-cafe-border h-9 w-9 flex items-center justify-center bg-cafe-surface/50"
+                  >
+                    ?
+                  </button>
+                </div>
+                {showExplanation && (
+                  <div className="bg-cafe-bg border border-cafe-border rounded-xl p-3.5 mt-2 text-xs font-work-sans space-y-2 text-cafe-body">
+                    <div>
+                      <span className="font-semibold text-emerald-700">🟢 Dynamic SSR:</span>
+                      <p className="mt-0.5">Queries live database on every single page load. Extremely fresh, but hits the database each time.</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-purple-700">⚡ On-Demand ISR:</span>
+                      <p className="mt-0.5">Serves pre-cached static HTML instantly. When you save in Admin, a background webhook invalidates the cache and rebuilds the static pages silently.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Auth Actions */}
+          {mobileAuth}
+        </div>
+      )}
     </header>
   );
 }

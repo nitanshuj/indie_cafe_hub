@@ -169,7 +169,7 @@ function CafeDetailGlobal() {
           <img
             src={cafe.image}
             alt={`Cover of ${cafe.name}`}
-            className="w-full h-[450px] object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+            className="w-full h-64 sm:h-[450px] object-cover transition-transform duration-500 group-hover:scale-[1.01]"
           />
           <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <span className="bg-black/60 text-white text-xs px-3.5 py-2 rounded-xl backdrop-blur-sm inline-flex items-center gap-1.5 font-work-sans font-medium">
@@ -221,7 +221,7 @@ function CafeDetailGlobal() {
             </p>
 
             {/* Quick Amenities Grid */}
-            <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-[#F5EBE9]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-[#F5EBE9]">
               <div className="flex items-start gap-3">
                 <div className={`p-2.5 rounded-xl ${cafe.wifi ? "bg-[#FFF7F5] text-[#E67E6B]" : "bg-gray-100 text-gray-400"}`}>
                   <Wifi size={18} />
@@ -267,7 +267,7 @@ function CafeDetailGlobal() {
             {cafe.gallery && cafe.gallery.length > 0 && (
               <section className="mt-12 border-t border-[#F5EBE9] pt-8">
                 <h3 className="text-lg font-semibold font-outfit text-[#2D2422] mb-4">Interior & Seating Gallery</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {cafe.gallery.map((img, idx) => (
                     <div
                       key={idx}

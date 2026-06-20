@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { Search, Wifi, ChevronDown, Coffee, Globe, MapPin } from "lucide-react";
+import { Search, Wifi, ChevronDown, Coffee, Globe, MapPin, SlidersHorizontal } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CafeCard } from "@/components/cafe-card";
 import { fetchCafes, fetchCities } from "@/lib/cafes";
@@ -36,6 +36,7 @@ function Directory() {
   const [selectedCountry, setSelectedCountry] = useState("All countries");
   const [selectedCity, setSelectedCity] = useState("All cities");
   const [wifiOnly, setWifiOnly] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const reloadData = async () => {
     const fresh = await fetchCafes();
@@ -107,91 +108,105 @@ function Directory() {
         className="sticky top-[73px] z-40 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150"
         data-testid="directory-filter-bar"
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <div className="relative flex-1">
-            <Search
-              size={18}
-              strokeWidth={1.5}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-cafe-muted"
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search cafes…"
-              data-testid="filter-search-input"
-              className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted pl-11 pr-4 py-2 outline-none font-work-sans"
-            />
-          </div>
-          {/* Country Select Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedCountry}
-              onChange={(e) => {
-                setSelectedCountry(e.target.value);
-                setSelectedCity("All cities");
-              }}
-              data-testid="filter-country-select"
-              className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <Search
+                size={18}
+                strokeWidth={1.5}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-cafe-muted"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search cafes…"
+                data-testid="filter-search-input"
+                className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted pl-11 pr-4 py-2 outline-none font-work-sans"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="sm:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cafe-border bg-cafe-surface text-cafe-body hover:bg-cafe-bg text-sm font-semibold transition-all cursor-pointer"
             >
-              <option value="All countries">All Countries</option>
-              {countriesList.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <Globe
-              size={16}
-              strokeWidth={1.5}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
-            />
-            <ChevronDown
-              size={16}
-              strokeWidth={1.5}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
-            />
+              <SlidersHorizontal size={16} strokeWidth={1.5} />
+              <span>Filters</span>
+            </button>
           </div>
 
-          {/* City Select Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              data-testid="filter-city-select"
-              className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+          {/* Filter dropdowns/toggles: visible on desktop, or when toggled on mobile */}
+          <div className={`${showMobileFilters ? "flex" : "hidden"} sm:flex flex-col sm:flex-row gap-3 items-stretch sm:items-center animate-fade-in`}>
+            {/* Country Select Dropdown */}
+            <div className="relative flex-1 sm:flex-none">
+              <select
+                value={selectedCountry}
+                onChange={(e) => {
+                  setSelectedCountry(e.target.value);
+                  setSelectedCity("All cities");
+                }}
+                data-testid="filter-country-select"
+                className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+              >
+                <option value="All countries">All Countries</option>
+                {countriesList.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <Globe
+                size={16}
+                strokeWidth={1.5}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+              />
+              <ChevronDown
+                size={16}
+                strokeWidth={1.5}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+              />
+            </div>
+
+            {/* City Select Dropdown */}
+            <div className="relative flex-1 sm:flex-none">
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                data-testid="filter-city-select"
+                className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+              >
+                <option value="All cities">All Cities</option>
+                {filteredCitiesList.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <MapPin
+                size={16}
+                strokeWidth={1.5}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+              />
+              <ChevronDown
+                size={16}
+                strokeWidth={1.5}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setWifiOnly((v) => !v)}
+              data-testid="filter-wifi-toggle"
+              aria-pressed={wifiOnly}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 font-work-sans text-sm ${
+                wifiOnly
+                  ? "bg-cafe-primary text-white border-cafe-primary hover:bg-cafe-primary-hover"
+                  : "bg-cafe-surface text-cafe-body border-cafe-border hover:border-cafe-primary/40"
+              }`}
             >
-              <option value="All cities">All Cities</option>
-              {filteredCitiesList.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <MapPin
-              size={16}
-              strokeWidth={1.5}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
-            />
-            <ChevronDown
-              size={16}
-              strokeWidth={1.5}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
-            />
+              <Wifi size={16} strokeWidth={1.5} /> WiFi Friendly
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setWifiOnly((v) => !v)}
-            data-testid="filter-wifi-toggle"
-            aria-pressed={wifiOnly}
-            className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 font-work-sans text-sm ${
-              wifiOnly
-                ? "bg-cafe-primary text-white border-cafe-primary hover:bg-cafe-primary-hover"
-                : "bg-cafe-surface text-cafe-body border-cafe-border hover:border-cafe-primary/40"
-            }`}
-          >
-            <Wifi size={16} strokeWidth={1.5} /> WiFi Friendly
-          </button>
         </div>
       </div>
 

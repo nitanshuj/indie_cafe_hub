@@ -11,16 +11,16 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Indie Coffee Hub — Bengaluru's best independent cafes" },
+      { title: "Indie Coffee Hub — The best independent cafes" },
       {
         name: "description",
         content:
-          "A curated directory of independent specialty coffee cafes in Bengaluru, hand-picked for nomads and coffee lovers.",
+          "A curated directory of independent specialty coffee cafes, hand-picked for nomads and coffee lovers.",
       },
-      { property: "og:title", content: "Indie Coffee Hub — Bengaluru" },
+      { property: "og:title", content: "Indie Coffee Hub" },
       {
         property: "og:description",
-        content: "Find laptop-friendly, specialty coffee cafes across Bengaluru.",
+        content: "Find laptop-friendly, specialty coffee cafes worldwide.",
       },
     ],
   }),
