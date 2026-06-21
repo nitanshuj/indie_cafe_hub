@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DirectoryRouteImport } from './routes/directory'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BrewCompassRouteImport } from './routes/brew-compass'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,6 +39,11 @@ const DirectoryRoute = DirectoryRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrewCompassRoute = BrewCompassRouteImport.update({
+  id: '/brew-compass',
+  path: '/brew-compass',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/brew-compass': typeof BrewCompassRoute
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/brew-compass': typeof BrewCompassRoute
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
+  '/brew-compass': typeof BrewCompassRoute
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/brew-compass'
     | '/contact'
     | '/directory'
     | '/login'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/brew-compass'
     | '/contact'
     | '/directory'
     | '/login'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/brew-compass'
     | '/contact'
     | '/directory'
     | '/login'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
+  BrewCompassRoute: typeof BrewCompassRoute
   ContactRoute: typeof ContactRoute
   DirectoryRoute: typeof DirectoryRoute
   LoginRoute: typeof LoginRoute
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brew-compass': {
+      id: '/brew-compass'
+      path: '/brew-compass'
+      fullPath: '/brew-compass'
+      preLoaderRoute: typeof BrewCompassRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -250,6 +270,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
+  BrewCompassRoute: BrewCompassRoute,
   ContactRoute: ContactRoute,
   DirectoryRoute: DirectoryRoute,
   LoginRoute: LoginRoute,

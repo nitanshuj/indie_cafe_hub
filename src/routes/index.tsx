@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Compass } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CafeCard } from "@/components/cafe-card";
 import { fetchCafes } from "@/lib/cafes";
@@ -81,6 +81,17 @@ function Index() {
               Browse directory <ArrowRight size={16} strokeWidth={1.5} />
             </Link>
           </form>
+
+          <div className="mt-8 flex justify-center">
+            <Link
+              to="/brew-compass"
+              data-testid="hero-brew-compass-cta"
+              className="bg-[#FDE4DD] text-[#E67E6B] rounded-full px-6 py-2 transition-transform hover:scale-105 inline-flex items-center gap-2 text-sm font-semibold font-work-sans shadow-sm hover:shadow"
+            >
+              <Compass size={16} strokeWidth={1.5} />
+              <span>Curious about the cup? Explore The Brew Compass.</span>
+            </Link>
+          </div>
         </div>
 
         <div className="relative border-y border-cafe-border bg-white/40 overflow-hidden py-4">

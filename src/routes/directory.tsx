@@ -6,8 +6,14 @@ import { CafeCard } from "@/components/cafe-card";
 import { fetchCafes, fetchCities } from "@/lib/cafes";
 import { getDeliveryStrategy } from "@/lib/cache";
 import { useAuth } from "@/lib/auth-context";
+import { z } from "zod";
+
+const directorySearchSchema = z.object({
+  query: z.string().optional().catch(""),
+});
 
 export const Route = createFileRoute("/directory")({
+  validateSearch: directorySearchSchema,
   loader: async () => {
     const [cafes, cities] = await Promise.all([fetchCafes(), fetchCities()]);
     return { cafes, cities };
@@ -30,9 +36,10 @@ export const Route = createFileRoute("/directory")({
 function Directory() {
   const { user } = useAuth();
   const { cafes: initialCafes, cities } = Route.useLoaderData();
+  const { query: urlQuery } = Route.useSearch();
   const [cafes, setCafes] = useState(initialCafes);
   const [strategy, setStrategy] = useState("dynamic");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(urlQuery || "");
   const [selectedCountry, setSelectedCountry] = useState("All countries");
   const [selectedCity, setSelectedCity] = useState("All cities");
   const [wifiOnly, setWifiOnly] = useState(false);
@@ -43,6 +50,12 @@ function Directory() {
     setCafes(fresh);
     setStrategy(getDeliveryStrategy());
   };
+
+  useEffect(() => {
+    if (urlQuery !== undefined) {
+      setQuery(urlQuery || "");
+    }
+  }, [urlQuery]);
 
   useEffect(() => {
     setStrategy(getDeliveryStrategy());
