@@ -624,6 +624,15 @@ export function Header() {
           >
             Directory
           </Link>
+          <Link
+            to="/brew-compass"
+            className="text-cafe-body hover:text-cafe-heading transition-colors"
+            activeProps={{ className: "text-cafe-heading font-medium" }}
+            activeOptions={{ exact: false }}
+            data-testid="nav-brew-compass-link"
+          >
+            New to Coffee?
+          </Link>
           <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
           <AuthArea />
         </nav>
@@ -660,6 +669,16 @@ export function Header() {
               activeProps={{ className: "text-cafe-primary font-semibold" }}
             >
               Directory
+            </Link>
+            <Link
+              to="/brew-compass"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-cafe-body hover:text-cafe-heading transition-colors py-1 text-sm font-medium font-work-sans"
+              activeProps={{ className: "text-cafe-primary font-semibold" }}
+              activeOptions={{ exact: false }}
+              data-testid="nav-mobile-brew-compass-link"
+            >
+              New to Coffee?
             </Link>
           </div>
 

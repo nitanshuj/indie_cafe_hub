@@ -17,7 +17,16 @@ import { Route as BrewCompassRouteImport } from './routes/brew-compass'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BrewCompassIndexRouteImport } from './routes/brew-compass/index'
 import { Route as CafesCafeIdRouteImport } from './routes/cafes.$cafeId'
+import { Route as BrewCompassMilkTypesRouteImport } from './routes/brew-compass/milk-types'
+import { Route as BrewCompassMenuDecoderRouteImport } from './routes/brew-compass/menu-decoder'
+import { Route as BrewCompassGlobalSpecialtiesRouteImport } from './routes/brew-compass/global-specialties'
+import { Route as BrewCompassConnoisseurRouteImport } from './routes/brew-compass/connoisseur'
+import { Route as BrewCompassCoffeeAtlasRouteImport } from './routes/brew-compass/coffee-atlas'
+import { Route as BrewCompassChilledBarRouteImport } from './routes/brew-compass/chilled-bar'
+import { Route as BrewCompassBlackCoffeeRouteImport } from './routes/brew-compass/black-coffee'
+import { Route as BrewCompassBeanRoastSpectrumRouteImport } from './routes/brew-compass/bean-roast-spectrum'
 import { Route as CountryCityRouteImport } from './routes/$country.$city'
 import { Route as CountryCityCafeSlugRouteImport } from './routes/$country.$city.$cafeSlug'
 
@@ -61,11 +70,58 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrewCompassIndexRoute = BrewCompassIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
 const CafesCafeIdRoute = CafesCafeIdRouteImport.update({
   id: '/cafes/$cafeId',
   path: '/cafes/$cafeId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrewCompassMilkTypesRoute = BrewCompassMilkTypesRouteImport.update({
+  id: '/milk-types',
+  path: '/milk-types',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
+const BrewCompassMenuDecoderRoute = BrewCompassMenuDecoderRouteImport.update({
+  id: '/menu-decoder',
+  path: '/menu-decoder',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
+const BrewCompassGlobalSpecialtiesRoute =
+  BrewCompassGlobalSpecialtiesRouteImport.update({
+    id: '/global-specialties',
+    path: '/global-specialties',
+    getParentRoute: () => BrewCompassRoute,
+  } as any)
+const BrewCompassConnoisseurRoute = BrewCompassConnoisseurRouteImport.update({
+  id: '/connoisseur',
+  path: '/connoisseur',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
+const BrewCompassCoffeeAtlasRoute = BrewCompassCoffeeAtlasRouteImport.update({
+  id: '/coffee-atlas',
+  path: '/coffee-atlas',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
+const BrewCompassChilledBarRoute = BrewCompassChilledBarRouteImport.update({
+  id: '/chilled-bar',
+  path: '/chilled-bar',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
+const BrewCompassBlackCoffeeRoute = BrewCompassBlackCoffeeRouteImport.update({
+  id: '/black-coffee',
+  path: '/black-coffee',
+  getParentRoute: () => BrewCompassRoute,
+} as any)
+const BrewCompassBeanRoastSpectrumRoute =
+  BrewCompassBeanRoastSpectrumRouteImport.update({
+    id: '/bean-roast-spectrum',
+    path: '/bean-roast-spectrum',
+    getParentRoute: () => BrewCompassRoute,
+  } as any)
 const CountryCityRoute = CountryCityRouteImport.update({
   id: '/$country/$city',
   path: '/$country/$city',
@@ -81,26 +137,43 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/brew-compass': typeof BrewCompassRoute
+  '/brew-compass': typeof BrewCompassRouteWithChildren
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
+  '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
+  '/brew-compass/black-coffee': typeof BrewCompassBlackCoffeeRoute
+  '/brew-compass/chilled-bar': typeof BrewCompassChilledBarRoute
+  '/brew-compass/coffee-atlas': typeof BrewCompassCoffeeAtlasRoute
+  '/brew-compass/connoisseur': typeof BrewCompassConnoisseurRoute
+  '/brew-compass/global-specialties': typeof BrewCompassGlobalSpecialtiesRoute
+  '/brew-compass/menu-decoder': typeof BrewCompassMenuDecoderRoute
+  '/brew-compass/milk-types': typeof BrewCompassMilkTypesRoute
   '/cafes/$cafeId': typeof CafesCafeIdRoute
+  '/brew-compass/': typeof BrewCompassIndexRoute
   '/$country/$city/$cafeSlug': typeof CountryCityCafeSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/brew-compass': typeof BrewCompassRoute
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
+  '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
+  '/brew-compass/black-coffee': typeof BrewCompassBlackCoffeeRoute
+  '/brew-compass/chilled-bar': typeof BrewCompassChilledBarRoute
+  '/brew-compass/coffee-atlas': typeof BrewCompassCoffeeAtlasRoute
+  '/brew-compass/connoisseur': typeof BrewCompassConnoisseurRoute
+  '/brew-compass/global-specialties': typeof BrewCompassGlobalSpecialtiesRoute
+  '/brew-compass/menu-decoder': typeof BrewCompassMenuDecoderRoute
+  '/brew-compass/milk-types': typeof BrewCompassMilkTypesRoute
   '/cafes/$cafeId': typeof CafesCafeIdRoute
+  '/brew-compass': typeof BrewCompassIndexRoute
   '/$country/$city/$cafeSlug': typeof CountryCityCafeSlugRoute
 }
 export interface FileRoutesById {
@@ -108,13 +181,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/brew-compass': typeof BrewCompassRoute
+  '/brew-compass': typeof BrewCompassRouteWithChildren
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
+  '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
+  '/brew-compass/black-coffee': typeof BrewCompassBlackCoffeeRoute
+  '/brew-compass/chilled-bar': typeof BrewCompassChilledBarRoute
+  '/brew-compass/coffee-atlas': typeof BrewCompassCoffeeAtlasRoute
+  '/brew-compass/connoisseur': typeof BrewCompassConnoisseurRoute
+  '/brew-compass/global-specialties': typeof BrewCompassGlobalSpecialtiesRoute
+  '/brew-compass/menu-decoder': typeof BrewCompassMenuDecoderRoute
+  '/brew-compass/milk-types': typeof BrewCompassMilkTypesRoute
   '/cafes/$cafeId': typeof CafesCafeIdRoute
+  '/brew-compass/': typeof BrewCompassIndexRoute
   '/$country/$city/$cafeSlug': typeof CountryCityCafeSlugRoute
 }
 export interface FileRouteTypes {
@@ -129,20 +211,37 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/$country/$city'
+    | '/brew-compass/bean-roast-spectrum'
+    | '/brew-compass/black-coffee'
+    | '/brew-compass/chilled-bar'
+    | '/brew-compass/coffee-atlas'
+    | '/brew-compass/connoisseur'
+    | '/brew-compass/global-specialties'
+    | '/brew-compass/menu-decoder'
+    | '/brew-compass/milk-types'
     | '/cafes/$cafeId'
+    | '/brew-compass/'
     | '/$country/$city/$cafeSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/admin'
-    | '/brew-compass'
     | '/contact'
     | '/directory'
     | '/login'
     | '/signup'
     | '/$country/$city'
+    | '/brew-compass/bean-roast-spectrum'
+    | '/brew-compass/black-coffee'
+    | '/brew-compass/chilled-bar'
+    | '/brew-compass/coffee-atlas'
+    | '/brew-compass/connoisseur'
+    | '/brew-compass/global-specialties'
+    | '/brew-compass/menu-decoder'
+    | '/brew-compass/milk-types'
     | '/cafes/$cafeId'
+    | '/brew-compass'
     | '/$country/$city/$cafeSlug'
   id:
     | '__root__'
@@ -155,7 +254,16 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/$country/$city'
+    | '/brew-compass/bean-roast-spectrum'
+    | '/brew-compass/black-coffee'
+    | '/brew-compass/chilled-bar'
+    | '/brew-compass/coffee-atlas'
+    | '/brew-compass/connoisseur'
+    | '/brew-compass/global-specialties'
+    | '/brew-compass/menu-decoder'
+    | '/brew-compass/milk-types'
     | '/cafes/$cafeId'
+    | '/brew-compass/'
     | '/$country/$city/$cafeSlug'
   fileRoutesById: FileRoutesById
 }
@@ -163,7 +271,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
-  BrewCompassRoute: typeof BrewCompassRoute
+  BrewCompassRoute: typeof BrewCompassRouteWithChildren
   ContactRoute: typeof ContactRoute
   DirectoryRoute: typeof DirectoryRoute
   LoginRoute: typeof LoginRoute
@@ -230,12 +338,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/brew-compass/': {
+      id: '/brew-compass/'
+      path: '/'
+      fullPath: '/brew-compass/'
+      preLoaderRoute: typeof BrewCompassIndexRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
     '/cafes/$cafeId': {
       id: '/cafes/$cafeId'
       path: '/cafes/$cafeId'
       fullPath: '/cafes/$cafeId'
       preLoaderRoute: typeof CafesCafeIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/brew-compass/milk-types': {
+      id: '/brew-compass/milk-types'
+      path: '/milk-types'
+      fullPath: '/brew-compass/milk-types'
+      preLoaderRoute: typeof BrewCompassMilkTypesRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/menu-decoder': {
+      id: '/brew-compass/menu-decoder'
+      path: '/menu-decoder'
+      fullPath: '/brew-compass/menu-decoder'
+      preLoaderRoute: typeof BrewCompassMenuDecoderRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/global-specialties': {
+      id: '/brew-compass/global-specialties'
+      path: '/global-specialties'
+      fullPath: '/brew-compass/global-specialties'
+      preLoaderRoute: typeof BrewCompassGlobalSpecialtiesRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/connoisseur': {
+      id: '/brew-compass/connoisseur'
+      path: '/connoisseur'
+      fullPath: '/brew-compass/connoisseur'
+      preLoaderRoute: typeof BrewCompassConnoisseurRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/coffee-atlas': {
+      id: '/brew-compass/coffee-atlas'
+      path: '/coffee-atlas'
+      fullPath: '/brew-compass/coffee-atlas'
+      preLoaderRoute: typeof BrewCompassCoffeeAtlasRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/chilled-bar': {
+      id: '/brew-compass/chilled-bar'
+      path: '/chilled-bar'
+      fullPath: '/brew-compass/chilled-bar'
+      preLoaderRoute: typeof BrewCompassChilledBarRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/black-coffee': {
+      id: '/brew-compass/black-coffee'
+      path: '/black-coffee'
+      fullPath: '/brew-compass/black-coffee'
+      preLoaderRoute: typeof BrewCompassBlackCoffeeRouteImport
+      parentRoute: typeof BrewCompassRoute
+    }
+    '/brew-compass/bean-roast-spectrum': {
+      id: '/brew-compass/bean-roast-spectrum'
+      path: '/bean-roast-spectrum'
+      fullPath: '/brew-compass/bean-roast-spectrum'
+      preLoaderRoute: typeof BrewCompassBeanRoastSpectrumRouteImport
+      parentRoute: typeof BrewCompassRoute
     }
     '/$country/$city': {
       id: '/$country/$city'
@@ -254,6 +425,34 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BrewCompassRouteChildren {
+  BrewCompassBeanRoastSpectrumRoute: typeof BrewCompassBeanRoastSpectrumRoute
+  BrewCompassBlackCoffeeRoute: typeof BrewCompassBlackCoffeeRoute
+  BrewCompassChilledBarRoute: typeof BrewCompassChilledBarRoute
+  BrewCompassCoffeeAtlasRoute: typeof BrewCompassCoffeeAtlasRoute
+  BrewCompassConnoisseurRoute: typeof BrewCompassConnoisseurRoute
+  BrewCompassGlobalSpecialtiesRoute: typeof BrewCompassGlobalSpecialtiesRoute
+  BrewCompassMenuDecoderRoute: typeof BrewCompassMenuDecoderRoute
+  BrewCompassMilkTypesRoute: typeof BrewCompassMilkTypesRoute
+  BrewCompassIndexRoute: typeof BrewCompassIndexRoute
+}
+
+const BrewCompassRouteChildren: BrewCompassRouteChildren = {
+  BrewCompassBeanRoastSpectrumRoute: BrewCompassBeanRoastSpectrumRoute,
+  BrewCompassBlackCoffeeRoute: BrewCompassBlackCoffeeRoute,
+  BrewCompassChilledBarRoute: BrewCompassChilledBarRoute,
+  BrewCompassCoffeeAtlasRoute: BrewCompassCoffeeAtlasRoute,
+  BrewCompassConnoisseurRoute: BrewCompassConnoisseurRoute,
+  BrewCompassGlobalSpecialtiesRoute: BrewCompassGlobalSpecialtiesRoute,
+  BrewCompassMenuDecoderRoute: BrewCompassMenuDecoderRoute,
+  BrewCompassMilkTypesRoute: BrewCompassMilkTypesRoute,
+  BrewCompassIndexRoute: BrewCompassIndexRoute,
+}
+
+const BrewCompassRouteWithChildren = BrewCompassRoute._addFileChildren(
+  BrewCompassRouteChildren,
+)
+
 interface CountryCityRouteChildren {
   CountryCityCafeSlugRoute: typeof CountryCityCafeSlugRoute
 }
@@ -270,7 +469,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
-  BrewCompassRoute: BrewCompassRoute,
+  BrewCompassRoute: BrewCompassRouteWithChildren,
   ContactRoute: ContactRoute,
   DirectoryRoute: DirectoryRoute,
   LoginRoute: LoginRoute,

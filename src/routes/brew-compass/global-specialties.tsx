@@ -1,0 +1,210 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+
+export const Route = createFileRoute("/brew-compass/global-specialties")({
+  head: () => ({
+    meta: [
+      { title: "Iconic Global Coffee Specialties | Brew School" },
+      {
+        name: "description",
+        content:
+          "Explore traditional global coffee recipes: Turkish Cezve, Vietnamese phin drip, and Algerian Mazagran. Learn their histories and visual layers.",
+      },
+    ],
+  }),
+  component: GlobalSpecialtiesPage,
+});
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+interface SpecialtyLayer {
+  name: string;
+  height: string;
+  bg: string;
+}
+
+interface SpecialtyDrink {
+  name: string;
+  origin: string;
+  tagline: string;
+  description: string;
+  accentColor: string;
+  textAccent: string;
+  imageUrl: string;
+  layers: SpecialtyLayer[];
+  isDark?: boolean;
+}
+
+const GLOBAL_DRINKS: SpecialtyDrink[] = [
+  {
+    name: "Turkish Coffee",
+    origin: "Turkey & Yemen",
+    tagline: "Ancient Cezve extraction.",
+    description:
+      "Finely powdered coffee beans simmered in a copper cezve pot, served unfiltered. The grounds settle at the bottom of the cup, creating an incredibly rich, thick, and intense texture.",
+    accentColor: "from-[#FDF2E9] to-[#F5CBA7]",
+    textAccent: "text-amber-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142058/Turkish-Coffee_ibniu9.jpg",
+    layers: [
+      { name: "Silt / Coffee Grounds", height: "20%", bg: "bg-[#27150C]" },
+      { name: "Thick Unfiltered Coffee", height: "65%", bg: "bg-[#3E2723]" },
+      { name: "Velvety Crema Foam", height: "15%", bg: "bg-[#8D6E63]/70" },
+    ],
+  },
+  {
+    name: "Vietnamese Cà Phê Sữa Đá",
+    origin: "Vietnam",
+    tagline: "Slow phin drip over condensed milk.",
+    description:
+      "Strong Robusta coffee brewed slowly through a metal phin filter directly onto a thick layer of sweetened condensed milk, then stirred and poured over crushed ice.",
+    accentColor: "from-[#E8F8F5] to-[#A3E4D7]",
+    textAccent: "text-teal-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142291/Vietnamese_C%C3%A0_Ph%C3%AA_S%E1%BB%AFa_%C4%90%C3%A1_eq1ygm.jpg",
+    layers: [
+      { name: "Crushed Ice", height: "20%", bg: "bg-white/40" },
+      { name: "Strong Robusta Brew", height: "55%", bg: "bg-[#3E2723]/90" },
+      { name: "Sweetened Condensed Milk", height: "25%", bg: "bg-amber-100" },
+    ],
+  },
+  {
+    name: "Mazagran",
+    origin: "Algeria & Portugal",
+    tagline: "The original iced lemon coffee.",
+    description:
+      "Originating in 1840s Algeria, French soldiers mixed cold coffee with water and lemon juice. The Portuguese adaptation swaps water for lemonade or iced tea, creating a sweet, citrusy pick-me-up.",
+    accentColor: "from-[#FEF9E7] to-[#F9E79F]",
+    textAccent: "text-amber-800",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782137523/Mazagran_coffee_Algeria_Portugal_wanbdw.png",
+    layers: [
+      { name: "Ice Cubes", height: "15%", bg: "bg-white/30" },
+      { name: "Lemon Slice & Juice / Soda", height: "25%", bg: "bg-yellow-200/50" },
+      { name: "Sweetened Cold Espresso", height: "60%", bg: "bg-[#3E2723]/80" },
+    ],
+  },
+];
+
+// ─── Glass card ──────────────────────────────────────────────────────────────
+function SpecialtyCard({ drink }: { drink: SpecialtyDrink }) {
+  const headingColor = drink.isDark ? "text-white" : "text-cafe-heading";
+  const bodyColor = drink.isDark ? "text-stone-300" : "text-cafe-body";
+  const mutedColor = drink.isDark ? "text-stone-400" : "text-cafe-muted";
+
+  return (
+    <div
+      className={`group relative bg-gradient-to-b ${drink.accentColor} border border-white/20 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row`}
+    >
+      {/* Left side: Content & anatomy */}
+      <div className="flex-1 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
+        {/* Text */}
+        <div className="flex-1 flex flex-col h-full min-h-[160px]">
+          <p className={`text-[10px] uppercase tracking-[0.15em] font-bold font-work-sans mb-1.5 ${drink.textAccent}`}>
+            {drink.origin}
+          </p>
+          <h3 className={`text-2xl font-bold font-outfit mb-1.5 ${headingColor}`}>
+            {drink.name}
+          </h3>
+          <p className={`text-xs italic font-work-sans mb-3 ${drink.textAccent}`}>
+            {drink.tagline}
+          </p>
+          <p className={`text-sm font-work-sans leading-relaxed flex-1 ${bodyColor}`}>
+            {drink.description}
+          </p>
+
+          {/* Layer key */}
+          <div className="mt-6 flex flex-col gap-2">
+            {[...drink.layers].reverse().map((l, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className={`w-3.5 h-3.5 rounded-sm inline-block flex-shrink-0 ${l.bg} border border-white/30`} />
+                <span className={`text-[12px] font-work-sans ${mutedColor}`}>{l.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cup Visual */}
+        <div className="flex-shrink-0 w-28 flex flex-col items-center justify-center self-center bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+          <div className="relative w-16 h-40 rounded-b-2xl rounded-t-lg overflow-hidden border-2 border-white/60 bg-white/5 shadow-inner flex flex-col-reverse">
+            {drink.layers.map((layer, i) => (
+              <div
+                key={i}
+                title={layer.name}
+                className={`w-full transition-all duration-700 ease-in-out ${layer.bg}`}
+                style={{ height: layer.height }}
+              />
+            ))}
+          </div>
+          <span className={`text-[10px] uppercase tracking-wider font-bold mt-2 font-work-sans ${mutedColor}`}>
+            Anatomy
+          </span>
+        </div>
+      </div>
+
+      {/* Right side: Photo */}
+      <div className="w-full md:w-[45%] h-64 md:h-auto min-h-[300px] relative overflow-hidden border-t md:border-t-0 md:border-l border-white/20">
+        <img
+          src={drink.imageUrl}
+          alt={drink.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/40 via-transparent to-transparent pointer-events-none" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+function GlobalSpecialtiesPage() {
+  return (
+    <main className="max-w-7xl mx-auto px-6 py-12 sm:py-16 space-y-16">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs font-work-sans text-cafe-muted">
+        <Link to="/brew-compass" className="hover:text-cafe-primary transition-colors">
+          Brew School
+        </Link>
+        <span>/</span>
+        <span className="text-cafe-heading font-medium">Global Specialties</span>
+      </nav>
+
+      {/* Header */}
+      <section className="space-y-4 max-w-3xl">
+        <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
+          Module 4
+        </p>
+        <h1 className="text-4xl sm:text-5xl font-light text-cafe-heading font-outfit leading-tight">
+          Iconic Global Coffee Specialties
+        </h1>
+        <p className="text-base text-cafe-body font-work-sans leading-relaxed">
+          Embark on a global journey to explore the traditional coffee specialties that define different coffee cultures.
+          From cezve-brewed unfiltered cups in Turkey to the refreshing lemon-spiked Algerian Mazagran, discover how regional
+          ingredients and history shape the daily cup.
+        </p>
+      </section>
+
+      {/* Grid (1 card per row) */}
+      <section
+        className="grid grid-cols-1 gap-8"
+        aria-label="Global coffee specialties cards"
+      >
+        {GLOBAL_DRINKS.map((drink) => (
+          <SpecialtyCard key={drink.name} drink={drink} />
+        ))}
+      </section>
+
+      {/* Module nav */}
+      <div className="flex items-center justify-between pt-6 border-t border-cafe-border">
+        <Link
+          to="/brew-compass/black-coffee"
+          className="inline-flex items-center gap-2 text-sm text-cafe-body hover:text-cafe-heading font-work-sans transition-colors"
+        >
+          <ArrowLeft size={15} /> Black Coffee Techniques
+        </Link>
+        <Link
+          to="/brew-compass/connoisseur"
+          className="inline-flex items-center gap-2 text-sm text-cafe-primary hover:text-cafe-primary-hover font-semibold font-work-sans transition-colors"
+        >
+          Next: Connoisseur Corner <ArrowRight size={15} />
+        </Link>
+      </div>
+    </main>
+  );
+}
