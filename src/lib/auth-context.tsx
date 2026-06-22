@@ -13,6 +13,7 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<AuthUser>;
   signUp: (email: string, password: string, name?: string) => Promise<AuthUser>;
   signOut: () => Promise<void>;
+  updateProfileName: (name: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -116,6 +117,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut: async () => {
       await supabase.auth.signOut();
       setUser(null);
+    },
+    updateProfileName: async (name: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { full_name: name }
+      });
+      if (authError) throw authError;
+
+      const { error: dbError } = await supabase
+        .from("profiles")
+        .update({ full_name: name })
+        .eq("id", user.id);
+      if (dbError) {
+        console.error("Failed to update profile table:", dbError);
+      }
+
+      setUser(prev => prev ? { ...prev, name } : null);
     },
   };
 

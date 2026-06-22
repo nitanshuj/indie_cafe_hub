@@ -19,6 +19,16 @@
   --cafe-negative-text: #a3938f;
 }
 
+[data-accessibility="protanopia"] {
+  --cafe-primary: #059669;
+  --cafe-primary-hover: #047857;
+  --cafe-primary-light: #d1fae5;
+  --cafe-open-bg: #d1fae5;
+  --cafe-open-text: #065f46;
+  --cafe-negative-bg: #ffedd5;
+  --cafe-negative-text: #b45309;
+}
+
 [data-accessibility="deuteranopia"] {
   --cafe-primary: #2563eb;
   --cafe-primary-hover: #1d4ed8;

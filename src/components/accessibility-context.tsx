@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-export type AccessibilityMode = "default" | "deuteranopia" | "tritanopia" | "monochromacy";
+export type AccessibilityMode = "default" | "protanopia" | "deuteranopia" | "tritanopia" | "monochromacy";
 
 type AccessibilityContextType = {
   accessibilityMode: AccessibilityMode;
@@ -14,7 +14,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     const saved = localStorage.getItem("accessibility-mode") as AccessibilityMode;
-    if (saved && ["default", "deuteranopia", "tritanopia", "monochromacy"].includes(saved)) {
+    if (saved && ["default", "protanopia", "deuteranopia", "tritanopia", "monochromacy"].includes(saved)) {
       setAccessibilityModeState(saved);
       if (saved !== "default") {
         document.documentElement.setAttribute("data-accessibility", saved);

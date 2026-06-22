@@ -28,7 +28,7 @@ const MODULES = [
   {
     to: "/brew-compass/menu-decoder",
     icon: Coffee,
-    label: "The Menu Decoder",
+    label: "The Menu Decoder - The Basic Coffees",
     sublabel: "The Basic Coffees",
     description:
       "Decode every drink on the coffee shop menu. Visualize the exact anatomy of each cup — espresso to foam — with an interactive layer-pour animation that shows you what's actually in your glass.",
@@ -39,7 +39,7 @@ const MODULES = [
     badge: "Start Here",
     badgeColor: "bg-[#4A2C11] text-white",
     imageUrl:
-      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=900",
+      "https://res.cloudinary.com/daon1coiv/image/upload/v1782155491/Module-1-The_Menu_Decoder_hpv1qa.jpg",
     imageAlt: "Espresso being poured",
   },
   {
@@ -73,7 +73,7 @@ const MODULES = [
     badge: "Techniques",
     badgeColor: "bg-cafe-primary text-white",
     imageUrl:
-      "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=900",
+      "https://res.cloudinary.com/daon1coiv/image/upload/v1782155255/black-coffee-cover_pgsfqq.jpg",
     imageAlt: "French press brewing",
   },
   {
@@ -90,7 +90,7 @@ const MODULES = [
     badge: "World Tour",
     badgeColor: "bg-purple-700 text-white",
     imageUrl:
-      "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=900",
+      "https://res.cloudinary.com/daon1coiv/image/upload/v1782155492/Module-4-Iconic-Global-Coffee-Specialities_vfl9bt.jpg",
     imageAlt: "Turkish coffee set",
   },
   {
@@ -108,7 +108,7 @@ const MODULES = [
     badgeColor: "bg-amber-500 text-white",
     dark: true,
     imageUrl:
-      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=900",
+      "https://res.cloudinary.com/daon1coiv/image/upload/v1782156145/Module_4_-_Connoisseur_Corner_cemahl.png",
     imageAlt: "Premium specialty coffee",
   },
   {

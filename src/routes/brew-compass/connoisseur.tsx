@@ -42,7 +42,7 @@ const PREMIUM_COFFEES: PremiumCoffee[] = [
     tastingNotes: ["Jasmine", "Bergamot", "Peach", "Tropical Fruit", "Honey"],
     story:
       "Originally from Ethiopia, the Geisha variety was brought to Central America in the 1950s. Hacienda La Esmeralda in Panama's highlands began producing it commercially in 2004, winning the Best of Panama auction — and the specialty coffee world was never the same.",
-    imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=1200",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782158439/Panama_Geisha_yl61de.png",
     accent: "from-amber-800 to-amber-900",
   },
   {
@@ -56,7 +56,7 @@ const PREMIUM_COFFEES: PremiumCoffee[] = [
     tastingNotes: ["Mild Sweetness", "Herbal", "Nutty", "Zero Bitterness", "Velvety"],
     story:
       "Coffee was introduced to Jamaica in 1728. The Blue Mountain micro-climate — high altitude, rich volcanic soil, consistent rainfall, and cool nights — creates a cup so perfectly balanced it's used as the benchmark for 'perfect mild coffee'.",
-    imageUrl: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=1200",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782158987/Jamaican_Blue_Mountain_juhxys.png",
     accent: "from-blue-900 to-slate-900",
   },
   {
@@ -70,7 +70,7 @@ const PREMIUM_COFFEES: PremiumCoffee[] = [
     tastingNotes: ["Smooth", "Earthy", "Low Bitterness", "Dark Chocolate", "Musty"],
     story:
       "During Dutch colonial rule in Indonesia, local farmers were forbidden from picking coffee for themselves. They discovered civets were eating the cherries, and began collecting and processing the passed beans — and Kopi Luwak was born. Ethical wild-source versions command a premium.",
-    imageUrl: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=1200",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782158987/Kopi-Luwak_t8fd6u.png",
     accent: "from-stone-800 to-stone-900",
   },
   {
@@ -84,7 +84,7 @@ const PREMIUM_COFFEES: PremiumCoffee[] = [
     tastingNotes: ["Bright Acidity", "Nutty", "Brown Sugar", "Stone Fruit", "Mild"],
     story:
       "Coffee arrived in Hawaii in 1828. Today Kona's 600+ small farms are tightly regulated — only coffee grown in the North and South Kona districts can legally bear the name. Beware of blends marketed as 'Kona' — they may contain as little as 10% genuine beans.",
-    imageUrl: "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&q=80&w=1200",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782159349/Hawaiian_Kona_jnvdlo.png",
     accent: "from-orange-900 to-red-950",
   },
 ];
@@ -226,7 +226,7 @@ function ConnoisseurPage() {
         <section className="space-y-5 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-semibold font-work-sans border border-amber-500/20">
             <Crown size={12} strokeWidth={1.5} />
-            Module 4
+            Module 5
           </div>
           <h1 className="text-4xl sm:text-5xl font-light text-white font-outfit leading-tight">
             Connoisseur Corner

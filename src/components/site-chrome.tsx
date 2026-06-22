@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { getDeliveryStrategy, setDeliveryStrategy, DeliveryStrategy } from "@/lib/cache";
 import { useAccessibility } from "./accessibility-context";
 
-function AuthArea() {
+function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -70,6 +70,10 @@ function AuthArea() {
           </div>
           <button
             type="button"
+            onClick={() => {
+              onOpenProfile();
+              setOpen(false);
+            }}
             className="w-full text-left px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans inline-flex items-center gap-2 cursor-pointer"
           >
             <User size={14} strokeWidth={1.5} /> Profile
@@ -107,13 +111,43 @@ import { useNavigate } from "@tanstack/react-router";
 import { fetchCities, City } from "@/lib/cafes";
 
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateProfileName } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { accessibilityMode, setAccessibilityMode } = useAccessibility();
   const [strategy, setStrategy] = useState<DeliveryStrategy>("dynamic");
   const [webhookStatus, setWebhookStatus] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  // Profile modal state
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [newProfileName, setNewProfileName] = useState(user?.name || "");
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    if (user?.name) {
+      setNewProfileName(user.name);
+    }
+  }, [user?.name]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProfileName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+    setSavingProfile(true);
+    try {
+      await updateProfileName(newProfileName.trim());
+      toast.success("Profile updated successfully!");
+      setProfileModalOpen(false);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to update profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   // City selection state
   const [cities, setCities] = useState<City[]>([]);
@@ -360,6 +394,16 @@ export function Header() {
           </Link>
         )}
         <button
+          type="button"
+          onClick={() => {
+            setProfileModalOpen(true);
+            setIsMobileMenuOpen(false);
+          }}
+          className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-heading py-1 font-medium font-work-sans w-full text-left cursor-pointer"
+        >
+          <User size={13} strokeWidth={1.5} /> Profile
+        </button>
+        <button
           onClick={() => {
             signOut();
             setIsMobileMenuOpen(false);
@@ -553,39 +597,20 @@ export function Header() {
             )}
           </div>
 
-          {/* Color-Blind Accessibility Palette Slider */}
+          {/* Color-Blind Accessibility Dropdown */}
           <div className="relative">
-            <div className="flex flex-col items-center gap-1.5 px-3 py-1.5 border border-cafe-border bg-cafe-surface/50 rounded-xl max-w-[150px]">
-              <div className="flex items-center justify-between w-full text-[9px] font-semibold text-cafe-body font-work-sans">
-                <span className="truncate">
-                  {accessibilityMode === "default"
-                    ? "Standard Theme"
-                    : accessibilityMode === "deuteranopia"
-                    ? "Deuteranopia"
-                    : accessibilityMode === "tritanopia"
-                    ? "Tritanopia"
-                    : "Achromatopsia"}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="3"
-                value={["default", "deuteranopia", "tritanopia", "monochromacy"].indexOf(accessibilityMode)}
-                onChange={(e) => {
-                  const modes: ("default" | "deuteranopia" | "tritanopia" | "monochromacy")[] = [
-                    "default",
-                    "deuteranopia",
-                    "tritanopia",
-                    "monochromacy",
-                  ];
-                  setAccessibilityMode(modes[parseInt(e.target.value)]);
-                }}
-                className="w-24 h-1.5 bg-[#F5EBE9] rounded-lg appearance-none cursor-pointer accent-cafe-primary"
-                style={{ outline: "none" }}
-                title="Slide to switch accessibility themes (Default -> Red/Green -> Blue/Yellow -> Grayscale)"
-              />
-            </div>
+            <select
+              value={accessibilityMode}
+              onChange={(e) => setAccessibilityMode(e.target.value as any)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cafe-border bg-cafe-surface/50 text-cafe-heading hover:bg-cafe-surface text-xs font-semibold font-work-sans outline-none cursor-pointer"
+              title="Select accessibility theme"
+            >
+              <option value="default">Standard Theme</option>
+              <option value="protanopia">Protanopia (Red-Blind)</option>
+              <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+              <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+              <option value="monochromacy">Achromatopsia (Grayscale)</option>
+            </select>
             {showTooltip && (
               <div className="absolute right-0 top-full mt-2.5 w-60 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-cafe-body">
                 <div className="font-bold text-cafe-heading mb-1 font-outfit flex items-center gap-1">
@@ -593,7 +618,7 @@ export function Header() {
                   <span>Choose Your Theme</span>
                 </div>
                 <p className="leading-relaxed">
-                  Drag this slider to choose a color-blind friendly theme (Deuteranopia, Tritanopia, or Achromatopsia).
+                  Select a color-blind friendly theme (Protanopia, Deuteranopia, Tritanopia, or Achromatopsia) from the dropdown.
                 </p>
                 <button
                   onClick={dismissTooltip}
@@ -634,7 +659,7 @@ export function Header() {
             New to Coffee?
           </Link>
           <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
-          <AuthArea />
+          <AuthArea onOpenProfile={() => setProfileModalOpen(true)} />
         </nav>
 
         {/* Mobile Menu Button */}
@@ -756,40 +781,20 @@ export function Header() {
               </div>
             </div>
 
-            {/* Accessibility Slider */}
+            {/* Accessibility Dropdown */}
             <div>
               <label className="text-[10px] font-bold text-cafe-primary uppercase tracking-wider block mb-1.5 font-outfit">Accessibility Theme</label>
-              <div className="flex flex-col items-center gap-2 p-3 border border-cafe-border bg-cafe-surface/50 rounded-xl">
-                <div className="flex items-center justify-between w-full text-[11px] font-semibold text-cafe-body font-work-sans">
-                  <span>
-                    {accessibilityMode === "default"
-                      ? "Standard Theme"
-                      : accessibilityMode === "deuteranopia"
-                      ? "Deuteranopia"
-                      : accessibilityMode === "tritanopia"
-                      ? "Tritanopia"
-                      : "Achromatopsia"}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="3"
-                  value={["default", "deuteranopia", "tritanopia", "monochromacy"].indexOf(accessibilityMode)}
-                  onChange={(e) => {
-                    const modes: ("default" | "deuteranopia" | "tritanopia" | "monochromacy")[] = [
-                      "default",
-                      "deuteranopia",
-                      "tritanopia",
-                      "monochromacy",
-                    ];
-                    setAccessibilityMode(modes[parseInt(e.target.value)]);
-                  }}
-                  className="w-full h-1.5 bg-[#F5EBE9] rounded-lg appearance-none cursor-pointer accent-cafe-primary animate-fade-in"
-                  style={{ outline: "none" }}
-                  title="Slide to switch accessibility themes (Default -> Red/Green -> Blue/Yellow -> Grayscale)"
-                />
-              </div>
+              <select
+                value={accessibilityMode}
+                onChange={(e) => setAccessibilityMode(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-xl border border-cafe-border bg-cafe-surface/50 text-cafe-heading hover:bg-cafe-surface text-xs font-semibold font-work-sans outline-none cursor-pointer"
+              >
+                <option value="default">Standard Theme</option>
+                <option value="protanopia">Protanopia (Red-Blind)</option>
+                <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+                <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+                <option value="monochromacy">Achromatopsia (Grayscale)</option>
+              </select>
             </div>
 
             {/* Strategy Toggle - Admin Only */}
@@ -843,6 +848,61 @@ export function Header() {
 
           {/* Auth Actions */}
           {mobileAuth}
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {profileModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-cafe-surface/90 backdrop-blur-xl border border-cafe-border rounded-2xl w-full max-w-md shadow-2xl p-6 relative animate-scale-in">
+            <button
+              onClick={() => setProfileModalOpen(false)}
+              className="absolute right-4 top-4 p-1 rounded-full text-cafe-muted hover:text-cafe-heading hover:bg-cafe-bg transition-colors cursor-pointer border-0 bg-transparent"
+              type="button"
+            >
+              <X size={18} />
+            </button>
+            <h3 className="font-outfit font-semibold text-lg text-cafe-heading mb-4">Edit Profile</h3>
+            <form onSubmit={handleSaveProfile} className="space-y-4 font-work-sans">
+              <div>
+                <label className="block text-xs font-semibold text-cafe-muted mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="w-full bg-cafe-bg/50 border border-cafe-border/50 rounded-xl px-3 py-2 text-sm text-cafe-muted cursor-not-allowed select-all"
+                />
+                <p className="text-[10px] text-cafe-muted mt-1">Email address cannot be changed.</p>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-cafe-muted mb-1">Profile Name</label>
+                <input
+                  type="text"
+                  value={newProfileName}
+                  onChange={(e) => setNewProfileName(e.target.value)}
+                  placeholder="Enter your name"
+                  required
+                  className="w-full bg-cafe-bg border border-cafe-border rounded-xl px-3 py-2 text-sm text-cafe-heading outline-none focus:border-cafe-primary transition-colors"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setProfileModalOpen(false)}
+                  className="px-4 py-2 border border-cafe-border rounded-xl text-sm font-medium text-cafe-body hover:bg-cafe-bg transition-colors cursor-pointer bg-transparent"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="px-4 py-2 bg-cafe-primary text-white hover:bg-cafe-primary-hover disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer border-0 flex items-center gap-1.5"
+                >
+                  {savingProfile ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </header>
