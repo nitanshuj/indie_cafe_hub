@@ -598,7 +598,7 @@ export function Header() {
           </div>
 
           {/* Color-Blind Accessibility Dropdown */}
-          <div className="relative">
+          <div className="relative flex items-center">
             <select
               value={accessibilityMode}
               onChange={(e) => setAccessibilityMode(e.target.value as any)}
@@ -611,8 +611,11 @@ export function Header() {
               <option value="tritanopia">Tritanopia (Blue-Blind)</option>
               <option value="monochromacy">Achromatopsia (Grayscale)</option>
             </select>
+            <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 text-[9px] text-cafe-muted font-semibold font-work-sans tracking-wide flex items-center gap-1 whitespace-nowrap">
+              <Eye size={10} className="text-cafe-primary/70" /> Color Blind Friendly Themes
+            </span>
             {showTooltip && (
-              <div className="absolute right-0 top-full mt-2.5 w-60 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-cafe-body">
+              <div className="absolute right-0 top-full mt-5 w-60 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-cafe-body">
                 <div className="font-bold text-cafe-heading mb-1 font-outfit flex items-center gap-1">
                   <Sparkles size={14} className="text-cafe-primary animate-pulse" />
                   <span>Choose Your Theme</span>
@@ -782,7 +785,7 @@ export function Header() {
             </div>
 
             {/* Accessibility Dropdown */}
-            <div>
+            <div className="flex flex-col">
               <label className="text-[10px] font-bold text-cafe-primary uppercase tracking-wider block mb-1.5 font-outfit">Accessibility Theme</label>
               <select
                 value={accessibilityMode}
@@ -795,6 +798,9 @@ export function Header() {
                 <option value="tritanopia">Tritanopia (Blue-Blind)</option>
                 <option value="monochromacy">Achromatopsia (Grayscale)</option>
               </select>
+              <span className="text-[9px] text-cafe-muted mt-1 text-center font-semibold font-work-sans tracking-wide flex items-center justify-center gap-1">
+                <Eye size={10} className="text-cafe-primary/70" /> Color Blind Friendly Themes
+              </span>
             </div>
 
             {/* Strategy Toggle - Admin Only */}

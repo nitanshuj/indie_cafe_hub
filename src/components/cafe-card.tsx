@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Wifi, Clock, MapPin, Check } from "lucide-react";
+import { Wifi, Clock, MapPin } from "lucide-react";
 import type { Cafe } from "@/lib/cafes";
 
 type Props = {
@@ -22,11 +22,6 @@ export function CafeCard({ cafe, className = "", imageHeightClass = "h-64", to }
       </div>
       <div className="p-6 sm:p-8">
         <div className="flex items-center gap-2 flex-wrap mb-4">
-          {cafe.open && (
-            <span className="bg-cafe-open-bg text-cafe-open-text rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
-              <Check size={12} strokeWidth={1.5} /> Open now
-            </span>
-          )}
           {cafe.wifi && (
             <span className="bg-cafe-primary-light text-cafe-primary rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
               <Wifi size={12} strokeWidth={1.5} /> WiFi
