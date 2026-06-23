@@ -45,19 +45,19 @@ export const Route = createFileRoute("/$country/$city/$cafeSlug")({
       : [],
   }),
   errorComponent: ({ error }) => (
-    <div className="min-h-screen bg-[#FFF7F5] grid place-items-center px-6">
+    <div className="min-h-screen bg-cafe-bg grid place-items-center px-6">
       <p className="text-[#6B5C58] font-work-sans">Something went wrong: {error.message}</p>
     </div>
   ),
   notFoundComponent: () => (
-    <div className="min-h-screen bg-[#FFF7F5]">
+    <div className="min-h-screen bg-cafe-bg">
       <Header />
       <div className="max-w-md mx-auto px-6 py-32 text-center">
         <h1 className="text-3xl font-outfit text-[#2D2422]">Cafe not found</h1>
         <p className="mt-3 text-[#6B5C58] font-work-sans">The requested listing does not exist in this city.</p>
         <Link
           to="/directory"
-          className="mt-6 inline-flex bg-[#E67E6B] text-white px-5 py-2.5 rounded-xl font-work-sans font-medium"
+          className="mt-6 inline-flex bg-cafe-primary text-white px-5 py-2.5 rounded-xl font-work-sans font-medium"
         >
           Back to directory
         </Link>
@@ -113,7 +113,7 @@ function CafeDetailGlobal() {
   const noiseInfo = cafe.noise_level ? noiseMetadata[cafe.noise_level] : null;
 
   return (
-    <div className="min-h-screen bg-[#FFF7F5]">
+    <div className="min-h-screen bg-cafe-bg">
       <Header />
 
       {/* Lightbox Zoom Modal */}
@@ -187,7 +187,7 @@ function CafeDetailGlobal() {
                 Active Listing
               </span>
               {cafe.wifi && (
-                <span className="bg-[#FDE4DD] text-[#E67E6B] rounded-full px-3 py-1 text-xs font-semibold font-work-sans inline-flex items-center gap-1">
+                <span className="bg-cafe-primary-light text-cafe-primary rounded-full px-3 py-1 text-xs font-semibold font-work-sans inline-flex items-center gap-1">
                   <Wifi size={12} /> Fast WiFi
                 </span>
               )}
@@ -199,17 +199,17 @@ function CafeDetailGlobal() {
 
             {cafe.specialty_focus && (
               <div className="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-2xl flex gap-3 text-[#2D2422]">
-                <ShieldCheck className="text-[#E67E6B] w-5 h-5 flex-shrink-0 mt-0.5" />
+                <ShieldCheck className="text-cafe-primary w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-xs uppercase font-bold tracking-wider text-[#E67E6B]">Specialty Focus</h4>
+                  <h4 className="text-xs uppercase font-bold tracking-wider text-cafe-primary">Specialty Focus</h4>
                   <p className="text-sm font-medium mt-0.5">{cafe.specialty_focus}</p>
                 </div>
               </div>
             )}
 
             {cafe.created_by_name && (
-              <div className="mt-3 inline-flex items-center gap-1.5 bg-[#FFF7F5] border border-[#F5EBE9] rounded-full px-3 py-1">
-                <UserCheck size={12} className="text-[#E67E6B]" />
+              <div className="mt-3 inline-flex items-center gap-1.5 bg-cafe-bg border border-cafe-border rounded-full px-3 py-1">
+                <UserCheck size={12} className="text-cafe-primary" />
                 <span className="text-[11px] font-work-sans text-[#6B5C58]">
                   Listed by <span className="font-semibold text-[#2D2422]">{cafe.created_by_name}</span>
                 </span>
@@ -221,58 +221,58 @@ function CafeDetailGlobal() {
             </p>
 
             {/* Quick Amenities Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-[#F5EBE9]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-cafe-border">
               <div className="flex items-start gap-3">
-                <div className={`p-2.5 rounded-xl ${cafe.wifi ? "bg-[#FFF7F5] text-[#E67E6B]" : "bg-gray-100 text-gray-400"}`}>
+                <div className={`p-2.5 rounded-xl ${cafe.wifi ? "bg-cafe-bg text-cafe-primary" : "bg-gray-100 text-gray-400"}`}>
                   <Wifi size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs uppercase font-bold tracking-wider text-[#A3938F]">Internet access</h4>
-                  <p className="text-sm font-semibold text-[#2D2422] mt-0.5">{cafe.wifi ? "WiFi Available" : "No WiFi"}</p>
+                  <h4 className="text-xs uppercase font-bold tracking-wider text-cafe-muted">Internet access</h4>
+                  <p className="text-sm font-semibold text-cafe-heading mt-0.5">{cafe.wifi ? "WiFi Available" : "No WiFi"}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className={`p-2.5 rounded-xl ${cafe.has_plug_points ? "bg-[#FFF7F5] text-[#E67E6B]" : "bg-gray-100 text-gray-400"}`}>
+                <div className={`p-2.5 rounded-xl ${cafe.has_plug_points ? "bg-cafe-bg text-cafe-primary" : "bg-gray-100 text-gray-400"}`}>
                   <Plug size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs uppercase font-bold tracking-wider text-[#A3938F]">Power Outlets</h4>
-                  <p className="text-sm font-semibold text-[#2D2422] mt-0.5">{cafe.has_plug_points ? "Abundant Plugs" : "Limited Plugs"}</p>
+                  <h4 className="text-xs uppercase font-bold tracking-wider text-cafe-muted">Power Outlets</h4>
+                  <p className="text-sm font-semibold text-cafe-heading mt-0.5">{cafe.has_plug_points ? "Abundant Plugs" : "Limited Plugs"}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 mt-2">
-                <div className={`p-2.5 rounded-xl ${cafe.has_ac ? "bg-[#FFF7F5] text-[#E67E6B]" : "bg-gray-100 text-gray-400"}`}>
+                <div className={`p-2.5 rounded-xl ${cafe.has_ac ? "bg-cafe-bg text-cafe-primary" : "bg-gray-100 text-gray-400"}`}>
                   <Snowflake size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs uppercase font-bold tracking-wider text-[#A3938F]">Climate Control</h4>
-                  <p className="text-sm font-semibold text-[#2D2422] mt-0.5">{cafe.has_ac ? "Air Conditioned" : "Natural Ventilation"}</p>
+                  <h4 className="text-xs uppercase font-bold tracking-wider text-cafe-muted">Climate Control</h4>
+                  <p className="text-sm font-semibold text-cafe-heading mt-0.5">{cafe.has_ac ? "Air Conditioned" : "Natural Ventilation"}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 mt-2">
-                <div className={`p-2.5 rounded-xl ${cafe.is_pet_friendly ? "bg-[#FFF7F5] text-[#E67E6B]" : "bg-gray-100 text-gray-400"}`}>
+                <div className={`p-2.5 rounded-xl ${cafe.is_pet_friendly ? "bg-cafe-bg text-cafe-primary" : "bg-gray-100 text-gray-400"}`}>
                   <ShieldCheck size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs uppercase font-bold tracking-wider text-[#A3938F]">Pet Policy</h4>
-                  <p className="text-sm font-semibold text-[#2D2422] mt-0.5">{cafe.is_pet_friendly ? "Pet Friendly" : "No Pets Allowed"}</p>
+                  <h4 className="text-xs uppercase font-bold tracking-wider text-cafe-muted">Pet Policy</h4>
+                  <p className="text-sm font-semibold text-cafe-heading mt-0.5">{cafe.is_pet_friendly ? "Pet Friendly" : "No Pets Allowed"}</p>
                 </div>
               </div>
             </div>
 
             {/* Gallery Section */}
             {cafe.gallery && cafe.gallery.length > 0 && (
-              <section className="mt-12 border-t border-[#F5EBE9] pt-8">
-                <h3 className="text-lg font-semibold font-outfit text-[#2D2422] mb-4">Interior & Seating Gallery</h3>
+              <section className="mt-12 border-t border-cafe-border pt-8">
+                <h3 className="text-lg font-semibold font-outfit text-cafe-heading mb-4">Interior & Seating Gallery</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {cafe.gallery.map((img, idx) => (
                     <div
                       key={idx}
                       onClick={() => setActiveImage(img)}
-                      className="rounded-2xl overflow-hidden border border-[#F5EBE9] bg-white aspect-square group relative cursor-zoom-in shadow-sm"
+                      className="rounded-2xl overflow-hidden border border-cafe-border bg-white aspect-square group relative cursor-zoom-in shadow-sm"
                     >
                       <img
                         src={img}
@@ -294,16 +294,16 @@ function CafeDetailGlobal() {
           {/* Logistics & Location Panel (Right 1 Column) */}
           <div className="space-y-6">
             {/* Info Card */}
-            <div className="bg-white border border-[#F5EBE9] rounded-[2rem] p-6 shadow-sm">
-              <h3 className="font-outfit font-semibold text-lg text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-4 flex items-center gap-2">
-                <Info size={18} className="text-[#E67E6B]" /> Logistics
+            <div className="bg-white border border-cafe-border rounded-[2rem] p-6 shadow-sm">
+              <h3 className="font-outfit font-semibold text-lg text-cafe-heading border-b border-cafe-border pb-3 mb-4 flex items-center gap-2">
+                <Info size={18} className="text-cafe-primary" /> Logistics
               </h3>
 
               <div className="space-y-4 font-work-sans">
                 <div>
-                  <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F]">Neighborhood</h4>
-                  <div className="flex items-center gap-1.5 mt-1 text-sm font-semibold text-[#2D2422]">
-                    <MapPin size={14} className="text-[#E67E6B]" />
+                  <h4 className="text-[10px] uppercase font-bold tracking-wider text-cafe-muted">Neighborhood</h4>
+                  <div className="flex items-center gap-1.5 mt-1 text-sm font-semibold text-cafe-heading">
+                    <MapPin size={14} className="text-cafe-primary" />
                     <span>{cafe.neighborhood}, {city.name}</span>
                   </div>
                 </div>
@@ -346,14 +346,14 @@ function CafeDetailGlobal() {
 
                       if (groupedRows.length > 0) {
                         return (
-                          <div className="divide-y divide-[#F5EBE9]">
+                          <div className="divide-y divide-cafe-border">
                             {groupedRows.map(({ day, value }) => (
                               <div key={day} className="flex items-center justify-between py-1.5">
-                                <span className="text-xs font-medium text-[#6B5C58] font-work-sans">{day}</span>
+                                <span className="text-xs font-medium text-cafe-body font-work-sans">{day}</span>
                                 <span className={`text-xs font-semibold font-work-sans ${
                                   String(value).toLowerCase() === "closed"
                                     ? "text-red-500"
-                                    : "text-[#2D2422]"
+                                    : "text-cafe-heading"
                                 }`}>{value}</span>
                               </div>
                             ))}
@@ -364,8 +364,8 @@ function CafeDetailGlobal() {
 
                     // Ultimate fallback – plain hours string
                     return (
-                      <div className="flex items-center gap-1.5 mt-1 text-sm text-[#2D2422] font-semibold">
-                        <Clock size={14} className="text-[#E67E6B]" />
+                      <div className="flex items-center gap-1.5 mt-1 text-sm text-cafe-heading font-semibold">
+                        <Clock size={14} className="text-cafe-primary" />
                         <span>{cafe.hours}</span>
                       </div>
                     );
@@ -390,11 +390,11 @@ function CafeDetailGlobal() {
                 )}
 
                 {cafe.created_by_name && (
-                  <div className="pt-3 border-t border-[#F5EBE9]">
-                    <h4 className="text-[10px] uppercase font-bold tracking-wider text-[#A3938F]">Listed By</h4>
+                  <div className="pt-3 border-t border-cafe-border">
+                    <h4 className="text-[10px] uppercase font-bold tracking-wider text-cafe-muted">Listed By</h4>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <UserCheck size={13} className="text-[#E67E6B]" />
-                      <span className="text-xs font-semibold text-[#2D2422]">{cafe.created_by_name}</span>
+                      <UserCheck size={13} className="text-cafe-primary" />
+                      <span className="text-xs font-semibold text-cafe-heading">{cafe.created_by_name}</span>
                     </div>
                   </div>
                 )}
@@ -405,7 +405,7 @@ function CafeDetailGlobal() {
                     href={cafe.google_maps_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#E67E6B] text-white hover:bg-[#D96C5A] py-2.5 rounded-xl font-work-sans text-xs font-semibold shadow-sm transition-all"
+                    className="w-full mt-2 inline-flex items-center justify-center gap-2 bg-cafe-primary text-white hover:bg-cafe-primary-hover py-2.5 rounded-xl font-work-sans text-xs font-semibold shadow-sm transition-all"
                   >
                     <Compass size={14} /> Open in Google Maps
                   </a>
@@ -416,9 +416,9 @@ function CafeDetailGlobal() {
         </div>
 
         {/* Comments Section */}
-        <section className="mt-12 border-t border-[#F5EBE9] pt-8">
-          <h3 className="text-xl font-outfit text-[#2D2422] font-semibold mb-6 flex items-center gap-2">
-            <MessageSquare size={18} className="text-[#E67E6B]" /> Nomad Discussions & Reviews
+        <section className="mt-12 border-t border-cafe-border pt-8">
+          <h3 className="text-xl font-outfit text-cafe-heading font-semibold mb-6 flex items-center gap-2">
+            <MessageSquare size={18} className="text-cafe-primary" /> Nomad Discussions & Reviews
           </h3>
           <CommentsSection cafeId={cafe.dbId} />
         </section>

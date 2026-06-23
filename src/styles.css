@@ -20,6 +20,7 @@
 }
 
 [data-accessibility="protanopia"] {
+  --cafe-bg: #f0fdf4;
   --cafe-primary: #059669;
   --cafe-primary-hover: #047857;
   --cafe-primary-light: #d1fae5;
@@ -30,6 +31,7 @@
 }
 
 [data-accessibility="deuteranopia"] {
+  --cafe-bg: #eff6ff;
   --cafe-primary: #2563eb;
   --cafe-primary-hover: #1d4ed8;
   --cafe-primary-light: #dbeafe;
@@ -40,6 +42,7 @@
 }
 
 [data-accessibility="tritanopia"] {
+  --cafe-bg: #fdf2f8;
   --cafe-primary: #db2777;
   --cafe-primary-hover: #be185d;
   --cafe-primary-light: #fce7f3;
@@ -50,6 +53,7 @@
 }
 
 [data-accessibility="monochromacy"] {
+  --cafe-bg: #f9fafb;
   --cafe-primary: #1f2937;
   --cafe-primary-hover: #111827;
   --cafe-primary-light: #f3f4f6;

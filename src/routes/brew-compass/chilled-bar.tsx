@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Snowflake, Zap } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/brew-compass/chilled-bar")({
   head: () => ({
@@ -127,6 +128,45 @@ function GlassCard({ drink }: { drink: ColdDrink }) {
   const bodyColor = drink.isDark ? "text-stone-300" : "text-cafe-body";
   const mutedColor = drink.isDark ? "text-stone-400" : "text-cafe-muted";
 
+  const [pouredCount, setPouredCount] = useState(drink.layers.length);
+  const [isBrewing, setIsBrewing] = useState(false);
+  const [currentStepText, setCurrentStepText] = useState("");
+
+  const handleBrew = () => {
+    if (isBrewing) return;
+    setIsBrewing(true);
+    setPouredCount(0);
+    setCurrentStepText("Chilling cup...");
+
+    const steps = [
+      "Adding ice...",
+      ...drink.layers.map((l) => `Pouring ${l.name}...`),
+      "Enjoy! ☕✨"
+    ];
+
+    let stepIdx = 0;
+    setCurrentStepText(steps[stepIdx]);
+
+    const runStep = () => {
+      setTimeout(() => {
+        stepIdx++;
+        if (stepIdx <= drink.layers.length) {
+          setPouredCount(stepIdx);
+          setCurrentStepText(steps[stepIdx]);
+          runStep();
+        } else {
+          setCurrentStepText(steps[stepIdx]);
+          setIsBrewing(false);
+          setTimeout(() => {
+            setCurrentStepText("");
+          }, 2500);
+        }
+      }, 700);
+    };
+
+    runStep();
+  };
+
   return (
     <div
       className={`group relative bg-gradient-to-b ${drink.accentColor} border border-white/20 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row`}
@@ -160,9 +200,14 @@ function GlassCard({ drink }: { drink: ColdDrink }) {
         </div>
 
         {/* Glass Visual */}
-        <div className="flex-shrink-0 w-28 flex flex-col items-center justify-center self-center bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+        <div className="relative flex-shrink-0 w-28 flex flex-col items-center justify-center self-center bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+          {currentStepText && (
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-cafe-primary text-white text-[9px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap shadow animate-bounce z-20">
+              {currentStepText}
+            </div>
+          )}
           <div className="relative w-16 h-40 rounded-b-2xl rounded-t-lg overflow-hidden border-2 border-white/60 bg-white/5 shadow-inner flex flex-col-reverse">
-            {drink.layers.map((layer, i) => (
+            {drink.layers.slice(0, pouredCount).map((layer, i) => (
               <div
                 key={i}
                 title={layer.name}
@@ -185,6 +230,13 @@ function GlassCard({ drink }: { drink: ColdDrink }) {
           <span className={`text-[10px] uppercase tracking-wider font-bold mt-2 font-work-sans ${mutedColor}`}>
             Anatomy
           </span>
+          <button
+            onClick={handleBrew}
+            disabled={isBrewing}
+            className="mt-2.5 px-3 py-1 bg-white hover:bg-cafe-primary-light text-cafe-primary border border-cafe-primary-light/50 disabled:opacity-50 text-[10px] font-bold font-work-sans rounded-xl transition-all cursor-pointer shadow-sm hover:shadow"
+          >
+            {isBrewing ? "Brewing..." : "Brew Drink"}
+          </button>
         </div>
       </div>
 

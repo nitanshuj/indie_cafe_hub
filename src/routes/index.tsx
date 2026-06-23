@@ -82,15 +82,30 @@ function Index() {
             </Link>
           </form>
 
-          <div className="mt-8 flex justify-center">
-            <Link
-              to="/brew-compass"
-              data-testid="hero-brew-compass-cta"
-              className="bg-[#FDE4DD] text-[#E67E6B] rounded-full px-6 py-2 transition-transform hover:scale-105 inline-flex items-center gap-2 text-sm font-semibold font-work-sans shadow-sm hover:shadow"
-            >
-              <Compass size={16} strokeWidth={1.5} />
-              <span>Curious about the cup? Explore The Brew Compass.</span>
-            </Link>
+          <div className="mt-12 max-w-2xl mx-auto">
+            <div className="bg-cafe-primary-light/30 backdrop-blur-md border border-cafe-primary-light rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-left shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="flex gap-4 items-start">
+                <div className="bg-cafe-primary-light text-cafe-primary p-3.5 rounded-2xl flex-shrink-0">
+                  <Compass size={28} className="animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="font-outfit font-semibold text-lg text-cafe-heading">
+                    Wanna know more about coffee?
+                  </h3>
+                  <p className="mt-1 text-sm text-cafe-body font-work-sans leading-relaxed">
+                    Decode drink menus, understand roast profiles, and explore origin regions with <strong>The Brew Compass</strong>.
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/brew-compass"
+                data-testid="hero-brew-compass-cta"
+                className="bg-cafe-primary hover:bg-cafe-primary-hover text-white px-5 py-2.5 rounded-xl font-work-sans font-semibold text-sm transition-all whitespace-nowrap flex items-center gap-1.5 hover:-translate-y-0.5"
+              >
+                <span>Open Compass</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         </div>
 

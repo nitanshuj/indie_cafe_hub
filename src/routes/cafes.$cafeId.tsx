@@ -25,12 +25,12 @@ export const Route = createFileRoute("/cafes/$cafeId")({
       : [],
   }),
   errorComponent: ({ error }) => (
-    <div className="min-h-screen bg-[#FFF7F5] grid place-items-center px-6">
+    <div className="min-h-screen bg-cafe-bg grid place-items-center px-6">
       <p className="text-[#6B5C58] font-work-sans">Something went wrong: {error.message}</p>
     </div>
   ),
   notFoundComponent: () => (
-    <div className="min-h-screen bg-[#FFF7F5]">
+    <div className="min-h-screen bg-cafe-bg">
       <Header />
       <div className="max-w-md mx-auto px-6 py-32 text-center">
         <h1 className="text-3xl font-outfit text-[#2D2422]">Cafe not found</h1>
@@ -85,7 +85,7 @@ function CafeDetail() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FFF7F5]">
+    <div className="min-h-screen bg-cafe-bg">
       <Header />
       
       {/* Lightbox Zoom Modal */}
@@ -157,7 +157,7 @@ function CafeDetail() {
               </span>
             )}
             {cafe.wifi && (
-              <span className="bg-[#FDE4DD] text-[#E67E6B] rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
+              <span className="bg-cafe-primary-light text-cafe-primary rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
                 <Wifi size={12} strokeWidth={1.5} /> WiFi
               </span>
             )}
@@ -225,7 +225,7 @@ function CafeDetail() {
             })()}
           </div>
           {cafe.created_by_name && (
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-[#FFF7F5] border border-[#F5EBE9] rounded-full px-3 py-1">
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-cafe-bg border border-cafe-border rounded-full px-3 py-1">
               <UserCheck size={12} className="text-[#E67E6B]" />
               <span className="text-[11px] font-work-sans text-[#6B5C58]">
                 Listed by <span className="font-semibold text-[#2D2422]">{cafe.created_by_name}</span>
