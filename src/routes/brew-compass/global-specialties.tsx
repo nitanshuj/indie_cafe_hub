@@ -33,6 +33,7 @@ interface SpecialtyDrink {
   imageUrl: string;
   layers: SpecialtyLayer[];
   isDark?: boolean;
+  countryCodes?: string[];
 }
 
 const GLOBAL_DRINKS: SpecialtyDrink[] = [
@@ -45,6 +46,7 @@ const GLOBAL_DRINKS: SpecialtyDrink[] = [
     accentColor: "from-[#FDF2E9] to-[#F5CBA7]",
     textAccent: "text-amber-900",
     imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142058/Turkish-Coffee_ibniu9.jpg",
+    countryCodes: ["TR", "YE"],
     layers: [
       { name: "Silt / Coffee Grounds", height: "20%", bg: "bg-[#27150C]" },
       { name: "Thick Unfiltered Coffee", height: "65%", bg: "bg-[#3E2723]" },
@@ -60,6 +62,7 @@ const GLOBAL_DRINKS: SpecialtyDrink[] = [
     accentColor: "from-[#E8F8F5] to-[#A3E4D7]",
     textAccent: "text-teal-900",
     imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142291/Vietnamese_C%C3%A0_Ph%C3%AA_S%E1%BB%AFa_%C4%90%C3%A1_eq1ygm.jpg",
+    countryCodes: ["VN"],
     layers: [
       { name: "Crushed Ice", height: "20%", bg: "bg-white/40" },
       { name: "Strong Robusta Brew", height: "55%", bg: "bg-[#3E2723]/90" },
@@ -75,10 +78,207 @@ const GLOBAL_DRINKS: SpecialtyDrink[] = [
     accentColor: "from-[#FEF9E7] to-[#F9E79F]",
     textAccent: "text-amber-800",
     imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782137523/Mazagran_coffee_Algeria_Portugal_wanbdw.png",
+    countryCodes: ["DZ", "PT"],
     layers: [
       { name: "Ice Cubes", height: "15%", bg: "bg-white/30" },
       { name: "Lemon Slice & Juice / Soda", height: "25%", bg: "bg-yellow-200/50" },
       { name: "Sweetened Cold Espresso", height: "60%", bg: "bg-[#3E2723]/80" },
+    ],
+  },
+  {
+    name: "Café de Olla",
+    origin: "Mexico",
+    tagline: "Spiced clay-pot brew.",
+    description:
+      "Brewed in a clay pot and spiced with cinnamon and unrefined cane sugar (piloncillo).",
+    accentColor: "from-[#FDF2E9] to-[#E5D3C3]",
+    textAccent: "text-amber-800",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251179/Caf%C3%A9_de_Olla_-_Mexico_oooujt.png",
+    countryCodes: ["MX"],
+    layers: [
+      { name: "Cane Sugar & Cinnamon Sediment", height: "15%", bg: "bg-[#3d2314]" },
+      { name: "Cinnamon Spiced Coffee", height: "85%", bg: "bg-[#5c3821]" },
+    ],
+  },
+  {
+    name: "Café Cubano",
+    origin: "Cuba",
+    tagline: "Extremely strong, sweet espresso.",
+    description:
+      "Extremely strong, dark-roasted espresso whisked directly with sugar to create a thick, sweet foam (espuma) on top.",
+    accentColor: "from-[#FFF5F5] to-[#FED7D7]",
+    textAccent: "text-red-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251179/Cafe_Cubano_Cuba_qodrhp.png",
+    countryCodes: ["CU"],
+    layers: [
+      { name: "Intense Espresso", height: "70%", bg: "bg-[#1c0f0d]" },
+      { name: "Espuma (Sweet Sugar Foam)", height: "30%", bg: "bg-[#d4a373]" },
+    ],
+  },
+  {
+    name: "Bicerin",
+    origin: "Italy",
+    tagline: "Three distinct layers of Turin tradition.",
+    description:
+      "A traditional Turin drink featuring distinct, unmixed layers of espresso, hot chocolate, and whipped cream.",
+    accentColor: "from-[#FDFEFE] to-[#EAEDED]",
+    textAccent: "text-stone-700",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251179/Bicerin_Italy_dnxxa2.png",
+    countryCodes: ["IT"],
+    layers: [
+      { name: "Rich Hot Chocolate", height: "40%", bg: "bg-[#2b1712]" },
+      { name: "Strong Espresso", height: "35%", bg: "bg-[#4a2e2b]" },
+      { name: "Heavy Whipped Cream", height: "25%", bg: "bg-[#fdfaf6]" },
+    ],
+  },
+  {
+    name: "Cortado",
+    origin: "Spain",
+    tagline: "Perfectly balanced espresso and milk.",
+    description:
+      "A shot of espresso cut with roughly an equal amount of warm, untextured milk to reduce acidity.",
+    accentColor: "from-[#F9EBEA] to-[#F2D7D5]",
+    textAccent: "text-rose-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782252607/Cortado_teas1i.jpg",
+    countryCodes: ["ES"],
+    layers: [
+      { name: "Espresso", height: "50%", bg: "bg-[#3e2723]" },
+      { name: "Warm Untextured Milk", height: "50%", bg: "bg-[#f5eade]" },
+    ],
+  },
+  {
+    name: "Frappé",
+    origin: "Greece",
+    tagline: "Deeply frothy iced instant coffee.",
+    description:
+      "Instant coffee, water, and sugar shaken until deeply frothy, then poured over ice.",
+    accentColor: "from-[#EBF5FB] to-[#D4E6F1]",
+    textAccent: "text-blue-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782252607/Greek_Frapp%C3%A9_2_yv7gct.png",
+    countryCodes: ["GR"],
+    layers: [
+      { name: "Ice & Cold Coffee Mix", height: "40%", bg: "bg-[#4b3621]" },
+      { name: "Deep Coffee Foam", height: "60%", bg: "bg-[#c6a07e]" },
+    ],
+  },
+  {
+    name: "Kaffeost",
+    origin: "Sweden & Finland",
+    tagline: "Coffee poured over bread-cheese.",
+    description:
+      "Hot black coffee poured over chunks of mild, baked bread-cheese.",
+    accentColor: "from-[#FEF9E7] to-[#FCF3CF]",
+    textAccent: "text-yellow-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251180/Kaffeost_Sweden_Finland_ita4x4.png",
+    countryCodes: ["SE", "FI"],
+    layers: [
+      { name: "Baked Bread-Cheese Chunks", height: "35%", bg: "bg-[#f9e7b9]" },
+      { name: "Hot Black Coffee", height: "65%", bg: "bg-[#2a1708]" },
+    ],
+  },
+  {
+    name: "Pharisäer",
+    origin: "Germany",
+    tagline: "Rum-spiked coffee under whipped cream.",
+    description:
+      "Strong dark coffee spiked with rum and hidden under a thick cap of whipped cream.",
+    accentColor: "from-[#FBEEE6] to-[#F5CBA7]",
+    textAccent: "text-orange-950",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251179/Pharis%C3%A4er_Germany_jul5zm.png",
+    countryCodes: ["DE"],
+    layers: [
+      { name: "Rum-Spiked Dark Coffee", height: "75%", bg: "bg-[#2b170e]" },
+      { name: "Whipped Cream Cap", height: "25%", bg: "bg-[#fafafa]" },
+    ],
+  },
+  {
+    name: "Flat White",
+    origin: "Australia / New Zealand",
+    tagline: "Velvety micro-foamed espresso.",
+    description:
+      "Espresso paired with velvety micro-foamed milk, featuring a higher coffee-to-milk ratio than a standard latte.",
+    accentColor: "from-[#FAF5EF] to-[#EFE3D3]",
+    textAccent: "text-amber-950",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782252606/Flat_White_k6k0ez.jpg",
+    countryCodes: ["AU", "NZ"],
+    layers: [
+      { name: "Bold Espresso", height: "35%", bg: "bg-[#381e13]" },
+      { name: "Velvety Microfoam Milk", height: "65%", bg: "bg-[#f6ebdc]" },
+    ],
+  },
+  {
+    name: "Kopi Joss",
+    origin: "Indonesia",
+    tagline: "Charcoal-infused hot brew.",
+    description:
+      "A street-style hot black coffee made famous by dropping a piece of glowing, red-hot charcoal directly into the cup.",
+    accentColor: "from-[#F2F3F4] to-[#D5D8DC]",
+    textAccent: "text-slate-800",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251179/Kopi_Joss_Indonesia_vus2po.png",
+    countryCodes: ["ID"],
+    layers: [
+      { name: "Glowing Red-Hot Charcoal", height: "20%", bg: "bg-[#e65f2b]" },
+      { name: "Hot Sweetened Black Coffee", height: "80%", bg: "bg-[#150a06]" },
+    ],
+  },
+  {
+    name: "Yuanyang",
+    origin: "Hong Kong",
+    tagline: "Coffee and milk tea fusion.",
+    description:
+      "A harmonious, half-and-half blend of strong coffee and Hong Kong-style milk tea.",
+    accentColor: "from-[#FEF5E7] to-[#FDEBD0]",
+    textAccent: "text-amber-900",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251181/Yuanyang_Hong_Kong_ygvbvz.png",
+    countryCodes: ["HK"],
+    layers: [
+      { name: "Hong Kong-style Milk Tea", height: "50%", bg: "bg-[#d7a15c]" },
+      { name: "Strong Coffee", height: "50%", bg: "bg-[#3b2219]" },
+    ],
+  },
+  {
+    name: "Indian Filter Coffee",
+    origin: "India",
+    tagline: "Chicory-infused frothy brew.",
+    description:
+      "A traditional South Indian beverage made by mixing frothed and boiled milk with the decoction obtained by brewing finely ground coffee powder blended with chicory in a traditional Indian filter, served in a tumbler and dabarah.",
+    accentColor: "from-[#FDEDEC] to-[#FADBD8]",
+    textAccent: "text-red-950",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251661/Indian-Filter-Coffee_fb4hyl.jpg",
+    countryCodes: ["IN"],
+    layers: [
+      { name: "Chicory Decoction", height: "30%", bg: "bg-[#321c13]" },
+      { name: "Hot Frothed Milk & Foam", height: "70%", bg: "bg-[#eedac3]" },
+    ],
+  },
+  {
+    name: "Café Touba",
+    origin: "Senegal",
+    tagline: "Deeply spiced pepper coffee.",
+    description:
+      "A deeply spiced coffee brewed with cloves and grains of Selim (a local spice similar to black pepper).",
+    accentColor: "from-[#EAFAF1] to-[#D5F5E3]",
+    textAccent: "text-emerald-950",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251180/Caf%C3%A9_Touba_Senegal_qn9crm.png",
+    countryCodes: ["SN"],
+    layers: [
+      { name: "Spiced Black Coffee", height: "90%", bg: "bg-[#21110a]" },
+      { name: "Grains of Selim & Clove Sediment", height: "10%", bg: "bg-[#120703]" },
+    ],
+  },
+  {
+    name: "Qahwa",
+    origin: "Saudi Arabia",
+    tagline: "Cardamom and saffron light brew.",
+    description:
+      "A lightly roasted, yellowish coffee heavily spiced with cardamom, saffron, and occasionally rose water.",
+    accentColor: "from-[#FEF9E7] to-[#F9E79F]",
+    textAccent: "text-yellow-800",
+    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782251662/Qahwa_Saudi_Arabia_miwawx.png",
+    countryCodes: ["SA"],
+    layers: [
+      { name: "Saffron & Rose Water infusion", height: "20%", bg: "bg-[#ffd54f]/50" },
+      { name: "Light Cardamom Spiced Brew", height: "80%", bg: "bg-[#d8c395]" },
     ],
   },
 ];
@@ -136,9 +336,16 @@ function SpecialtyCard({ drink }: { drink: SpecialtyDrink }) {
       <div className="flex-1 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 items-start">
         {/* Text */}
         <div className="flex-1 flex flex-col h-full min-h-[160px]">
-          <p className={`text-[10px] uppercase tracking-[0.15em] font-bold font-work-sans mb-1.5 ${drink.textAccent}`}>
-            {drink.origin}
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <p className={`text-[10px] uppercase tracking-[0.15em] font-bold font-work-sans ${drink.textAccent}`}>
+              {drink.origin}
+            </p>
+            {drink.countryCodes && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 bg-black/5 rounded font-work-sans text-cafe-body/80 border border-black/5">
+                {drink.countryCodes.join(" / ")}
+              </span>
+            )}
+          </div>
           <h3 className={`text-2xl font-bold font-outfit mb-1.5 ${headingColor}`}>
             {drink.name}
           </h3>

@@ -18,7 +18,12 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       setAccessibilityModeState(saved);
       if (saved !== "default") {
         document.documentElement.setAttribute("data-accessibility", saved);
+      } else {
+        document.documentElement.removeAttribute("data-accessibility");
       }
+    } else {
+      setAccessibilityModeState("default");
+      document.documentElement.removeAttribute("data-accessibility");
     }
   }, []);
 
