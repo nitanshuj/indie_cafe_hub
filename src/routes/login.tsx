@@ -115,9 +115,17 @@ function Login() {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-cafe-body font-work-sans mb-2">
-            Password
-          </label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-cafe-body font-work-sans">
+              Password
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-xs font-semibold text-cafe-primary hover:text-cafe-primary-hover font-work-sans"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <input
             type="password"
             required

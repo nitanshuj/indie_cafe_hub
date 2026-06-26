@@ -60,11 +60,11 @@ function CafeDetail() {
     if (fresh) {
       setCafe(fresh);
     }
-    setStrategy(getDeliveryStrategy());
+    setStrategy(await getDeliveryStrategy());
   };
 
   useEffect(() => {
-    setStrategy(getDeliveryStrategy());
+    getDeliveryStrategy().then(setStrategy);
     window.addEventListener("delivery-strategy-change", reloadData);
     window.addEventListener("isr-cache-updated", reloadData);
     return () => {

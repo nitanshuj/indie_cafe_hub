@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { createServerFn } from "@tanstack/react-start";
 import {
   UploadCloud,
   ImageIcon,
@@ -45,16 +46,40 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-async function handleImageUpload(file: File) {
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+const getCloudinarySignature = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const apiSecret = process.env.CLOUDINARY_API_SECRET || import.meta.env.CLOUDINARY_API_SECRET;
+    const apiKey = process.env.CLOUDINARY_API_KEY || import.meta.env.CLOUDINARY_API_KEY;
+    const cloudName = process.env.VITE_CLOUDINARY_CLOUD_NAME || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.VITE_CLOUDINARY_UPLOAD_PRESET || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-  if (!cloudName || !uploadPreset) {
-    throw new Error("Missing Cloudinary configuration in .env");
-  }
+    if (!apiSecret || !apiKey || !cloudName || !uploadPreset) {
+      throw new Error("Missing Cloudinary configuration on server");
+    }
+
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const stringToSign = `timestamp=${timestamp}&upload_preset=${uploadPreset}${apiSecret}`;
+
+    const crypto = await import("crypto");
+    const signature = crypto.createHash("sha1").update(stringToSign).digest("hex");
+
+    return {
+      signature,
+      timestamp,
+      apiKey,
+      cloudName,
+      uploadPreset
+    };
+  });
+
+async function handleImageUpload(file: File) {
+  const { signature, timestamp, apiKey, cloudName, uploadPreset } = await getCloudinarySignature();
 
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("api_key", apiKey);
+  formData.append("timestamp", timestamp.toString());
+  formData.append("signature", signature);
   formData.append("upload_preset", uploadPreset);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -157,6 +182,20 @@ function Admin() {
 
   const [activeImage, setActiveImage] = useState<string | null>(null);
 
+  // Strategy simulation state
+  const [activeStrategy, setActiveStrategy] = useState("dynamic");
+
+  useEffect(() => {
+    getDeliveryStrategy().then(setActiveStrategy);
+    const handleStrategyChange = () => {
+      getDeliveryStrategy().then(setActiveStrategy);
+    };
+    window.addEventListener("delivery-strategy-change", handleStrategyChange);
+    return () => {
+      window.removeEventListener("delivery-strategy-change", handleStrategyChange);
+    };
+  }, []);
+
   // Escape key closes Lightbox
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -250,8 +289,7 @@ function Admin() {
           </div>
           <h1 className="mt-6 text-3xl font-outfit tracking-tight text-[#2D2422]">Admins only</h1>
           <p className="mt-3 text-[#6B5C58] font-work-sans">
-            Sign in with an admin account to manage the directory. (Tip: use an email containing
-            "admin".)
+            Sign in with an admin account to manage the directory.
           </p>
           <Link
             to="/login"
@@ -497,7 +535,7 @@ function Admin() {
       }
 
       // Step 3: Check strategy and simulate Webhook
-      const strategy = getDeliveryStrategy();
+      const strategy = await getDeliveryStrategy();
       if (strategy === "isr") {
         setPipelineStage(4); // 4. Webhook Trigger
         await new Promise((r) => setTimeout(r, 1000));
@@ -510,11 +548,11 @@ function Admin() {
         );
 
         // Clear simulate ISR cache to force a fresh fetch
-        clearIsrCache();
+        await clearIsrCache();
 
         // Update simulate ISR cache in localStorage
         const latestList = await fetchCafes(); // Fetches live then caches it
-        setIsrCache(latestList);
+        await setIsrCache(latestList);
       } else {
         // Just reload in dynamic mode
         await new Promise((r) => setTimeout(r, 400));
@@ -598,7 +636,7 @@ function Admin() {
     }
   };
 
-  const activeStrategy = getDeliveryStrategy();
+
 
   return (
     <div className="min-h-screen bg-[#FFF7F5]">

@@ -48,7 +48,7 @@ function Directory() {
   const reloadData = async () => {
     const fresh = await fetchCafes();
     setCafes(fresh);
-    setStrategy(getDeliveryStrategy());
+    setStrategy(await getDeliveryStrategy());
   };
 
   useEffect(() => {
@@ -58,7 +58,7 @@ function Directory() {
   }, [urlQuery]);
 
   useEffect(() => {
-    setStrategy(getDeliveryStrategy());
+    getDeliveryStrategy().then(setStrategy);
     window.addEventListener("delivery-strategy-change", reloadData);
     window.addEventListener("isr-cache-updated", reloadData);
     return () => {

@@ -10,7 +10,7 @@ begin
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
-    coalesce((new.email like '%admin%'), false) -- Auto-sets admin if email contains 'admin'
+    false
   );
   return new;
 end;

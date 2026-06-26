@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DirectoryRouteImport } from './routes/directory'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BrewCompassRouteImport } from './routes/brew-compass'
@@ -35,9 +37,19 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DirectoryRoute = DirectoryRouteImport.update({
@@ -140,7 +152,9 @@ export interface FileRoutesByFullPath {
   '/brew-compass': typeof BrewCompassRouteWithChildren
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
   '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
@@ -161,7 +175,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
   '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
@@ -184,7 +200,9 @@ export interface FileRoutesById {
   '/brew-compass': typeof BrewCompassRouteWithChildren
   '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
   '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
@@ -208,7 +226,9 @@ export interface FileRouteTypes {
     | '/brew-compass'
     | '/contact'
     | '/directory'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
     | '/$country/$city'
     | '/brew-compass/bean-roast-spectrum'
@@ -229,7 +249,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/directory'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
     | '/$country/$city'
     | '/brew-compass/bean-roast-spectrum'
@@ -251,7 +273,9 @@ export interface FileRouteTypes {
     | '/brew-compass'
     | '/contact'
     | '/directory'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
     | '/$country/$city'
     | '/brew-compass/bean-roast-spectrum'
@@ -274,7 +298,9 @@ export interface RootRouteChildren {
   BrewCompassRoute: typeof BrewCompassRouteWithChildren
   ContactRoute: typeof ContactRoute
   DirectoryRoute: typeof DirectoryRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   CountryCityRoute: typeof CountryCityRouteWithChildren
   CafesCafeIdRoute: typeof CafesCafeIdRoute
@@ -289,11 +315,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/directory': {
@@ -472,7 +512,9 @@ const rootRouteChildren: RootRouteChildren = {
   BrewCompassRoute: BrewCompassRouteWithChildren,
   ContactRoute: ContactRoute,
   DirectoryRoute: DirectoryRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   CountryCityRoute: CountryCityRouteWithChildren,
   CafesCafeIdRoute: CafesCafeIdRoute,

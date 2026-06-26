@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           session.user.user_metadata?.full_name ||
           session.user.email?.split("@")[0] ||
           "Friend",
-        isAdmin: profile?.is_admin || session.user.email?.toLowerCase().includes("admin") || false,
+        isAdmin: profile?.is_admin || false,
       });
     } else {
       setUser(null);
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data.user.user_metadata?.full_name ||
           data.user.email?.split("@")[0] ||
           "Friend",
-        isAdmin: profile?.is_admin || data.user.email?.toLowerCase().includes("admin") || false,
+        isAdmin: profile?.is_admin || false,
       };
       return u;
     },
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data.user.user_metadata?.full_name ||
           data.user.email?.split("@")[0] ||
           "Friend",
-        isAdmin: profile?.is_admin || data.user.email?.toLowerCase().includes("admin") || false,
+        isAdmin: profile?.is_admin || false,
       };
       return u;
     },

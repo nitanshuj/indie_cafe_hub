@@ -205,8 +205,8 @@ export async function fetchCities(): Promise<City[]> {
 
 export async function fetchCafes(): Promise<Cafe[]> {
   // If in client-side ISR mode, serve from local simulation cache
-  if (typeof window !== "undefined" && getDeliveryStrategy() === "isr") {
-    const cached = getIsrCache();
+  if (typeof window !== "undefined" && (await getDeliveryStrategy()) === "isr") {
+    const cached = await getIsrCache();
     if (cached) {
       return cached;
     }
@@ -225,7 +225,7 @@ export async function fetchCafes(): Promise<Cafe[]> {
 
   // Save cache state for ISR simulation
   if (typeof window !== "undefined") {
-    setIsrCache(cafes);
+    await setIsrCache(cafes);
   }
 
   return cafes;

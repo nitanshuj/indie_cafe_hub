@@ -197,9 +197,9 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    setStrategy(getDeliveryStrategy());
+    getDeliveryStrategy().then(setStrategy);
     const handleStrategyChange = () => {
-      setStrategy(getDeliveryStrategy());
+      getDeliveryStrategy().then(setStrategy);
     };
     window.addEventListener("delivery-strategy-change", handleStrategyChange);
 
@@ -258,9 +258,9 @@ export function Header() {
     };
   }, []);
 
-  const toggleStrategy = () => {
+  const toggleStrategy = async () => {
     const next: DeliveryStrategy = strategy === "dynamic" ? "isr" : "dynamic";
-    setDeliveryStrategy(next);
+    await setDeliveryStrategy(next);
   };
 
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
