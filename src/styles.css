@@ -3,69 +3,46 @@
 @import "tw-animate-css";
 
 :root {
-  --cafe-bg: #fff7f5;
-  --cafe-surface: #ffffff;
-  --cafe-footer: #2d2422;
-  --cafe-primary: #e67e6b;
-  --cafe-primary-hover: #d96c5a;
-  --cafe-primary-light: #fde4dd;
-  --cafe-heading: #2d2422;
-  --cafe-body: #6b5c58;
-  --cafe-muted: #a3938f;
-  --cafe-border: #f5ebe9;
-  --cafe-open-bg: #e8f5e9;
-  --cafe-open-text: #2e7d32;
-  --cafe-negative-bg: #f5ebe9;
-  --cafe-negative-text: #a3938f;
+  --cafe-bg: #0F1115;
+  --cafe-surface: #1A1D24;
+  --cafe-footer: #080A0D;
+  --cafe-primary: #00F0FF;
+  --cafe-primary-hover: #00C8D6;
+  --cafe-primary-light: rgba(0, 240, 255, 0.1);
+  --cafe-heading: #E0E0E0;
+  --cafe-body: #A0A5B0;
+  --cafe-muted: #4F5666;
+  --cafe-border: #2A2E37;
+  --cafe-open-bg: rgba(0, 240, 255, 0.05);
+  --cafe-open-text: #00F0FF;
+  --cafe-negative-bg: rgba(255, 200, 87, 0.05);
+  --cafe-negative-text: #FFC857;
 }
 
-[data-accessibility="protanopia"] {
-  --cafe-bg: #f0fdf4;
-  --cafe-primary: #059669;
-  --cafe-primary-hover: #047857;
-  --cafe-primary-light: #d1fae5;
-  --cafe-open-bg: #d1fae5;
-  --cafe-open-text: #065f46;
-  --cafe-negative-bg: #ffedd5;
-  --cafe-negative-text: #b45309;
-}
-
-[data-accessibility="deuteranopia"] {
-  --cafe-bg: #eff6ff;
-  --cafe-primary: #2563eb;
-  --cafe-primary-hover: #1d4ed8;
-  --cafe-primary-light: #dbeafe;
-  --cafe-open-bg: #dbeafe;
-  --cafe-open-text: #1e40af;
-  --cafe-negative-bg: #fef3c7;
-  --cafe-negative-text: #b45309;
-}
-
-[data-accessibility="tritanopia"] {
-  --cafe-bg: #fdf2f8;
-  --cafe-primary: #db2777;
-  --cafe-primary-hover: #be185d;
-  --cafe-primary-light: #fce7f3;
-  --cafe-open-bg: #e0f2fe;
-  --cafe-open-text: #0369a1;
-  --cafe-negative-bg: #fee2e2;
-  --cafe-negative-text: #b91c1c;
-}
-
+[data-accessibility="protanopia"],
+[data-accessibility="deuteranopia"],
+[data-accessibility="tritanopia"],
 [data-accessibility="monochromacy"] {
-  --cafe-bg: #f9fafb;
-  --cafe-primary: #1f2937;
-  --cafe-primary-hover: #111827;
-  --cafe-primary-light: #f3f4f6;
-  --cafe-open-bg: #e5e7eb;
-  --cafe-open-text: #374151;
-  --cafe-negative-bg: #f3f4f6;
-  --cafe-negative-text: #4b5563;
+  --cafe-bg: #0F1115;
+  --cafe-surface: #1A1D24;
+  --cafe-footer: #080A0D;
+  --cafe-primary: #00F0FF;
+  --cafe-primary-hover: #00C8D6;
+  --cafe-primary-light: rgba(0, 240, 255, 0.1);
+  --cafe-heading: #FFFFFF;
+  --cafe-body: #D0D5E0;
+  --cafe-muted: #6F7686;
+  --cafe-border: #3A3E47;
+  --cafe-open-bg: rgba(0, 240, 255, 0.1);
+  --cafe-open-text: #00F0FF;
+  --cafe-negative-bg: rgba(255, 200, 87, 0.1);
+  --cafe-negative-text: #FFC857;
 }
 
 @theme {
   --font-outfit: "Outfit", sans-serif;
-  --font-work-sans: "Work Sans", sans-serif;
+  --font-work-sans: "JetBrains Mono", "Fira Code", monospace;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
   --color-cafe-bg: var(--cafe-bg);
   --color-cafe-surface: var(--cafe-surface);
@@ -98,6 +75,10 @@
   }
   * {
     border-color: var(--color-cafe-border);
+  }
+  ::selection {
+    background-color: rgba(0, 240, 255, 0.3);
+    color: #FFFFFF;
   }
 }
 

@@ -25,14 +25,14 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
         <Link
           to="/login"
           data-testid="header-signin-link"
-          className="text-sm text-cafe-body hover:text-cafe-heading px-3 py-2 rounded-xl transition-colors font-work-sans"
+          className="text-xs text-cafe-body hover:text-cafe-primary px-3 py-2 transition-colors font-mono uppercase tracking-wider"
         >
           Sign In
         </Link>
         <Link
           to="/signup"
           data-testid="header-signup-link"
-          className="text-sm bg-cafe-primary text-white hover:bg-cafe-primary-hover px-4 py-2 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-work-sans font-medium"
+          className="text-xs bg-[#00F0FF] text-[#0F1115] hover:bg-[#00C8D6] px-4 py-2 border border-[#00F0FF] hover:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all font-mono font-medium uppercase tracking-widest"
         >
           Join Free
         </Link>
@@ -48,7 +48,7 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         data-testid="header-avatar-button"
-        className="w-9 h-9 rounded-full bg-cafe-primary-light text-cafe-primary inline-flex items-center justify-center font-medium font-work-sans hover:ring-2 hover:ring-cafe-primary/30 transition-all cursor-pointer"
+        className="w-9 h-9 rounded-none border border-cafe-border bg-[#1A1D24] text-cafe-primary inline-flex items-center justify-center font-medium font-mono hover:border-[#00F0FF] hover:shadow-[0_0_8px_rgba(0,240,255,0.2)] transition-all cursor-pointer"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -56,17 +56,17 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
       </button>
       {open && (
         <div
-          className="absolute right-0 mt-2 w-56 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_var(--cafe-primary-alpha-08)] py-2 z-50 animate-fade-in"
+          className="absolute right-0 mt-2 w-56 bg-cafe-surface border border-cafe-border rounded-none py-2 z-50 animate-fade-in"
           data-testid="header-avatar-menu"
         >
           <div className="px-4 py-2 border-b border-cafe-border">
             {user.isAdmin && (
-              <p className="text-xs font-bold text-cafe-primary mb-1 font-outfit" data-testid="menu-welcome-admin">
+              <p className="text-[10px] font-bold text-cafe-primary mb-1 font-mono uppercase tracking-wider" data-testid="menu-welcome-admin">
                 Welcome Admin
               </p>
             )}
-            <p className="text-sm font-medium text-cafe-heading font-outfit truncate">{user.name}</p>
-            <p className="text-xs text-cafe-muted font-work-sans truncate">{user.email}</p>
+            <p className="text-xs font-semibold text-cafe-heading font-mono truncate">{user.name}</p>
+            <p className="text-[10px] text-cafe-muted font-mono truncate">{user.email}</p>
           </div>
           <button
             type="button"
@@ -74,7 +74,7 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
               onOpenProfile();
               setOpen(false);
             }}
-            className="w-full text-left px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans inline-flex items-center gap-2 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-xs text-cafe-body hover:bg-cafe-bg hover:text-cafe-primary font-mono uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer"
           >
             <User size={14} strokeWidth={1.5} /> Profile
           </button>
@@ -83,7 +83,7 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
               to="/admin"
               onClick={() => setOpen(false)}
               data-testid="header-admin-link"
-              className="block px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans"
+              className="block px-4 py-2 text-xs text-cafe-body hover:bg-cafe-bg hover:text-cafe-primary font-mono uppercase tracking-wider"
             >
               <span className="inline-flex items-center gap-2">
                 <LayoutDashboard size={14} strokeWidth={1.5} /> Admin Dashboard
@@ -97,7 +97,7 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
               setOpen(false);
             }}
             data-testid="header-signout-button"
-            className="w-full text-left px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans inline-flex items-center gap-2 cursor-pointer"
+            className="w-full text-left px-4 py-2 text-xs text-cafe-body hover:bg-cafe-bg hover:text-cafe-primary font-mono uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer"
           >
             <LogOut size={14} strokeWidth={1.5} /> Sign Out
           </button>
@@ -370,17 +370,17 @@ export function Header() {
   const mobileAuth = user ? (
     <div className="border-t border-cafe-border pt-4">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-9 h-9 rounded-full bg-cafe-primary-light text-cafe-primary inline-flex items-center justify-center font-medium font-work-sans">
+        <div className="w-9 h-9 rounded-none border border-cafe-border bg-[#1A1D24] text-cafe-primary inline-flex items-center justify-center font-medium font-mono">
           {(user.name || user.email).charAt(0).toUpperCase()}
         </div>
         <div>
           {user.isAdmin && (
-            <p className="text-[10px] font-bold text-cafe-primary tracking-wider uppercase font-outfit" data-testid="menu-welcome-admin">
+            <p className="text-[10px] font-bold text-cafe-primary tracking-wider uppercase font-mono" data-testid="menu-welcome-admin">
               Admin
             </p>
           )}
-          <p className="text-xs font-semibold text-cafe-heading font-outfit">{user.name}</p>
-          <p className="text-[10px] text-cafe-muted font-work-sans truncate max-w-[160px]">{user.email}</p>
+          <p className="text-xs font-semibold text-cafe-heading font-mono">{user.name}</p>
+          <p className="text-[10px] text-cafe-muted font-mono truncate max-w-[160px]">{user.email}</p>
         </div>
       </div>
       <div className="space-y-2">
@@ -388,7 +388,7 @@ export function Header() {
           <Link
             to="/admin"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-heading py-1 font-medium font-work-sans"
+            className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-primary py-1 font-medium font-mono uppercase tracking-wider"
           >
             <LayoutDashboard size={13} strokeWidth={1.5} /> Admin Dashboard
           </Link>
@@ -399,7 +399,7 @@ export function Header() {
             setProfileModalOpen(true);
             setIsMobileMenuOpen(false);
           }}
-          className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-heading py-1 font-medium font-work-sans w-full text-left cursor-pointer"
+          className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-primary py-1 font-medium font-mono uppercase tracking-wider w-full text-left cursor-pointer"
         >
           <User size={13} strokeWidth={1.5} /> Profile
         </button>
@@ -408,7 +408,7 @@ export function Header() {
             signOut();
             setIsMobileMenuOpen(false);
           }}
-          className="flex items-center gap-2 text-xs text-rose-600 py-1 font-semibold font-work-sans w-full text-left cursor-pointer"
+          className="flex items-center gap-2 text-xs text-red-500 py-1 font-semibold font-mono uppercase tracking-wider w-full text-left cursor-pointer"
         >
           <LogOut size={13} strokeWidth={1.5} /> Sign Out
         </button>
@@ -419,14 +419,14 @@ export function Header() {
       <Link
         to="/login"
         onClick={() => setIsMobileMenuOpen(false)}
-        className="w-full text-center py-2 rounded-xl border border-cafe-border text-cafe-heading hover:bg-cafe-bg font-medium text-xs font-work-sans transition-colors"
+        className="w-full text-center py-2 rounded-none border border-cafe-border text-cafe-heading hover:border-[#00F0FF] hover:text-[#00F0FF] font-medium text-xs font-mono uppercase tracking-wider transition-colors"
       >
         Sign In
       </Link>
       <Link
         to="/signup"
         onClick={() => setIsMobileMenuOpen(false)}
-        className="w-full text-center py-2 rounded-xl bg-cafe-primary text-white hover:bg-cafe-primary-hover font-medium text-xs font-work-sans transition-all duration-200"
+        className="w-full text-center py-2 rounded-none bg-[#00F0FF] text-[#0F1115] hover:bg-[#00C8D6] font-medium text-xs font-mono uppercase tracking-widest transition-all"
       >
         Join Free
       </Link>
@@ -435,29 +435,29 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150 shadow-sm"
+      className="sticky top-0 z-50 bg-[#0F1115]/90 backdrop-blur-xl border-b border-[#2A2E37] backdrop-saturate-150"
       data-testid="site-header"
     >
       {/* Geolocation first-visit prompt bar */}
       {showLocationPrompt && (
-        <div className="bg-cafe-bg border-b border-cafe-border py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-sm z-[110] relative">
-          <div className="flex items-center gap-2 text-cafe-heading font-work-sans">
+        <div className="bg-[#1A1D24] border-b border-cafe-border py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-xs z-[110] relative font-mono uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-cafe-heading">
             <Compass className="text-cafe-primary w-4 h-4 animate-pulse" />
-            <span>Would you like to auto-detect your nearest city directory?</span>
+            <span>[GEOLOC] Auto-detect closest operational lab?</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleAutoDetect()}
               disabled={detecting}
-              className="bg-cafe-primary text-white hover:bg-cafe-primary-hover px-4 py-1.5 rounded-xl font-medium text-xs transition-colors"
+              className="bg-[#00F0FF] text-[#0F1115] hover:bg-[#00C8D6] px-4 py-1.5 rounded-none font-medium text-[10px] transition-colors border-0"
             >
-              {detecting ? "Locating..." : "Use My Location"}
+              {detecting ? "INITIATING..." : "RUN GEOLOC"}
             </button>
             <button
               onClick={dismissPrompt}
-              className="text-cafe-body hover:text-cafe-heading border border-cafe-border px-4 py-1.5 rounded-xl text-xs bg-cafe-surface transition-colors"
+              className="text-cafe-body hover:text-cafe-heading border border-cafe-border px-4 py-1.5 rounded-none text-[10px] bg-transparent transition-colors"
             >
-              No thanks
+              BYPASS
             </button>
           </div>
         </div>
@@ -465,8 +465,8 @@ export function Header() {
 
       {/* Webhook Simulator Notification Bar */}
       {webhookStatus && (
-        <div className="bg-cafe-primary text-white py-2.5 px-6 text-center text-xs font-semibold font-work-sans animate-fade-in flex items-center justify-center gap-2.5 z-[100] relative">
-          <RefreshCw size={14} className="animate-spin text-white" />
+        <div className="bg-[#00F0FF] text-[#0F1115] py-2.5 px-6 text-center text-[10px] font-semibold font-mono tracking-widest uppercase animate-fade-in flex items-center justify-center gap-2.5 z-[100] relative">
+          <RefreshCw size={14} className="animate-spin text-[#0F1115]" />
           <span>{webhookStatus}</span>
         </div>
       )}
@@ -474,62 +474,62 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link
           to="/"
-          className="flex items-center gap-2 text-cafe-heading font-outfit text-xl font-medium"
+          className="flex items-center gap-2 text-cafe-heading font-outfit text-xl font-bold tracking-widest uppercase"
           data-testid="header-logo-link"
         >
           <Coffee strokeWidth={1.5} className="text-cafe-primary" />
-          <span>Indie Coffee Hub</span>
+          <span>Indie Coffee Hub<span className="font-mono text-xs text-cafe-primary ml-1.5">[LAB]</span></span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-2 sm:gap-4 text-sm font-work-sans">
+        <nav className="hidden lg:flex items-center gap-2 sm:gap-4 text-xs font-mono uppercase tracking-widest">
           {/* Strategy Toggle - Admin Only */}
           {user && user.isAdmin && (
             <div className="relative flex items-center gap-1.5 mr-2">
               <button
                 onClick={toggleStrategy}
                 title="Toggle Delivery Strategy"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium font-work-sans transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-none border text-[10px] font-semibold font-mono tracking-wider transition-all cursor-pointer ${
                   strategy === "isr"
-                    ? "bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
-                    : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+                    ? "bg-purple-950/40 border-purple-800 text-purple-400 hover:bg-purple-900/40"
+                    : "bg-[#00F0FF]/5 border-[#00F0FF]/30 text-[#00F0FF] hover:bg-[#00F0FF]/10"
                 }`}
               >
                 {strategy === "isr" ? (
                   <>
-                    <Layers size={13} className="text-purple-600 animate-pulse" />
-                    <span className="hidden sm:inline">Strategy:</span> On-Demand ISR
+                    <Layers size={13} className="text-purple-400 animate-pulse" />
+                    <span className="hidden sm:inline">STRAT:</span> ON-DEMAND ISR
                   </>
                 ) : (
                   <>
-                    <Globe size={13} className="text-emerald-600 animate-pulse" />
-                    <span className="hidden sm:inline">Strategy:</span> Dynamic SSR
+                    <Globe size={13} className="text-[#00F0FF] animate-pulse" />
+                    <span className="hidden sm:inline">STRAT:</span> DYNAMIC SSR
                   </>
                 )}
               </button>
               
               <button
                 onClick={() => setShowExplanation(!showExplanation)}
-                className="text-cafe-muted hover:text-cafe-heading p-1 rounded-full text-xs font-semibold cursor-pointer border border-cafe-border h-5 w-5 inline-flex items-center justify-center"
+                className="text-cafe-muted hover:text-cafe-heading p-1 rounded-none text-[10px] font-bold cursor-pointer border border-cafe-border h-5 w-5 inline-flex items-center justify-center bg-transparent"
                 title="What is this?"
               >
                 ?
               </button>
 
               {showExplanation && (
-                <div className="absolute right-0 top-10 mt-1 w-80 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-4 z-[999] text-cafe-heading animate-fade-up">
-                  <h3 className="font-outfit font-medium text-sm border-b border-cafe-border pb-2 mb-2 flex items-center justify-between">
-                    <span>Data Strategy Simulator</span>
-                    <button onClick={() => setShowExplanation(false)} className="text-xs text-cafe-muted hover:text-cafe-heading">Close</button>
+                <div className="absolute right-0 top-10 mt-1 w-80 bg-[#1A1D24] border border-[#2A2E37] rounded-none p-4 z-[999] text-cafe-heading animate-fade-up">
+                  <h3 className="font-mono font-bold text-xs border-b border-[#2A2E37] pb-2 mb-2 flex items-center justify-between uppercase tracking-wider">
+                    <span>Data Strategy Terminal</span>
+                    <button onClick={() => setShowExplanation(false)} className="text-[10px] text-cafe-muted hover:text-cafe-primary border-0 bg-transparent">BYPASS</button>
                   </h3>
-                  <div className="space-y-3 text-xs font-work-sans text-cafe-body">
+                  <div className="space-y-3 text-[10px] font-mono text-cafe-body uppercase tracking-wider">
                     <div>
-                      <span className="font-semibold text-emerald-700">🟢 Dynamic SSR:</span>
-                      <p className="mt-0.5">Queries live database on every single page load. Extremely fresh, but hits the database each time.</p>
+                      <span className="font-bold text-[#00F0FF]">🟢 DYNAMIC SSR:</span>
+                      <p className="mt-0.5 text-cafe-muted">Queries live database on every single page load. Real-time synchronicity.</p>
                     </div>
                     <div>
-                      <span className="font-semibold text-purple-700">⚡ On-Demand ISR:</span>
-                      <p className="mt-0.5">Serves pre-cached static HTML instantly. When you save in Admin, a background webhook invalidates the cache and rebuilds the static pages silently.</p>
+                      <span className="font-bold text-purple-400">⚡ ON-DEMAND ISR:</span>
+                      <p className="mt-0.5 text-cafe-muted">Static pre-cached HTML delivery. Saved events trigger CDN cache purge webhook.</p>
                     </div>
                   </div>
                 </div>
@@ -541,52 +541,52 @@ export function Header() {
           <div className="relative" ref={cityRef}>
             <button
               onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cafe-border bg-cafe-surface/50 text-cafe-heading hover:bg-cafe-surface text-xs font-semibold font-work-sans transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-none border border-cafe-border bg-[#1A1D24] text-cafe-heading hover:border-[#00F0FF] hover:text-[#00F0FF] text-[10px] font-semibold font-mono tracking-wider transition-all cursor-pointer"
             >
-              <MapPin size={14} className="text-cafe-primary" />
-              <span>{activeCity ? activeCity.name : "Select City"}</span>
+              <MapPin size={14} className="text-[#00F0FF]" />
+              <span>{activeCity ? activeCity.name.toUpperCase() : "SELECT NODE"}</span>
             </button>
 
             {cityDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-2 z-50 animate-fade-in">
+              <div className="absolute right-0 mt-2 w-64 bg-[#1A1D24] border border-[#2A2E37] rounded-none p-2 z-50 animate-fade-in">
                 <input
                   type="text"
-                  placeholder="Search cities..."
+                  placeholder="FILTER NODES..."
                   value={citySearchQuery}
                   onChange={(e) => setCitySearchQuery(e.target.value)}
-                  className="w-full bg-cafe-bg border border-cafe-border rounded-xl px-3 py-1.5 text-xs outline-none mb-2 font-work-sans text-cafe-heading"
+                  className="w-full bg-[#0F1115] border border-cafe-border rounded-none px-3 py-1.5 text-[10px] outline-none mb-2 font-mono text-cafe-heading uppercase tracking-wider"
                 />
                 <button
                   onClick={() => {
                     setCityDropdownOpen(false);
                     handleAutoDetect();
                   }}
-                  className="w-full text-left px-3 py-2 text-xs font-semibold text-cafe-primary hover:bg-cafe-bg rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="w-full text-left px-3 py-2 text-[10px] font-semibold text-[#00F0FF] hover:bg-[#0F1115] rounded-none transition-colors flex items-center gap-1.5 cursor-pointer uppercase tracking-wider"
                 >
                   <Compass size={13} />
-                  <span>Auto-Detect Nearest City</span>
+                  <span>Auto-Detect Nearest Node</span>
                 </button>
-                <div className="border-t border-cafe-border/75 my-1.5" />
+                <div className="border-t border-[#2A2E37] my-1.5" />
                 <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
                   {Object.keys(groupedCities).length === 0 ? (
-                    <p className="text-[10px] text-cafe-muted text-center py-2 font-work-sans">No cities found</p>
+                    <p className="text-[9px] text-cafe-muted text-center py-2 font-mono">No nodes indexed</p>
                   ) : (
                     Object.entries(groupedCities).map(([countryName, countryCities]) => (
                       <div key={countryName} className="space-y-0.5">
-                        <div className="text-[10px] font-bold text-cafe-primary tracking-wider uppercase px-3 pt-1.5 font-outfit">
+                        <div className="text-[9px] font-bold text-[#00F0FF] tracking-wider uppercase px-3 pt-1.5 font-mono">
                           {countryName}
                         </div>
                         {countryCities.map((city) => (
                           <button
                             key={city.id}
                             onClick={() => handleCitySelect(city)}
-                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium font-work-sans transition-colors cursor-pointer flex justify-between items-center ${
+                            className={`w-full text-left px-3 py-1.5 rounded-none text-[10px] font-medium font-mono tracking-wider transition-colors cursor-pointer flex justify-between items-center ${
                               activeCity?.id === city.id
-                                ? "bg-cafe-bg text-cafe-primary font-semibold"
-                                : "text-cafe-body hover:bg-cafe-bg/60 hover:text-cafe-heading"
+                                ? "bg-[#0F1115] text-[#00F0FF] font-semibold"
+                                : "text-cafe-body hover:bg-[#0F1115] hover:text-cafe-heading"
                             }`}
                           >
-                            <span>{city.name}</span>
+                            <span>{city.name.toUpperCase()}</span>
                           </button>
                         ))}
                       </div>
@@ -602,73 +602,70 @@ export function Header() {
             <select
               value={accessibilityMode}
               onChange={(e) => setAccessibilityMode(e.target.value as any)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cafe-border bg-cafe-surface/50 text-cafe-heading hover:bg-cafe-surface text-xs font-semibold font-work-sans outline-none cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-none border border-cafe-border bg-[#1A1D24] text-cafe-heading hover:border-[#00F0FF] hover:text-[#00F0FF] text-[10px] font-semibold font-mono tracking-wider outline-none cursor-pointer uppercase"
               title="Select accessibility theme"
             >
-              <option value="default">Standard Theme</option>
-              <option value="protanopia">Protanopia (Red-Blind)</option>
-              <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
-              <option value="tritanopia">Tritanopia (Blue-Blind)</option>
-              <option value="monochromacy">Achromatopsia (Grayscale)</option>
+              <option value="default">STANDARD MATRIX</option>
+              <option value="protanopia">PROTANOPIA (RED-BLIND)</option>
+              <option value="deuteranopia">DEUTERANOPIA (GREEN-BLIND)</option>
+              <option value="tritanopia">TRITANOPIA (BLUE-BLIND)</option>
+              <option value="monochromacy">ACHROMATOPSIA (MONO)</option>
             </select>
-            <span className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 text-[9px] text-cafe-muted font-semibold font-work-sans tracking-wide flex items-center gap-1 whitespace-nowrap">
-              <Eye size={10} className="text-cafe-primary/70" /> Color Blind Friendly Themes
-            </span>
             {showTooltip && (
-              <div className="absolute right-0 top-full mt-5 w-60 bg-cafe-surface border border-cafe-border rounded-2xl shadow-[0_12px_40px_rgba(45,36,34,0.12)] p-3.5 z-[100] animate-fade-in text-xs font-work-sans text-cafe-body">
-                <div className="font-bold text-cafe-heading mb-1 font-outfit flex items-center gap-1">
+              <div className="absolute right-0 top-full mt-5 w-60 bg-[#1A1D24] border border-[#2A2E37] rounded-none p-3.5 z-[100] animate-fade-in text-[10px] font-mono text-cafe-body uppercase tracking-wider">
+                <div className="font-bold text-cafe-heading mb-1 flex items-center gap-1">
                   <Sparkles size={14} className="text-cafe-primary animate-pulse" />
                   <span>Choose Your Theme</span>
                 </div>
-                <p className="leading-relaxed">
+                <p className="leading-relaxed text-cafe-muted">
                   Select a color-blind friendly theme (Protanopia, Deuteranopia, Tritanopia, or Achromatopsia) from the dropdown.
                 </p>
                 <button
                   onClick={dismissTooltip}
-                  className="mt-2.5 w-full bg-cafe-primary text-white hover:bg-cafe-primary-hover py-1.5 rounded-xl text-[10px] font-semibold transition-colors cursor-pointer"
+                  className="mt-2.5 w-full bg-[#00F0FF] text-[#0F1115] hover:bg-[#00C8D6] py-1.5 rounded-none text-[10px] font-bold tracking-widest uppercase transition-colors cursor-pointer border-0"
                 >
                   Got it
                 </button>
                 {/* Tooltip caret pointing up */}
-                <div className="absolute -top-1.5 right-6 w-3 h-3 bg-cafe-surface border-t border-l border-cafe-border rotate-45" />
+                <div className="absolute -top-1.5 right-6 w-3 h-3 bg-[#1A1D24] border-t border-l border-[#2A2E37] rotate-45" />
               </div>
             )}
           </div>
 
           <Link
             to="/"
-            className="hidden sm:inline text-cafe-body hover:text-cafe-heading transition-colors"
-            activeProps={{ className: "text-cafe-heading font-medium" }}
+            className="hidden sm:inline text-cafe-body hover:text-[#00F0FF] transition-colors"
+            activeProps={{ className: "text-[#00F0FF] font-semibold" }}
             activeOptions={{ exact: true }}
             data-testid="nav-home-link"
           >
-            Home
+            HOME
           </Link>
           <Link
             to="/directory"
-            className="text-cafe-body hover:text-cafe-heading transition-colors"
-            activeProps={{ className: "text-cafe-heading font-medium" }}
+            className="text-cafe-body hover:text-[#00F0FF] transition-colors"
+            activeProps={{ className: "text-[#00F0FF] font-semibold" }}
             data-testid="nav-directory-link"
           >
-            Directory
+            DIRECTORY
           </Link>
           <Link
             to="/brew-compass"
-            className="text-cafe-body hover:text-cafe-heading transition-colors"
-            activeProps={{ className: "text-cafe-heading font-medium" }}
+            className="text-cafe-body hover:text-[#00F0FF] transition-colors"
+            activeProps={{ className: "text-[#00F0FF] font-semibold" }}
             activeOptions={{ exact: false }}
             data-testid="nav-brew-compass-link"
           >
-            New to Coffee?
+            BREW_COMPASS
           </Link>
-          <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
+          <span className="hidden sm:inline-block w-px h-5 bg-[#2A2E37]" />
           <AuthArea onOpenProfile={() => setProfileModalOpen(true)} />
         </nav>
 
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden p-2 rounded-xl text-cafe-heading hover:bg-cafe-bg transition-colors border border-cafe-border flex items-center justify-center cursor-pointer"
+          className="lg:hidden p-2 rounded-none text-cafe-heading hover:bg-[#1A1D24] transition-colors border border-cafe-border flex items-center justify-center cursor-pointer"
           aria-label="Toggle Menu"
           aria-expanded={isMobileMenuOpen}
         >
@@ -859,52 +856,52 @@ export function Header() {
 
       {/* Edit Profile Modal */}
       {profileModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-cafe-surface/90 backdrop-blur-xl border border-cafe-border rounded-2xl w-full max-w-md shadow-2xl p-6 relative animate-scale-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#1A1D24] border border-[#2A2E37] rounded-none w-full max-w-md p-6 relative animate-scale-in">
             <button
               onClick={() => setProfileModalOpen(false)}
-              className="absolute right-4 top-4 p-1 rounded-full text-cafe-muted hover:text-cafe-heading hover:bg-cafe-bg transition-colors cursor-pointer border-0 bg-transparent"
+              className="absolute right-4 top-4 p-1 rounded-none text-cafe-muted hover:text-cafe-primary hover:bg-[#0F1115] transition-colors cursor-pointer border-0 bg-transparent"
               type="button"
             >
               <X size={18} />
             </button>
-            <h3 className="font-outfit font-semibold text-lg text-cafe-heading mb-4">Edit Profile</h3>
-            <form onSubmit={handleSaveProfile} className="space-y-4 font-work-sans">
+            <h3 className="font-mono font-bold text-xs text-[#00F0FF] mb-4 uppercase tracking-wider">EDIT_PROFILE.CONFIG</h3>
+            <form onSubmit={handleSaveProfile} className="space-y-4 font-mono uppercase tracking-wider text-xs">
               <div>
-                <label className="block text-xs font-semibold text-cafe-muted mb-1">Email Address</label>
+                <label className="block text-[10px] font-semibold text-cafe-muted mb-1">Email Address</label>
                 <input
                   type="email"
                   value={user?.email || ""}
                   disabled
-                  className="w-full bg-cafe-bg/50 border border-cafe-border/50 rounded-xl px-3 py-2 text-sm text-cafe-muted cursor-not-allowed select-all"
+                  className="w-full bg-[#0F1115] border border-cafe-border rounded-none px-3 py-2 text-xs text-cafe-muted cursor-not-allowed select-all"
                 />
-                <p className="text-[10px] text-cafe-muted mt-1">Email address cannot be changed.</p>
+                <p className="text-[9px] text-cafe-muted mt-1">[UNMUTABLE PARAMETER]</p>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-cafe-muted mb-1">Profile Name</label>
+                <label className="block text-[10px] font-semibold text-cafe-muted mb-1">Profile Name</label>
                 <input
                   type="text"
                   value={newProfileName}
                   onChange={(e) => setNewProfileName(e.target.value)}
-                  placeholder="Enter your name"
+                  placeholder="Enter name"
                   required
-                  className="w-full bg-cafe-bg border border-cafe-border rounded-xl px-3 py-2 text-sm text-cafe-heading outline-none focus:border-cafe-primary transition-colors"
+                  className="w-full bg-[#0F1115] border border-cafe-border rounded-none px-3 py-2 text-xs text-cafe-heading outline-none focus:border-[#00F0FF] transition-colors"
                 />
               </div>
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setProfileModalOpen(false)}
-                  className="px-4 py-2 border border-cafe-border rounded-xl text-sm font-medium text-cafe-body hover:bg-cafe-bg transition-colors cursor-pointer bg-transparent"
+                  className="px-4 py-2 border border-cafe-border rounded-none text-xs font-semibold text-cafe-body hover:border-[#FFC857] hover:text-[#FFC857] transition-colors cursor-pointer bg-transparent"
                 >
-                  Cancel
+                  ABORT
                 </button>
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="px-4 py-2 bg-cafe-primary text-white hover:bg-cafe-primary-hover disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer border-0 flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#00F0FF] text-[#0F1115] hover:bg-[#00C8D6] disabled:opacity-50 rounded-none text-xs font-semibold tracking-wider transition-colors cursor-pointer border-0 flex items-center gap-1.5"
                 >
-                  {savingProfile ? "Saving..." : "Save Changes"}
+                  {savingProfile ? "SAVING..." : "COMMIT CHANGES"}
                 </button>
               </div>
             </form>
@@ -917,35 +914,35 @@ export function Header() {
 
 export function Footer() {
   return (
-    <footer className="bg-[#2D2422] text-white/80 mt-24" data-testid="site-footer">
-      <div className="max-w-7xl mx-auto px-6 py-16 grid gap-10 md:grid-cols-2">
+    <footer className="bg-[#080A0D] text-cafe-muted mt-24 border-t border-[#2A2E37]" data-testid="site-footer">
+      <div className="max-w-7xl mx-auto px-6 py-16 grid gap-10 md:grid-cols-2 font-mono uppercase tracking-wider">
         <div>
-          <div className="flex items-center gap-2 text-white font-outfit text-xl font-medium">
+          <div className="flex items-center gap-2 text-cafe-heading font-outfit text-xl font-bold">
             <Coffee strokeWidth={1.5} className="text-cafe-primary" />
-            <span>Indie Coffee Hub</span>
+            <span>Indie Coffee Hub<span className="font-mono text-xs text-cafe-primary ml-1.5">[LAB]</span></span>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-white/60 max-w-xs font-work-sans">
-            A small, hand-picked directory of independent speciality cafes across the world.
+          <p className="mt-4 text-[10px] leading-relaxed text-cafe-muted max-w-xs font-mono">
+            SYS_LOCATOR: Curated registry of independent specialty coffee nodes for digital nomads and lab operators.
           </p>
         </div>
-        <div className="text-sm font-work-sans flex flex-col gap-3 md:text-right md:items-end">
+        <div className="text-[10px] font-mono flex flex-col gap-3 md:text-right md:items-end">
           <Link
             to="/about"
-            className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary hover:text-cafe-primary-hover transition-colors block"
+            className="tracking-[0.2em] font-bold text-cafe-primary hover:text-[#00C8D6] transition-colors block"
           >
-            About
+            SYS_ABOUT.EXE
           </Link>
           <Link
             to="/contact"
-            className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary hover:text-cafe-primary-hover transition-colors block"
+            className="tracking-[0.2em] font-bold text-cafe-primary hover:text-[#00C8D6] transition-colors block"
           >
-            Contact Us
+            SYS_CONTACT.EXE
           </Link>
         </div>
       </div>
-      <div className="border-t border-white/10">
-        <p className="max-w-7xl mx-auto px-6 py-6 text-xs text-white/40 font-work-sans">
-          © {new Date().getFullYear()} Indie Coffee Hub. Bengaluru.
+      <div className="border-t border-[#2A2E37]">
+        <p className="max-w-7xl mx-auto px-6 py-6 text-[9px] text-[#3D4148] font-mono uppercase tracking-widest">
+          © {new Date().getFullYear()} Indie Coffee Hub. BENGALURU_NODAL_MATRIX. ALL RIGHTS RESERVED.
         </p>
       </div>
     </footer>

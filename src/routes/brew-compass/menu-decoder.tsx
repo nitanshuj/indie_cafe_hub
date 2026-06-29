@@ -371,14 +371,20 @@ function DrinkCard({ drink }: { drink: Drink }) {
 
   return (
     <div
-      className={`group relative bg-white border border-cafe-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col ${drink.wide ? "sm:col-span-2 lg:col-span-1" : ""}`}
+      className={`group relative bg-[#1A1D24] border border-[#2A2E37] rounded-none overflow-hidden transition-all duration-300 hover:border-[#00F0FF] hover:shadow-[0_0_15px_rgba(0,240,255,0.1)] flex flex-col ${drink.wide ? "sm:col-span-2 lg:col-span-1" : ""}`}
     >
+      {/* Terminal Title bar */}
+      <div className="bg-[#080A0D]/50 border-b border-[#2A2E37] px-4 py-2 flex items-center justify-between text-[9px] font-mono text-cafe-muted uppercase tracking-widest">
+        <span>STRAT_DECODE: {drink.name}</span>
+        <span className="text-[#00F0FF] group-hover:animate-pulse">● ONLINE</span>
+      </div>
+
       {/* Cup Visual */}
-      <div className="relative h-36 mx-6 mt-6 flex items-center justify-between px-8 bg-[#8A9992] rounded-xl border border-white/10 shadow-inner">
+      <div className="relative h-36 mx-4 mt-4 flex items-center justify-between px-6 bg-[#0F1115] border border-[#2A2E37]">
         <div className="flex-shrink-0 flex items-center justify-center">
           <svg
             viewBox="0 0 100 100"
-            className="w-24 h-24 overflow-visible"
+            className="w-20 h-20 overflow-visible"
           >
             <defs>
               <clipPath id={clipId}>
@@ -436,30 +442,29 @@ function DrinkCard({ drink }: { drink: Drink }) {
             </g>
 
             {/* Cup wireframe stroke */}
-            {/* White mug outline (lip, walls, bottom, and handle) */}
             <path
               d="M 28,12 L 33.5,76 C 34.5,84 40,86 50,86 C 60,86 65.5,84 66.5,76 L 72,12"
               fill="none"
-              stroke="#FFFFFF"
+              stroke="#E0E0E0"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* White cup lip ellipse top */}
+            {/* Cup lip ellipse top */}
             <ellipse
               cx="50"
               cy="12"
               rx="22"
               ry="2"
               fill="none"
-              stroke="#FFFFFF"
+              stroke="#E0E0E0"
               strokeWidth="2"
             />
-            {/* White mug handle */}
+            {/* Mug handle */}
             <path
               d="M 69.5,28 C 80,28 80,60 67.5,60"
               fill="none"
-              stroke="#FFFFFF"
+              stroke="#E0E0E0"
               strokeWidth="2.5"
               strokeLinecap="round"
             />
@@ -467,44 +472,44 @@ function DrinkCard({ drink }: { drink: Drink }) {
         </div>
 
         {/* Proportions Text next to the image */}
-        <div className="flex flex-col justify-center space-y-1.5 text-[11px] font-work-sans text-white/80">
+        <div className="flex flex-col justify-center space-y-1 text-[9px] font-mono text-cafe-muted uppercase tracking-wider">
           {parseFloat(drink.espressoHeight) > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-sm bg-[#2D1B0F] inline-block border border-white/20" />
-              <span className="font-semibold text-white">{drink.espressoHeight}</span>
-              <span>Espresso</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-[#2D1B0F] inline-block border border-[#2A2E37]" />
+              <span className="font-bold text-cafe-heading">{drink.espressoHeight}</span>
+              <span>ESPRESSO</span>
             </div>
           )}
           {drink.layers.map((l) => (
-            <div key={l.name} className="flex items-center gap-2">
+            <div key={l.name} className="flex items-center gap-1.5">
               <span
-                className="w-2.5 h-2.5 rounded-sm inline-block border border-white/20"
+                className="w-2 h-2 inline-block border border-[#2A2E37]"
                 style={{ backgroundColor: COLOR_MAP[l.bg] || "#E5E7EB" }}
               />
-              <span className="font-semibold text-white">{l.target}</span>
-              <span>{l.name}</span>
+              <span className="font-bold text-cafe-heading">{l.target}</span>
+              <span>{l.name.toUpperCase()}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Text */}
-      <div className="px-6 py-5 flex-1 flex flex-col">
-        <p className="text-[10px] uppercase tracking-[0.15em] font-semibold text-cafe-primary font-work-sans mb-1">
-          {drink.tagline}
+      <div className="px-4 py-5 flex-1 flex flex-col">
+        <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-cafe-primary font-mono mb-1">
+          &gt; {drink.tagline}
         </p>
-        <h3 className="text-lg font-semibold text-[#2D2422] font-outfit mb-2">
+        <h3 className="text-md font-bold text-cafe-heading font-outfit uppercase tracking-wider mb-2">
           {drink.name}
         </h3>
-        <p className="text-xs text-[#6B5C58] font-work-sans leading-relaxed flex-1">
+        <p className="text-[11px] text-cafe-body font-mono leading-relaxed flex-1 lowercase">
           {drink.description}
         </p>
       </div>
 
       {/* Hover hint */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <span className="bg-white/20 text-white text-[9px] font-semibold font-work-sans px-2 py-0.5 rounded-full">
-          Pouring…
+      <div className="absolute top-10 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <span className="bg-[#00F0FF]/15 border border-[#00F0FF]/40 text-[#00F0FF] text-[8px] font-bold font-mono px-2 py-0.5 uppercase tracking-widest">
+          POURING…
         </span>
       </div>
     </div>
@@ -514,91 +519,92 @@ function DrinkCard({ drink }: { drink: Drink }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 function MenuDecoderPage() {
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12 sm:py-16 space-y-16">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs font-work-sans text-cafe-muted">
-        <Link to="/brew-compass" className="hover:text-cafe-primary transition-colors">
-          Brew School
-        </Link>
-        <span>/</span>
-        <span className="text-cafe-heading font-medium">The Menu Decoder - The Basic Coffees</span>
-      </nav>
+    <div className="min-h-screen bg-[#0F1115]">
+      <Header />
+      <main className="max-w-7xl mx-auto px-6 py-12 sm:py-16 space-y-16">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-cafe-muted">
+          <Link to="/brew-compass" className="hover:text-cafe-primary transition-colors">
+            BREW_SCHOOL
+          </Link>
+          <span>/</span>
+          <span className="text-cafe-heading font-medium">MENU_DECODER.EXE</span>
+        </nav>
 
-      {/* Header */}
-      <section className="space-y-4 max-w-2xl">
-        <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
-          Module 1
-        </p>
-        <h1 className="text-4xl sm:text-5xl font-light text-cafe-heading font-outfit leading-tight">
-          The Menu Decoder - The Basic Coffees
-        </h1>
-        <p className="text-base text-cafe-body font-work-sans leading-relaxed">
-          Hover over any card to watch the drink's layers pour in — espresso
-          first, then steamed milk, then foam. Each layer rises to its exact
-          proportion so you can see exactly what's in your cup.
-        </p>
-
-        {/* Hint */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#FDE4DD]/60 border border-[#FDE4DD] rounded-xl text-xs font-work-sans text-[#E67E6B]">
-          <Info size={13} strokeWidth={2} />
-          Hover any card to trigger the pour animation
-        </div>
-      </section>
-
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4">
-        {LEGEND.map((l) => (
-          <div key={l.label} className="flex items-center gap-2">
-            <span className={`w-3 h-3 rounded-sm inline-block ${l.bg}`} />
-            <span className="text-xs text-cafe-body font-work-sans">{l.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Bento Grid */}
-      <section
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-        aria-label="Coffee drink cards"
-      >
-        {DRINKS.map((drink) => (
-          <DrinkCard key={drink.name} drink={drink} />
-        ))}
-      </section>
-
-      {/* Find in directory CTA */}
-      <section className="bg-white border border-cafe-border rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-cafe-heading font-outfit">
-            Ready to try one?
-          </h2>
-          <p className="text-sm text-cafe-body font-work-sans">
-            Search our directory for indie cafes near you that serve your new
-            favourite drink.
+        {/* Header */}
+        <section className="space-y-4 max-w-2xl">
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-cafe-primary font-mono">
+            MODULE_01 // ANATOMY_MATRIX
           </p>
-        </div>
-        <Link
-          to="/directory"
-          className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-2.5 bg-cafe-primary hover:bg-cafe-primary-hover text-white rounded-xl font-work-sans font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5"
-        >
-          Explore the Directory <ArrowRight size={15} strokeWidth={2} />
-        </Link>
-      </section>
+          <h1 className="text-3xl sm:text-5xl font-black text-cafe-heading font-outfit leading-tight uppercase tracking-wider">
+            THE MENU DECODER // ESPRESSO DRINK ANATOMY
+          </h1>
+          <p className="text-xs text-cafe-body font-mono leading-relaxed uppercase tracking-wider">
+            DECONSTRUCT BEVERAGE COMPOSITION. TRIGGER HOVER INPUTS TO ACTIVATE FLUID POUR SIMULATIONS. EACH STRATA RISES TO MATH-CALCULATED PARAMETERS INDICATING EXACT LIQUID RATIOS.
+          </p>
 
-      {/* Module nav */}
-      <div className="flex items-center justify-between pt-4 border-t border-cafe-border">
-        <Link
-          to="/brew-compass"
-          className="inline-flex items-center gap-2 text-sm text-cafe-body hover:text-cafe-heading font-work-sans transition-colors"
+          {/* Hint */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FFC857]/5 border border-[#FFC857]/30 text-[9px] font-mono text-[#FFC857] uppercase tracking-wider">
+            <Info size={12} />
+            HINT: TRIGGER HOVER STATE ON CARDS TO EXECUTE FLUID EXTRACTION ANIMATIONS.
+          </div>
+        </section>
+
+        {/* Legend */}
+        <div className="flex flex-wrap items-center gap-4 border-y border-[#2A2E37] py-4">
+          {LEGEND.map((l) => (
+            <div key={l.label} className="flex items-center gap-2">
+              <span className={`w-3 h-3 rounded-none inline-block ${l.bg.replace("border-white/20", "border-[#2A2E37]")}`} />
+              <span className="text-[10px] text-cafe-body font-mono uppercase tracking-wider">{l.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Bento Grid */}
+        <section
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          aria-label="Coffee drink cards"
         >
-          <ArrowLeft size={15} /> Back to Brew School
-        </Link>
-        <Link
-          to="/brew-compass/chilled-bar"
-          className="inline-flex items-center gap-2 text-sm text-cafe-primary hover:text-cafe-primary-hover font-semibold font-work-sans transition-colors"
-        >
-          Next: The Chilled Bar <ArrowRight size={15} />
-        </Link>
-      </div>
-    </main>
+          {DRINKS.map((drink) => (
+            <DrinkCard key={drink.name} drink={drink} />
+          ))}
+        </section>
+
+        {/* Find in directory CTA */}
+        <section className="bg-[#1A1D24] border border-[#2A2E37] p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="space-y-1">
+            <h2 className="text-xs font-bold text-cafe-heading font-mono uppercase tracking-widest">
+              DEPLOY FINDINGS IN THE FIELD?
+            </h2>
+            <p className="text-[10px] text-cafe-muted font-mono uppercase tracking-wider">
+              RUN LOCATOR QUERIES ON INDEPENDENT STATIONS HARBORING THESE EXACT BEVERAGE SPECIFICATIONS.
+            </p>
+          </div>
+          <Link
+            to="/directory"
+            className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-[#00F0FF] hover:bg-[#00C8D6] text-[#0F1115] hover:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all font-mono font-bold text-xs uppercase tracking-widest"
+          >
+            RUN SEARCH MATRIX <ArrowRight size={14} />
+          </Link>
+        </section>
+
+        {/* Module nav */}
+        <div className="flex items-center justify-between pt-4 border-t border-[#2A2E37]">
+          <Link
+            to="/brew-compass"
+            className="inline-flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-primary font-mono uppercase tracking-widest transition-colors"
+          >
+            <ArrowLeft size={14} /> BACK_TO_SCHOOL
+          </Link>
+          <Link
+            to="/brew-compass/chilled-bar"
+            className="inline-flex items-center gap-2 text-xs text-cafe-primary hover:text-[#00C8D6] font-bold font-mono uppercase tracking-widest transition-colors"
+          >
+            NEXT: CHILLED_BAR <ArrowRight size={14} />
+          </Link>
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }

@@ -263,16 +263,16 @@ const METHODS: BrewMethod[] = [
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function SpecTable({ specs }: { specs: BrewSpec[] }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 font-mono text-xs uppercase tracking-wider">
       {specs.map((s) => (
         <div
           key={s.label}
-          className="bg-cafe-bg/60 border border-cafe-border rounded-xl p-3 text-center"
+          className="bg-[#0F1115] border border-[#2A2E37] rounded-none p-3 text-left"
         >
-          <p className="text-[10px] uppercase tracking-wider font-bold text-cafe-primary font-work-sans mb-1">
-            {s.label}
+          <p className="text-[9px] font-bold text-cafe-primary mb-1">
+            {s.label.replace(/\s+/g, "_")}
           </p>
-          <p className="text-sm font-semibold text-cafe-heading font-outfit">{s.value}</p>
+          <p className="text-xs font-bold text-cafe-heading">{s.value}</p>
         </div>
       ))}
     </div>
@@ -283,32 +283,32 @@ function MethodCard({ method }: { method: BrewMethod }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="group relative bg-[#FFFFFF] border border-cafe-border rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row">
+    <div className="group relative bg-[#1A1D24] border border-[#2A2E37] rounded-none overflow-hidden transition-all duration-300 hover:border-[#00F0FF] hover:shadow-[0_0_15px_rgba(0,240,255,0.1)] flex flex-col md:flex-row">
       {/* Left side: Content */}
       <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="bg-cafe-primary text-white text-[10px] font-bold font-work-sans px-3 py-1 rounded-full shadow-sm">
+          <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-widest text-cafe-muted">
+            <span className="bg-[#00F0FF]/15 border border-[#00F0FF]/30 text-[#00F0FF] px-2.5 py-0.5 rounded-none font-bold">
               {method.category}
             </span>
-            <span className="text-xs text-cafe-muted font-work-sans">{method.origin}</span>
+            <span>ORIGIN // {method.origin}</span>
           </div>
 
-          <h2 className="text-3xl font-medium text-cafe-heading font-outfit mt-3">
+          <h2 className="text-2xl font-bold text-cafe-heading font-outfit uppercase mt-4 tracking-wider">
             {method.name}
           </h2>
-          <p className="text-xs italic text-cafe-muted font-work-sans mt-1.5 mb-4">
-            "{method.tagline}"
+          <p className="text-xs text-cafe-primary font-mono mt-1 mb-4 uppercase tracking-wider">
+            &gt; CLASSIFICATION: {method.tagline}
           </p>
-          <p className="text-sm text-cafe-body font-work-sans leading-relaxed">
+          <p className="text-xs text-cafe-body font-mono leading-relaxed lowercase">
             {method.description}
           </p>
 
           {/* Cup profile banner */}
-          <div className="mt-4 bg-cafe-bg/40 border border-cafe-border/50 rounded-xl p-3 flex items-start gap-2.5">
-            <Sparkles size={16} className="text-cafe-primary mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-cafe-heading font-semibold font-work-sans leading-snug">
-              {method.cupProfile}
+          <div className="mt-4 bg-[#0F1115] border border-[#2A2E37] rounded-none p-3 flex items-start gap-2.5">
+            <Sparkles size={14} className="text-[#FFC857] mt-0.5 flex-shrink-0" />
+            <p className="text-[10px] text-cafe-heading font-bold font-mono leading-snug uppercase tracking-wider">
+              PROFILE // {method.cupProfile}
             </p>
           </div>
 
@@ -317,27 +317,27 @@ function MethodCard({ method }: { method: BrewMethod }) {
         </div>
 
         {/* Expandable step-by-step guide */}
-        <div className="mt-6 border-t border-cafe-border/50 pt-4">
+        <div className="mt-6 border-t border-[#2A2E37] pt-4">
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between text-xs font-semibold text-cafe-heading hover:text-cafe-primary transition-colors py-1 cursor-pointer font-work-sans"
+            className="w-full flex items-center justify-between text-[10px] font-bold text-[#00F0FF] hover:text-[#00C8D6] transition-colors py-1 cursor-pointer font-mono uppercase tracking-widest"
           >
             <span>Step-by-Step Guide</span>
-            {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
           
           {isOpen && (
-            <ol className="mt-4 space-y-4 border-l-2 border-cafe-primary/20 pl-4 transition-all duration-300">
+            <ol className="mt-4 space-y-4 border-l border-[#2A2E37] pl-4 transition-all duration-300">
               {method.steps.map((s) => (
-                <li key={s.step} className="text-xs font-work-sans">
-                  <div className="flex items-center gap-2 font-bold text-cafe-heading">
-                    <span className="text-[10px] bg-cafe-primary text-white w-4 h-4 rounded-full flex items-center justify-center font-outfit">
-                      {s.step}
+                <li key={s.step} className="text-xs font-mono">
+                  <div className="flex items-center gap-2 font-bold text-cafe-heading uppercase tracking-wider">
+                    <span className="text-[9px] bg-[#00F0FF]/15 border border-[#00F0FF]/40 text-[#00F0FF] w-5 h-5 rounded-none flex items-center justify-center">
+                      0{s.step}
                     </span>
                     <span>{s.title}</span>
                   </div>
-                  <p className="text-cafe-body leading-relaxed mt-1.5 pl-6">
+                  <p className="text-cafe-body leading-relaxed mt-1.5 pl-7 lowercase">
                     {s.body}
                   </p>
                 </li>
@@ -348,14 +348,14 @@ function MethodCard({ method }: { method: BrewMethod }) {
       </div>
 
       {/* Right side: Photo */}
-      <div className="w-full md:w-[45%] h-64 md:h-auto min-h-[350px] relative overflow-hidden border-t md:border-t-0 md:border-l border-cafe-border">
+      <div className="w-full md:w-[45%] h-64 md:h-auto min-h-[350px] relative overflow-hidden border-t md:border-t-0 md:border-l border-[#2A2E37]">
         <img
           src={method.imageUrl}
           alt={method.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          className="w-full h-full object-cover grayscale contrast-125 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/40 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/60 via-transparent to-transparent pointer-events-none" />
       </div>
     </div>
   );
@@ -364,56 +364,58 @@ function MethodCard({ method }: { method: BrewMethod }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 function BlackCoffeePage() {
   return (
-    <main className="max-w-7xl mx-auto px-6 py-12 sm:py-16 space-y-16">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs font-work-sans text-cafe-muted">
-        <Link to="/brew-compass" className="hover:text-cafe-primary transition-colors">
-          Brew School
-        </Link>
-        <span>/</span>
-        <span className="text-cafe-heading font-medium">Black Coffee Methods</span>
-      </nav>
+    <div className="min-h-screen bg-[#0F1115]">
+      <Header />
+      <main className="max-w-7xl mx-auto px-6 py-12 sm:py-16 space-y-16">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-cafe-muted">
+          <Link to="/brew-compass" className="hover:text-cafe-primary transition-colors">
+            BREW_SCHOOL
+          </Link>
+          <span>/</span>
+          <span className="text-cafe-heading font-medium">BLACK_COFFEE_METHODS.CFG</span>
+        </nav>
 
-      {/* Page Header */}
-      <section className="space-y-4 max-w-3xl">
-        <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
-          Module 3
-        </p>
-        <h1 className="text-4xl sm:text-5xl font-light text-cafe-heading font-outfit leading-tight">
-          Black Coffee Brewing Techniques
-        </h1>
-        <p className="text-base text-cafe-body font-work-sans leading-relaxed">
-          Every major brewing method — from the clean pour-over to the bold
-          stovetop Moka and vapor-driven Siphon — with key brew parameters, cup
-          profiles, and step-by-step extraction guides.
-        </p>
-      </section>
+        {/* Page Header */}
+        <section className="space-y-4 max-w-3xl">
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-cafe-primary font-mono">
+            MODULE_03 // EXTRACTION_PARAMETERS
+          </p>
+          <h1 className="text-3xl sm:text-5xl font-black text-cafe-heading font-outfit leading-tight uppercase tracking-wider">
+            BLACK COFFEE BREWING TECHNIQUES
+          </h1>
+          <p className="text-xs text-cafe-body font-mono leading-relaxed uppercase tracking-wider">
+            COMPILE BREW PARAMETERS. READOUT GUIDES TO ALL MAJOR BLACK COFFEE EXTRACTIONS: AUTOMATIC FILTER SYSTEMS, POUR-OVER INDUCTION, PRESSURE-DRIVEN CHAMBERS AND LABORATORY VACUUMS.
+          </p>
+        </section>
 
-      {/* Grid of Methods (1 card per row) */}
-      <section
-        className="grid grid-cols-1 gap-8"
-        aria-label="Black coffee brewing methods"
-      >
-        {METHODS.map((method) => (
-          <MethodCard key={method.id} method={method} />
-        ))}
-      </section>
-
-      {/* Module nav */}
-      <div className="flex items-center justify-between pt-6 border-t border-cafe-border">
-        <Link
-          to="/brew-compass/chilled-bar"
-          className="inline-flex items-center gap-2 text-sm text-cafe-body hover:text-cafe-heading font-work-sans transition-colors"
+        {/* Grid of Methods (1 card per row) */}
+        <section
+          className="grid grid-cols-1 gap-8"
+          aria-label="Black coffee brewing methods"
         >
-          <ArrowLeft size={15} /> Chilled Bar
-        </Link>
-        <Link
-          to="/brew-compass/global-specialties"
-          className="inline-flex items-center gap-2 text-sm text-cafe-primary hover:text-cafe-primary-hover font-semibold font-work-sans transition-colors"
-        >
-          Next: Iconic Global Coffee Specialties <ArrowRight size={15} />
-        </Link>
-      </div>
-    </main>
+          {METHODS.map((method) => (
+            <MethodCard key={method.id} method={method} />
+          ))}
+        </section>
+
+        {/* Module nav */}
+        <div className="flex items-center justify-between pt-6 border-t border-[#2A2E37]">
+          <Link
+            to="/brew-compass/chilled-bar"
+            className="inline-flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-primary font-mono uppercase tracking-widest transition-colors"
+          >
+            <ArrowLeft size={14} /> CHILLED_BAR
+          </Link>
+          <Link
+            to="/brew-compass/global-specialties"
+            className="inline-flex items-center gap-2 text-xs text-cafe-primary hover:text-[#00C8D6] font-bold font-mono uppercase tracking-widest transition-colors"
+          >
+            NEXT: GLOBAL_SPECIALTIES <ArrowRight size={14} />
+          </Link>
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }

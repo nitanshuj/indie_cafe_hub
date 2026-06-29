@@ -20,14 +20,14 @@ export const Route = createFileRoute("/directory")({
   },
   head: () => ({
     meta: [
-      { title: "Directory — Indie Coffee Hub" },
+      { title: "Node Registry Directory — Indie Coffee Hub" },
       {
         name: "description",
         content:
-          "Browse every independent cafe in our directory. Filter by country, city, and WiFi friendliness.",
+          "Browse independent cafe nodes in our directory. Filter by country, city, and WiFi status.",
       },
-      { property: "og:title", content: "Cafe Directory — Indie Coffee Hub" },
-      { property: "og:description", content: "Browse and filter global independent cafes." },
+      { property: "og:title", content: "Cafe Node Registry" },
+      { property: "og:description", content: "Browse and filter global independent operational nodes." },
     ],
   }),
   component: Directory,
@@ -67,9 +67,8 @@ function Directory() {
     };
   }, []);
 
-  // Compute unique countries from loaded cities
   const countriesList = useMemo(() => {
-    const countriesMap = new Map<string, string>(); // country_id -> country_name
+    const countriesMap = new Map<string, string>();
     cities.forEach((city) => {
       if (city.country) {
         countriesMap.set(city.country.id, city.country.name);
@@ -78,7 +77,6 @@ function Directory() {
     return Array.from(countriesMap.entries()).map(([id, name]) => ({ id, name }));
   }, [cities]);
 
-  // Compute cities filtered by selected country
   const filteredCitiesList = useMemo(() => {
     if (selectedCountry === "All countries") {
       return cities;
@@ -88,14 +86,11 @@ function Directory() {
 
   const filtered = useMemo(() => {
     return cafes.filter((c) => {
-      // Country filter
       if (selectedCountry !== "All countries") {
         const cafeCity = cities.find((city) => city.id === c.city_id);
         if (!cafeCity || cafeCity.country_id !== selectedCountry) return false;
       }
-      // City filter
       if (selectedCity !== "All cities" && c.city_id !== selectedCity) return false;
-
       if (wifiOnly && !c.wifi) return false;
       if (
         query &&
@@ -114,43 +109,40 @@ function Directory() {
   };
 
   return (
-    <div className="min-h-screen bg-cafe-bg">
+    <div className="min-h-screen bg-[#0F1115]">
       <Header />
 
       <div
-        className="sticky top-[73px] z-40 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150"
+        className="sticky top-[73px] z-40 bg-[#0F1115]/95 border-b border-[#2A2E37] backdrop-blur-md"
         data-testid="directory-filter-bar"
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
           <div className="flex gap-3 items-center">
             <div className="relative flex-1">
               <Search
-                size={18}
-                strokeWidth={1.5}
+                size={16}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-cafe-muted"
               />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search cafes…"
+                placeholder="FILTER SEARCH PATHS..."
                 data-testid="filter-search-input"
-                className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted pl-11 pr-4 py-2 outline-none font-work-sans"
+                className="w-full bg-[#1A1D24] border border-[#2A2E37] rounded-none focus:border-[#00F0FF] focus:shadow-[inset_0_0_8px_rgba(0,240,255,0.2)] placeholder:text-cafe-muted text-[#00F0FF] pl-11 pr-4 py-2 outline-none font-mono text-xs uppercase tracking-wider"
               />
             </div>
             <button
               type="button"
               onClick={() => setShowMobileFilters(!showMobileFilters)}
-              className="sm:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cafe-border bg-cafe-surface text-cafe-body hover:bg-cafe-bg text-sm font-semibold transition-all cursor-pointer"
+              className="sm:hidden flex items-center gap-1.5 px-4 py-2 rounded-none border border-cafe-border bg-[#1A1D24] text-cafe-heading hover:border-[#00F0FF] text-xs font-mono uppercase tracking-wider transition-all cursor-pointer"
             >
-              <SlidersHorizontal size={16} strokeWidth={1.5} />
-              <span>Filters</span>
+              <SlidersHorizontal size={14} />
+              <span>PARAMS</span>
             </button>
           </div>
 
-          {/* Filter dropdowns/toggles: visible on desktop, or when toggled on mobile */}
           <div className={`${showMobileFilters ? "flex" : "hidden"} sm:flex flex-col sm:flex-row gap-3 items-stretch sm:items-center animate-fade-in`}>
-            {/* Country Select Dropdown */}
             <div className="relative flex-1 sm:flex-none">
               <select
                 value={selectedCountry}
@@ -159,110 +151,106 @@ function Directory() {
                   setSelectedCity("All cities");
                 }}
                 data-testid="filter-country-select"
-                className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+                className="appearance-none bg-[#1A1D24] border border-[#2A2E37] rounded-none text-cafe-heading pl-10 pr-10 py-2 outline-none font-mono text-xs uppercase tracking-wider w-full sm:w-auto cursor-pointer focus:border-[#00F0FF]"
               >
-                <option value="All countries">All Countries</option>
+                <option value="All countries">ALL REGIONS (GLOBAL)</option>
                 {countriesList.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {c.name.toUpperCase()}
                   </option>
                 ))}
               </select>
               <Globe
-                size={16}
-                strokeWidth={1.5}
+                size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
               />
               <ChevronDown
-                size={16}
-                strokeWidth={1.5}
+                size={14}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
               />
             </div>
 
-            {/* City Select Dropdown */}
             <div className="relative flex-1 sm:flex-none">
               <select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
                 data-testid="filter-city-select"
-                className="appearance-none bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary text-cafe-heading pl-10 pr-10 py-2 outline-none font-work-sans w-full sm:w-auto cursor-pointer"
+                className="appearance-none bg-[#1A1D24] border border-[#2A2E37] rounded-none text-cafe-heading pl-10 pr-10 py-2 outline-none font-mono text-xs uppercase tracking-wider w-full sm:w-auto cursor-pointer focus:border-[#00F0FF]"
               >
-                <option value="All cities">All Cities</option>
+                <option value="All cities">ALL STATIONS (NODES)</option>
                 {filteredCitiesList.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {c.name.toUpperCase()}
                   </option>
                 ))}
               </select>
               <MapPin
-                size={16}
-                strokeWidth={1.5}
+                size={14}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
               />
               <ChevronDown
-                size={16}
-                strokeWidth={1.5}
+                size={14}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-cafe-muted pointer-events-none"
               />
             </div>
+
             <button
               type="button"
               onClick={() => setWifiOnly((v) => !v)}
               data-testid="filter-wifi-toggle"
               aria-pressed={wifiOnly}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 font-work-sans text-sm ${
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-none border transition-all font-mono text-xs uppercase tracking-wider ${
                 wifiOnly
-                  ? "bg-cafe-primary text-white border-cafe-primary hover:bg-cafe-primary-hover"
-                  : "bg-cafe-surface text-cafe-body border-cafe-border hover:border-cafe-primary/40"
+                  ? "bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF] hover:bg-[#00F0FF]/25 shadow-[inset_0_0_8px_rgba(0,240,255,0.2)]"
+                  : "bg-[#1A1D24] text-cafe-body border-cafe-border hover:border-[#00F0FF] hover:text-[#00F0FF]"
               }`}
             >
-              <Wifi size={16} strokeWidth={1.5} /> WiFi Friendly
+              <Wifi size={14} /> HIGH_BANDWIDTH WIFI
             </button>
           </div>
         </div>
       </div>
 
       <section className="max-w-7xl mx-auto px-6 py-16">
-        <div className="mb-10 flex items-start justify-between flex-wrap gap-4">
+        <div className="mb-10 flex items-start justify-between flex-wrap gap-4 border-b border-[#2A2E37] pb-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
-              {filtered.length} {filtered.length === 1 ? "cafe" : "cafes"}
+            <p className="text-xs uppercase tracking-widest font-mono text-cafe-primary">
+              &gt; INDEXED_NODES: {filtered.length} {filtered.length === 1 ? "UNIT" : "UNITS"} FOUND
             </p>
-            <h1 className="mt-3 text-5xl sm:text-6xl tracking-tight font-light text-cafe-heading font-outfit">
-              The directory
+            <h1 className="mt-2 text-4xl sm:text-5xl tracking-widest font-black text-cafe-heading font-outfit uppercase">
+              NODE DIRECTORY MATRIX
             </h1>
           </div>
           {user && user.isAdmin && (
-            <div className={`text-xs px-3.5 py-2 rounded-xl border flex items-center gap-1.5 font-medium font-work-sans shadow-sm transition-all ${
+            <div className={`text-[10px] px-3.5 py-2 border rounded-none flex items-center gap-1.5 font-mono uppercase tracking-wider ${
               strategy === "isr"
-                ? "bg-purple-50 border-purple-200 text-purple-700"
-                : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                ? "bg-purple-950/20 border-purple-800 text-purple-400"
+                : "bg-[#00F0FF]/5 border-[#00F0FF]/30 text-[#00F0FF]"
             }`}>
-              <span className={`w-2 h-2 rounded-full ${strategy === "isr" ? "bg-purple-500 animate-pulse" : "bg-emerald-500 animate-ping"}`} />
-              {strategy === "isr" ? "Serving from Static CDN Edge (ISR Mode)" : "Live DB Query (Dynamic SSR Mode)"}
+              <span className={`w-2 h-2 rounded-none ${strategy === "isr" ? "bg-purple-500 animate-pulse" : "bg-[#00F0FF] animate-ping"}`} />
+              {strategy === "isr" ? "CDN_CACHE: ACTIVE (ISR)" : "SERVER_LIVE: SSR QUERY"}
             </div>
           )}
         </div>
 
         {filtered.length === 0 ? (
           <div className="text-center py-24 max-w-md mx-auto" data-testid="directory-empty-state">
-            <div className="inline-flex w-16 h-16 rounded-full bg-cafe-primary-light items-center justify-center text-cafe-primary">
-              <Coffee strokeWidth={1.5} />
+            <div className="inline-flex w-16 h-16 border border-red-500/30 bg-red-500/10 items-center justify-center text-red-400">
+              <Coffee size={24} />
             </div>
-            <h2 className="mt-6 text-3xl tracking-tight font-medium text-cafe-heading font-outfit">
-              No cafes match — yet.
+            <h2 className="mt-6 text-xl tracking-widest font-bold text-cafe-heading font-mono uppercase">
+              QUERY RETURNED NULL // ZERO MATCHES
             </h2>
-            <p className="mt-3 text-cafe-body font-work-sans leading-relaxed">
-              Try widening your search, or have a look at the whole directory.
+            <p className="mt-3 text-cafe-muted font-mono text-xs uppercase tracking-wider">
+              No index matched your request configuration. Adjust filtering variables and run search again.
             </p>
             <button
               type="button"
               onClick={clearAll}
               data-testid="empty-clear-filters-button"
-              className="mt-6 text-cafe-primary hover:text-cafe-primary-hover font-work-sans font-medium"
+              className="mt-6 text-[#00F0FF] hover:text-[#00C8D6] font-mono text-xs uppercase tracking-widest border border-[#00F0FF]/30 px-4 py-2 hover:bg-[#00F0FF]/5"
             >
-              Clear all filters
+              RESET PARAMS
             </button>
           </div>
         ) : (
