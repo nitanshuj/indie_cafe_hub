@@ -435,7 +435,7 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 bg-cafe-surface/70 backdrop-blur-xl border-b border-cafe-border backdrop-saturate-150 shadow-sm"
+      className="sticky top-0 z-50 bg-transparent border-b border-[#1A1715] backdrop-blur-sm"
       data-testid="site-header"
     >
       {/* Geolocation first-visit prompt bar */}

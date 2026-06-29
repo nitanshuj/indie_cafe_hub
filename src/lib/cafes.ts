@@ -36,6 +36,10 @@ export type Cafe = {
   // Creator attribution
   created_by_name?: string;
 
+  // City & country resolved names (from join)
+  city_name?: string;
+  country_name?: string;
+
   // Nomad & Expansion fields
   city_id?: string;
   specialty_focus?: string;
@@ -102,6 +106,10 @@ export function mapDbCafeToUiCafe(dbCafe: any): Cafe {
       || dbCafe.profiles?.username
       || dbCafe.profiles?.email
       || undefined,
+
+    // City & country names — populated when cities join is present
+    city_name: dbCafe.cities?.name || undefined,
+    country_name: dbCafe.cities?.countries?.name || undefined,
 
     // Mapped new fields
     city_id: dbCafe.city_id,
@@ -214,7 +222,7 @@ export async function fetchCafes(): Promise<Cafe[]> {
 
   const { data, error } = await supabase
     .from("cafes")
-    .select("*")
+    .select("*, cities(name, countries(name))")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("Error fetching cafes:", error);

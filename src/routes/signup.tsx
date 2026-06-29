@@ -74,18 +74,16 @@ function SignUp() {
                 <Coffee strokeWidth={1.5} />
               </div>
               <h2 className="text-3xl font-outfit text-cafe-heading font-light tracking-tight">
-                Verify your email
+                Sign Up Successful!
               </h2>
               <p className="mt-4 text-cafe-body leading-relaxed text-sm">
-                We've sent a verification link to{" "}
-                <strong className="text-cafe-heading">{email}</strong>. Please check your inbox and
-                verify your email address to complete your registration.
+                Your account has been created. You can now sign in.
               </p>
               <Link
                 to="/login"
                 className="mt-8 w-full bg-cafe-primary text-white hover:bg-cafe-primary-hover px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-medium inline-flex items-center justify-center gap-2"
               >
-                Go to Sign in
+                Go to Login
               </Link>
             </div>
           ) : (

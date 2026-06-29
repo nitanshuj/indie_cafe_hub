@@ -3,20 +3,23 @@
 @import "tw-animate-css";
 
 :root {
-  --cafe-bg: #fff7f5;
-  --cafe-surface: #ffffff;
-  --cafe-footer: #2d2422;
-  --cafe-primary: #e67e6b;
-  --cafe-primary-hover: #d96c5a;
-  --cafe-primary-light: #fde4dd;
-  --cafe-heading: #2d2422;
-  --cafe-body: #6b5c58;
-  --cafe-muted: #a3938f;
-  --cafe-border: #f5ebe9;
-  --cafe-open-bg: #e8f5e9;
-  --cafe-open-text: #2e7d32;
-  --cafe-negative-bg: #f5ebe9;
-  --cafe-negative-text: #a3938f;
+  /* ── Industrial Minimalist Palette ─────────────────────────────── */
+  --cafe-bg: #F5F2EB;           /* Unbleached Paper — page background  */
+  --cafe-surface: #E5E2DA;      /* Warm Concrete — card surfaces        */
+  --cafe-footer: #1A1715;       /* Ristretto Black — footer             */
+  --cafe-primary: #1A1715;      /* Ristretto Black — primary actions    */
+  --cafe-primary-hover: #3A3532;/* Slightly lighter for hover states    */
+  --cafe-primary-light: #E5E2DA;/* Warm Concrete as light accent        */
+  --cafe-heading: #1A1715;      /* Ristretto Black — headings           */
+  --cafe-body: #3A3532;         /* Dark warm brown — body text          */
+  --cafe-muted: #7A7370;        /* Muted warm grey                      */
+  --cafe-border: #1A1715;       /* Hard black — default border          */
+  --cafe-ink: #1A1715;          /* Canonical ink / border token         */
+  --cafe-surface-accent: #E5E2DA; /* Warm Concrete alias                */
+  --cafe-open-bg: #d4edda;
+  --cafe-open-text: #1A1715;
+  --cafe-negative-bg: #E5E2DA;
+  --cafe-negative-text: #7A7370;
 }
 
 [data-accessibility="protanopia"] {
@@ -64,9 +67,13 @@
 }
 
 @theme {
+  /* ── Typefaces ──────────────────────────────────────────────────── */
   --font-outfit: "Outfit", sans-serif;
   --font-work-sans: "Work Sans", sans-serif;
+  --font-space-grotesk: "Space Grotesk", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
 
+  /* ── Color tokens ───────────────────────────────────────────────── */
   --color-cafe-bg: var(--cafe-bg);
   --color-cafe-surface: var(--cafe-surface);
   --color-cafe-footer: var(--cafe-footer);
@@ -77,6 +84,8 @@
   --color-cafe-body: var(--cafe-body);
   --color-cafe-muted: var(--cafe-muted);
   --color-cafe-border: var(--cafe-border);
+  --color-cafe-ink: var(--cafe-ink);
+  --color-cafe-surface-accent: var(--cafe-surface-accent);
   --color-cafe-open-bg: var(--cafe-open-bg);
   --color-cafe-open-text: var(--cafe-open-text);
   --color-cafe-negative-bg: var(--cafe-negative-bg);
@@ -94,7 +103,7 @@
   body {
     background-color: var(--color-cafe-bg);
     color: var(--color-cafe-body);
-    font-family: var(--font-work-sans);
+    font-family: var(--font-space-grotesk);
   }
   * {
     border-color: var(--color-cafe-border);
@@ -110,7 +119,7 @@
   }
 }
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 35s linear infinite;
 }
 
 @keyframes fade-up {

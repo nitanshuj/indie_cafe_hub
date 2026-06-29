@@ -525,11 +525,13 @@ function Admin() {
           .eq("id", editingCafe.dbId);
         if (updateError) throw updateError;
       } else {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
         const { error: insertError } = await supabase
           .from("cafes")
           .insert({
             ...cafeData,
             created_at: new Date().toISOString(),
+            created_by: authUser?.id ?? null,
           });
         if (insertError) throw insertError;
       }

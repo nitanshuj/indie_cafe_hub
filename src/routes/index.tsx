@@ -27,143 +27,147 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const marqueeItems = [
+// Monospace data ticker items — replaces the old image marquee
+const tickerItems = [
+  "985 CAFES INDEXED",
+  "42 CITIES",
+  "LIVE DATA",
+  "SPECIALTY ONLY",
+  "NO CHAINS",
+  "INDIE VERIFIED",
   "LAPTOP FRIENDLY",
-  "SPECIALTY COFFEE",
-  "LOCAL BAKERY",
-  "FAST WIFI",
-  "INDEPENDENT",
-  "WORLDWIDE",
+  "PRECISION ROASTED",
 ];
 
 function Index() {
   const { featured } = Route.useLoaderData();
 
   return (
-    <div className="min-h-screen bg-cafe-bg">
+    <div className="min-h-screen bg-[#F5F2EB]">
       <Header />
 
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
-          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
-            A global specialty cafe directory
+      {/* ────────────────────────────────────────────────────────────
+          SECTION 1 — FEATURED PRECISION CAFES (TOP)
+      ──────────────────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-6 pt-14 pb-0">
+        {/* Section header */}
+        <div className="flex items-end justify-between flex-wrap gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#1A1715]/60">
+            Featured Precision Cafes // This Month
           </p>
-          <h1 className="mt-6 text-5xl sm:text-6xl tracking-tight font-light text-cafe-heading font-outfit max-w-3xl mx-auto leading-[1.05]">
-            Your city's best indie cafes, found.
-          </h1>
-          <p className="mt-6 text-base leading-relaxed text-cafe-body font-work-sans max-w-xl mx-auto">
-            Hand-picked corners of the world for specialty coffee, slow mornings, and focused work —
-            no chains, no clutter.
-          </p>
-
-          <form
-            className="mt-10 max-w-xl mx-auto flex flex-col sm:flex-row gap-3"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <div className="relative flex-1">
-              <Search
-                size={18}
-                strokeWidth={1.5}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-cafe-muted"
-              />
-              <input
-                type="search"
-                placeholder="Search by name or neighborhood…"
-                data-testid="hero-search-input"
-                className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted pl-11 pr-4 py-3 outline-none font-work-sans"
-              />
-            </div>
-            <Link
-              to="/directory"
-              data-testid="hero-browse-button"
-              className="bg-cafe-primary text-white hover:bg-cafe-primary-hover px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-work-sans font-medium inline-flex items-center justify-center gap-2"
-            >
-              Browse directory <ArrowRight size={16} strokeWidth={1.5} />
-            </Link>
-          </form>
-
-          <div className="mt-12 max-w-2xl mx-auto">
-            <div className="bg-cafe-primary-light/30 backdrop-blur-md border border-cafe-primary-light rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 text-left shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="flex gap-4 items-start">
-                <div className="bg-cafe-primary-light text-cafe-primary p-3.5 rounded-2xl flex-shrink-0">
-                  <Compass size={28} className="animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="font-outfit font-semibold text-lg text-cafe-heading">
-                    Wanna know more about coffee?
-                  </h3>
-                  <p className="mt-1 text-sm text-cafe-body font-work-sans leading-relaxed">
-                    Decode drink menus, understand roast profiles, and explore origin regions with <strong>The Brew Compass</strong>.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/brew-compass"
-                data-testid="hero-brew-compass-cta"
-                className="bg-cafe-primary hover:bg-cafe-primary-hover text-white px-5 py-2.5 rounded-xl font-work-sans font-semibold text-sm transition-all whitespace-nowrap flex items-center gap-1.5 hover:-translate-y-0.5"
-              >
-                <span>Open Compass</span>
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative border-y border-cafe-border bg-white/40 overflow-hidden py-4">
-          <div className="flex animate-marquee whitespace-nowrap">
-            {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
-              <span
-                key={i}
-                className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary mx-8 font-work-sans"
-              >
-                {item} •
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-6 py-20 sm:py-28">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-12">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary font-work-sans">
-              Featured this month
-            </p>
-            <h2 className="mt-3 text-3xl sm:text-4xl tracking-tight font-medium text-cafe-heading font-outfit">
-              Where people are going right now
-            </h2>
-          </div>
           <Link
             to="/directory"
             data-testid="featured-see-all-link"
-            className="text-cafe-primary hover:text-cafe-primary-hover font-work-sans font-medium inline-flex items-center gap-2"
+            className="font-mono text-[10px] uppercase tracking-widest text-[#1A1715] hover:underline underline-offset-4"
           >
-            See all <ArrowRight size={16} strokeWidth={1.5} />
+            See all →
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-6">
-          {featured.map((cafe, i) => {
-            let colSpan = "md:col-span-8 lg:col-span-4";
-            let heightClass = "h-56";
-            if (i === 0) {
-              colSpan = "md:col-span-8 lg:col-span-8";
-              heightClass = "h-80";
-            } else if (i === 1) {
-              colSpan = "md:col-span-8 lg:col-span-4";
-              heightClass = "h-80";
-            }
-            return (
-              <CafeCard
-                key={cafe.id}
-                cafe={cafe}
-                className={colSpan}
-                imageHeightClass={heightClass}
-              />
-            );
-          })}
+        {/* Cafe card grid — strict 2-col, equal row heights via grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {featured.map((cafe) => (
+            <CafeCard
+              key={cafe.id}
+              cafe={cafe}
+            />
+          ))}
+          {featured.length % 2 !== 0 && (
+            <Link
+              className="flex flex-col items-center justify-center border-2 border-[#1A1715] bg-[#E5E2DA] p-8 text-center hover:bg-[#1A1715] hover:text-[#F5F2EB] transition-colors h-full min-h-[350px]"
+              to="/directory"
+            >
+              <span className="font-mono text-sm tracking-widest uppercase">
+                /// DISCOVER MORE SPACES ///
+              </span>
+              <h3 className="font-sans text-xl font-bold mt-2">
+                View All Indexed Cities &amp; Cafes →
+              </h3>
+            </Link>
+          )}
         </div>
       </section>
+
+      {/* ────────────────────────────────────────────────────────────
+          SECTION 2 — MAIN HERO (MIDDLE)
+      ──────────────────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-6 py-20 sm:py-28">
+        <h1 className="font-space-grotesk text-6xl sm:text-7xl lg:text-8xl font-light tracking-tighter text-[#1A1715] max-w-4xl leading-[0.95]">
+          Your city's best indie cafes, found.
+        </h1>
+
+        {/* Search row */}
+        <form
+          className="mt-12 max-w-2xl flex flex-col sm:flex-row"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <div className="relative flex-1">
+            <Search
+              size={16}
+              strokeWidth={1.5}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1715]/40 pointer-events-none"
+            />
+            <input
+              type="search"
+              placeholder="Search by city, neighborhood, or name..."
+              data-testid="hero-search-input"
+              className="w-full border-2 border-[#1A1715] border-r-0 rounded-none bg-white font-mono text-sm text-[#1A1715] placeholder:text-[#1A1715]/40 pl-10 pr-4 py-4 outline-none focus:ring-2 focus:ring-[#1A1715] focus:ring-inset"
+            />
+          </div>
+          <Link
+            to="/directory"
+            data-testid="hero-browse-button"
+            className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] hover:bg-transparent hover:text-[#1A1715] font-mono text-[11px] uppercase tracking-widest px-8 py-4 transition-colors duration-150 whitespace-nowrap inline-flex items-center justify-center gap-2"
+          >
+            Browse directory <ArrowRight size={14} strokeWidth={1.5} />
+          </Link>
+        </form>
+      </section>
+
+      {/* ────────────────────────────────────────────────────────────
+          SECTION 3 — BREW COMPASS CTA (BOTTOM)
+      ──────────────────────────────────────────────────────────── */}
+      <section className="border-t-2 border-[#1A1715] max-w-7xl mx-auto px-6 py-16">
+        <div className="border-2 border-[#1A1715] bg-[#E5E2DA] p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          {/* Left block */}
+          <div>
+            <Compass size={22} strokeWidth={1} className="text-[#1A1715] mb-5" />
+            <h3 className="font-space-grotesk text-2xl font-medium text-[#1A1715] tracking-tight">
+              Wanna know more about coffee?
+            </h3>
+            <p className="mt-3 font-mono text-[11px] text-[#1A1715]/60 leading-relaxed max-w-sm">
+              // DECODE DRINK MENUS. UNDERSTAND ROAST PROFILES.<br />
+              // EXPLORE ORIGIN REGIONS WITH THE BREW COMPASS.
+            </p>
+          </div>
+
+          {/* CTA button */}
+          <Link
+            to="/brew-compass"
+            data-testid="hero-brew-compass-cta"
+            className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] hover:bg-transparent hover:text-[#1A1715] font-mono text-[11px] uppercase tracking-widest px-7 py-3.5 transition-colors duration-150 whitespace-nowrap inline-flex items-center gap-2.5 flex-shrink-0"
+          >
+            Open Compass <ArrowRight size={13} strokeWidth={1.5} />
+          </Link>
+        </div>
+      </section>
+
+      {/* ────────────────────────────────────────────────────────────
+          SECTION 4 — MONOSPACE DATA TICKER (BOTTOM STRIP)
+          Text-only ticker on Ristretto Black — kinetic but not chaotic
+      ──────────────────────────────────────────────────────────── */}
+      <div className="border-t-2 border-[#1A1715] bg-[#1A1715] overflow-hidden py-3">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...tickerItems, ...tickerItems, ...tickerItems, ...tickerItems].map((item, i) => (
+            <span
+              key={i}
+              className="font-mono text-[9px] uppercase tracking-[0.25em] text-[#F5F2EB]/50 mx-10"
+            >
+              /// {item}
+            </span>
+          ))}
+        </div>
+      </div>
 
       <Footer />
     </div>

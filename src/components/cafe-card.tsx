@@ -1,57 +1,79 @@
 import { Link } from "@tanstack/react-router";
-import { Wifi, Clock, MapPin } from "lucide-react";
+import { Wifi, Clock, MapPin, Globe } from "lucide-react";
 import type { Cafe } from "@/lib/cafes";
 
 type Props = {
   cafe: Cafe;
   className?: string;
-  imageHeightClass?: string;
   to?: string;
 };
 
-export function CafeCard({ cafe, className = "", imageHeightClass = "h-64", to }: Props) {
+export function CafeCard({ cafe, className = "", to }: Props) {
   const cardContent = (
     <>
-      <div className={`overflow-hidden ${imageHeightClass}`}>
+      {/* Image — fixed height so every card's dividing line is at the same pixel */}
+      <div className="overflow-hidden border-b-2 border-[#1A1715]">
         <img
           src={cafe.image}
           alt={`Interior of ${cafe.name}`}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-48 object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
         />
       </div>
-      <div className="p-6 sm:p-8">
+
+      {/* Card body — row 2 of the internal grid (1fr), grows to fill; DETAILS bar is pinned to row 3 */}
+      <div className="flex flex-col justify-between p-4 bg-[#E5E2DA]">
+        {/* Badges row */}
         <div className="flex items-center gap-2 flex-wrap mb-4">
           {cafe.wifi && (
-            <span className="bg-cafe-primary-light text-cafe-primary rounded-full px-3 py-1 text-xs font-medium font-work-sans inline-flex items-center gap-1">
-              <Wifi size={12} strokeWidth={1.5} /> WiFi
+            <span className="rounded-none border border-[#1A1715] bg-transparent text-[#1A1715] font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 inline-flex items-center gap-1">
+              <Wifi size={10} strokeWidth={1.5} /> WIFI
             </span>
           )}
         </div>
-        <h3 className="font-outfit text-2xl font-medium text-cafe-heading tracking-tight">
+
+        {/* Cafe name */}
+        <h3 className="font-space-grotesk text-xl font-medium text-[#1A1715] tracking-tight leading-tight">
           {cafe.name}
         </h3>
-        <div className="mt-2 flex items-center gap-3 text-xs text-cafe-muted font-work-sans">
+
+        {/* Location + Hours — monospace data style */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-[#1A1715]/50 font-mono uppercase tracking-wider">
           <span className="inline-flex items-center gap-1">
-            <MapPin size={12} strokeWidth={1.5} />
+            <MapPin size={10} strokeWidth={1.5} />
             {cafe.neighborhood}
           </span>
           <span className="inline-flex items-center gap-1">
-            <Clock size={12} strokeWidth={1.5} />
+            <Clock size={10} strokeWidth={1.5} />
             {cafe.hours}
           </span>
+          {(cafe.city_name || cafe.country_name) && (
+            <span className="inline-flex items-center gap-1">
+              <Globe size={10} strokeWidth={1.5} />
+              {[cafe.city_name, cafe.country_name].filter(Boolean).join(", ")}
+            </span>
+          )}
         </div>
-        <p className="mt-4 text-cafe-body font-work-sans leading-relaxed text-sm">{cafe.blurb}</p>
-        <div className="mt-5 flex flex-wrap gap-2">
+
+        {/* Blurb — clamped to 3 lines to cap height footprint uniformly */}
+        <p className="mt-4 text-[#3A3532] font-sans leading-relaxed text-sm line-clamp-3">{cafe.blurb}</p>
+
+        {/* Tags */}
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {cafe.tags.map((t) => (
             <span
               key={t}
-              className="text-xs text-cafe-body border border-cafe-border rounded-full px-3 py-1 font-work-sans"
+              className="text-[9px] text-[#1A1715] border border-[#1A1715] rounded-none px-2 py-0.5 font-mono uppercase tracking-wider"
             >
               {t}
             </span>
           ))}
         </div>
+      </div>
+
+      {/* DETAILS bar — visual element (outer Link handles navigation) */}
+      <div className="border-t-2 border-[#1A1715] py-3 text-center text-[10px] font-mono uppercase tracking-[0.2em] text-[#1A1715] bg-[#E5E2DA] group-hover:bg-[#1A1715] group-hover:text-[#F5F2EB] transition-colors duration-150">
+        Details →
       </div>
     </>
   );
@@ -61,7 +83,7 @@ export function CafeCard({ cafe, className = "", imageHeightClass = "h-64", to }
       <Link
         to={to}
         data-testid={`cafe-card-link-${cafe.id}`}
-        className={`group block bg-cafe-surface border border-cafe-border shadow-sm rounded-[2rem] overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
+        className={`group grid grid-rows-[auto_1fr_auto] bg-[#E5E2DA] border-2 border-[#1A1715] rounded-none overflow-hidden transition-colors duration-150 ${className}`}
       >
         {cardContent}
       </Link>
@@ -73,7 +95,7 @@ export function CafeCard({ cafe, className = "", imageHeightClass = "h-64", to }
       to="/cafes/$cafeId"
       params={{ cafeId: cafe.id }}
       data-testid={`cafe-card-link-${cafe.id}`}
-      className={`group block bg-white border border-[#F5EBE9] shadow-[0_8px_30px_rgba(230,126,107,0.04)] rounded-[2rem] overflow-hidden transition-all duration-300 hover:shadow-[0_12px_40px_rgba(230,126,107,0.08)] hover:-translate-y-1 ${className}`}
+      className={`group grid grid-rows-[auto_1fr_auto] bg-[#E5E2DA] border-2 border-[#1A1715] rounded-none overflow-hidden transition-colors duration-150 ${className}`}
     >
       {cardContent}
     </Link>
