@@ -10,6 +10,7 @@ import { z } from "zod";
 
 const directorySearchSchema = z.object({
   query: z.string().optional().catch(""),
+  page: z.coerce.number().catch(1),
 });
 
 export const Route = createFileRoute("/directory")({
@@ -36,7 +37,8 @@ export const Route = createFileRoute("/directory")({
 function Directory() {
   const { user } = useAuth();
   const { cafes: initialCafes, cities } = Route.useLoaderData();
-  const { query: urlQuery } = Route.useSearch();
+  const { query: urlQuery, page } = Route.useSearch();
+  const currentPage = page || 1;
   const [cafes, setCafes] = useState(initialCafes);
   const [strategy, setStrategy] = useState("dynamic");
   const [query, setQuery] = useState(urlQuery || "");
@@ -114,7 +116,13 @@ function Directory() {
   };
 
   return (
-    <div className="min-h-screen bg-cafe-bg">
+    <div
+      className="min-h-screen bg-cafe-bg bg-fixed bg-center bg-contain bg-no-repeat"
+      style={{
+        backgroundImage: 'linear-gradient(rgba(245, 242, 235, 0.93), rgba(245, 242, 235, 0.93)), url("https://res.cloudinary.com/daon1coiv/image/upload/v1782760872/french_press_cover_image_gaoppk.png")',
+        backgroundBlendMode: 'multiply',
+      }}
+    >
       <Header />
 
       <div
@@ -266,17 +274,56 @@ function Directory() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filtered.map((cafe, i) => (
-              <div
-                key={cafe.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <CafeCard cafe={cafe} imageHeightClass={i % 3 === 1 ? "h-80" : "h-64"} />
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filtered.slice((currentPage - 1) * 6, currentPage * 6).map((cafe, i) => (
+                <div
+                  key={cafe.id}
+                  className="animate-fade-up"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <CafeCard cafe={cafe} index={(currentPage - 1) * 6 + i} />
+                </div>
+              ))}
+            </div>
+
+            {/* Brutalist Pagination controls */}
+            {Math.ceil(filtered.length / 6) > 1 && (
+              <div className="flex items-center justify-between border-2 border-[#1A1715] p-4 bg-[#E5E2DA] font-mono text-xs uppercase tracking-widest mt-12">
+                {currentPage > 1 ? (
+                  <Link
+                    to="/directory"
+                    search={(prev) => ({ ...prev, page: currentPage - 1 })}
+                    className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] px-4 py-2 hover:bg-transparent hover:text-[#1A1715] transition-colors font-bold"
+                  >
+                    PREV
+                  </Link>
+                ) : (
+                  <span className="opacity-40 border-2 border-transparent px-4 py-2">
+                    PREV
+                  </span>
+                )}
+
+                <span>
+                  PAGE {currentPage} OF {Math.ceil(filtered.length / 6)}
+                </span>
+
+                {currentPage < Math.ceil(filtered.length / 6) ? (
+                  <Link
+                    to="/directory"
+                    search={(prev) => ({ ...prev, page: currentPage + 1 })}
+                    className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] px-4 py-2 hover:bg-transparent hover:text-[#1A1715] transition-colors font-bold"
+                  >
+                    NEXT
+                  </Link>
+                ) : (
+                  <span className="opacity-40 border-2 border-transparent px-4 py-2">
+                    NEXT
+                  </span>
+                )}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </section>
 

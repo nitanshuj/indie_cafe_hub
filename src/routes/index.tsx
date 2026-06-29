@@ -3,11 +3,17 @@ import { Search, ArrowRight, Compass } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
 import { CafeCard } from "@/components/cafe-card";
 import { fetchCafes } from "@/lib/cafes";
+import { z } from "zod";
+
+const indexSearchSchema = z.object({
+  page: z.coerce.number().catch(1),
+});
 
 export const Route = createFileRoute("/")({
+  validateSearch: indexSearchSchema,
   loader: async () => {
     const cafes = await fetchCafes();
-    return { featured: cafes.slice(0, 5) };
+    return { cafes };
   },
   head: () => ({
     meta: [
@@ -40,10 +46,20 @@ const tickerItems = [
 ];
 
 function Index() {
-  const { featured } = Route.useLoaderData();
+  const { cafes } = Route.useLoaderData();
+  const { page } = Route.useSearch();
+  const currentPage = page || 1;
+  const paginatedCafes = cafes.slice((currentPage - 1) * 6, currentPage * 6);
+  const totalPages = Math.ceil(cafes.length / 6);
 
   return (
-    <div className="min-h-screen bg-[#F5F2EB]">
+    <div
+      className="min-h-screen bg-[#F5F2EB] bg-fixed bg-center bg-cover bg-no-repeat"
+      style={{
+        backgroundImage: 'linear-gradient(rgba(245, 242, 235, 0.93), rgba(245, 242, 235, 0.93)), url("https://res.cloudinary.com/daon1coiv/image/upload/v1782759373/hario_v60_cover_letter_mhb4rd.png")',
+        backgroundBlendMode: 'multiply',
+      }}
+    >
       <Header />
 
       {/* ────────────────────────────────────────────────────────────
@@ -64,28 +80,53 @@ function Index() {
           </Link>
         </div>
 
-        {/* Cafe card grid — strict 2-col, equal row heights via grid */}
+        {/* Cafe card grid — 2-column layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {featured.map((cafe) => (
+          {paginatedCafes.map((cafe, index) => (
             <CafeCard
               key={cafe.id}
               cafe={cafe}
+              index={(currentPage - 1) * 6 + index}
             />
           ))}
-          {featured.length % 2 !== 0 && (
-            <Link
-              className="flex flex-col items-center justify-center border-2 border-[#1A1715] bg-[#E5E2DA] p-8 text-center hover:bg-[#1A1715] hover:text-[#F5F2EB] transition-colors h-full min-h-[350px]"
-              to="/directory"
-            >
-              <span className="font-mono text-sm tracking-widest uppercase">
-                /// DISCOVER MORE SPACES ///
-              </span>
-              <h3 className="font-sans text-xl font-bold mt-2">
-                View All Indexed Cities &amp; Cafes →
-              </h3>
-            </Link>
-          )}
         </div>
+
+        {/* Brutalist Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-2 border-[#1A1715] p-4 bg-[#E5E2DA] font-mono text-xs uppercase tracking-widest mt-12">
+            {currentPage > 1 ? (
+              <Link
+                to="/"
+                search={{ page: currentPage - 1 }}
+                className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] px-4 py-2 hover:bg-transparent hover:text-[#1A1715] transition-colors font-bold"
+              >
+                PREV
+              </Link>
+            ) : (
+              <span className="opacity-40 border-2 border-transparent px-4 py-2">
+                PREV
+              </span>
+            )}
+
+            <span>
+              PAGE {currentPage} OF {totalPages}
+            </span>
+
+            {currentPage < totalPages ? (
+              <Link
+                to="/"
+                search={{ page: currentPage + 1 }}
+                className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] px-4 py-2 hover:bg-transparent hover:text-[#1A1715] transition-colors font-bold"
+              >
+                NEXT
+              </Link>
+            ) : (
+              <span className="opacity-40 border-2 border-transparent px-4 py-2">
+                NEXT
+              </span>
+            )}
+          </div>
+        )}
       </section>
 
       {/* ────────────────────────────────────────────────────────────

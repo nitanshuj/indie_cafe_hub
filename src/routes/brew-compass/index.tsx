@@ -184,84 +184,86 @@ function BrewSchoolHub() {
       </section>
 
       {/* Module List — 1 per row */}
-      <section className="space-y-5">
+      <section className="space-y-8">
         {MODULES.map((mod, index) => {
           const Icon = mod.icon;
           return (
             <Link
               key={mod.to}
               to={mod.to}
-              className={`group relative flex flex-col sm:flex-row items-stretch rounded-2xl overflow-hidden border ${mod.border} shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 min-h-[200px] sm:min-h-[220px]`}
+              className={`group flex flex-col w-full h-auto sm:h-80 border-2 border-[#1A1715] rounded-none overflow-hidden transition-colors duration-150 ${
+                index % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"
+              }`}
               data-testid={`hub-module-${mod.label.toLowerCase().replace(/\s+/g, "-")}`}
               aria-label={`Go to ${mod.label}`}
             >
-              {/* ── LEFT: text content ──────────────────────────────── */}
+              {/* ── Content side (50%) ── */}
               <div
-                className={`relative flex flex-col justify-between p-8 sm:p-10 bg-gradient-to-br ${mod.accent} flex-1 min-w-0`}
+                className={`relative flex flex-col justify-between p-6 bg-gradient-to-br ${mod.accent} w-full sm:w-1/2 sm:h-full overflow-hidden`}
               >
-                {/* Top row: module number + badge */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${mod.iconBg} shadow-md flex-shrink-0`}
-                    >
-                      <Icon size={18} strokeWidth={1.5} className={mod.iconColor} />
+                {/* Card body wrapper */}
+                <div className="flex flex-col justify-between flex-grow overflow-hidden">
+                  <div>
+                    {/* Top row: icon + badge */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-none border border-[#1A1715] flex items-center justify-center ${mod.iconBg} shadow-sm flex-shrink-0`}
+                        >
+                          <Icon size={14} strokeWidth={1.5} className={mod.iconColor} />
+                        </div>
+                        <span
+                          className={`text-[9px] font-bold uppercase tracking-widest font-work-sans ${mod.dark ? "text-amber-400" : "text-cafe-muted"}`}
+                        >
+                          Module {index + 1}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#1A1715] rounded-none font-work-sans ${mod.badgeColor}`}
+                      >
+                        {mod.badge}
+                      </span>
                     </div>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-widest font-work-sans ${mod.dark ? "text-amber-400" : "text-cafe-muted"}`}
-                    >
-                      Module {index + 1}
-                    </span>
+
+                    {/* Text content */}
+                    <div className="space-y-1">
+                      <p
+                        className={`text-[9px] uppercase tracking-[0.18em] font-semibold font-work-sans ${mod.dark ? "text-amber-400" : "text-cafe-primary"}`}
+                      >
+                        {mod.sublabel}
+                      </p>
+                      <h2
+                        className={`text-xl sm:text-2xl font-medium font-outfit leading-snug line-clamp-1 ${mod.dark ? "text-white" : "text-cafe-heading"}`}
+                      >
+                        {mod.label}
+                      </h2>
+                      <p
+                        className={`text-xs leading-relaxed font-work-sans line-clamp-3 ${mod.dark ? "text-white/65" : "text-cafe-body"}`}
+                      >
+                        {mod.description}
+                      </p>
+                    </div>
                   </div>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full font-work-sans ${mod.badgeColor}`}
-                  >
-                    {mod.badge}
-                  </span>
                 </div>
 
-                {/* Text body */}
-                <div className="flex-1 space-y-2 mb-6">
-                  <p
-                    className={`text-[10px] uppercase tracking-[0.18em] font-semibold font-work-sans ${mod.dark ? "text-amber-400" : "text-cafe-primary"}`}
-                  >
-                    {mod.sublabel}
-                  </p>
-                  <h2
-                    className={`text-2xl sm:text-3xl font-medium font-outfit leading-snug ${mod.dark ? "text-white" : "text-cafe-heading"}`}
-                  >
-                    {mod.label}
-                  </h2>
-                  <p
-                    className={`text-sm leading-relaxed font-work-sans max-w-md ${mod.dark ? "text-white/65" : "text-cafe-body"}`}
-                  >
-                    {mod.description}
-                  </p>
-                </div>
-
-                {/* CTA */}
-                <div
-                  className={`inline-flex items-center gap-2 text-sm font-semibold font-work-sans transition-all duration-200 group-hover:gap-3 ${mod.dark ? "text-amber-400" : "text-cafe-primary"}`}
-                >
-                  Explore module
-                  <ArrowRight
-                    size={15}
-                    strokeWidth={2}
-                    className="transition-transform duration-200 group-hover:translate-x-1.5"
-                  />
+                {/* Bottom EXPLORE bar inside content column */}
+                <div className={`mt-4 border-t border-[#1A1715] -mx-6 -mb-6 py-2.5 text-center text-[10px] font-mono uppercase tracking-[0.25em] transition-colors duration-150 ${
+                  mod.dark
+                    ? "bg-[#1A1715] text-amber-400 group-hover:bg-amber-400 group-hover:text-[#1A1715]"
+                    : "bg-transparent text-cafe-primary group-hover:bg-[#1A1715] group-hover:text-[#F5F2EB]"
+                }`}>
+                  Explore module →
                 </div>
               </div>
 
-              {/* ── RIGHT: photo ─────────────────────────────────────── */}
-              <div className="relative w-full sm:w-80 lg:w-96 flex-shrink-0 overflow-hidden min-h-[200px] sm:min-h-0">
+              {/* ── Image side (50%) ── */}
+              <div className={`relative w-full sm:w-1/2 flex-shrink-0 overflow-hidden h-48 sm:h-full border-t-2 sm:border-t-0 ${index % 2 === 0 ? "sm:border-l-2" : "sm:border-r-2"} border-[#1A1715]`}>
                 <img
                   src={mod.imageUrl}
                   alt={mod.imageAlt}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   loading="lazy"
                 />
-                {/* Subtle left-edge gradient blend into card bg */}
-                <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white/20 to-transparent" />
               </div>
             </Link>
           );

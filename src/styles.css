@@ -5,20 +5,20 @@
 :root {
   /* ── Industrial Minimalist Palette ─────────────────────────────── */
   --cafe-bg: #F5F2EB;           /* Unbleached Paper — page background  */
-  --cafe-surface: #E5E2DA;      /* Warm Concrete — card surfaces        */
+  --cafe-surface: #D4E2EC;      /* Light Blue — card surfaces         */
   --cafe-footer: #1A1715;       /* Ristretto Black — footer             */
   --cafe-primary: #1A1715;      /* Ristretto Black — primary actions    */
   --cafe-primary-hover: #3A3532;/* Slightly lighter for hover states    */
-  --cafe-primary-light: #E5E2DA;/* Warm Concrete as light accent        */
+  --cafe-primary-light: #D4E2EC;/* Light Blue concrete as light accent */
   --cafe-heading: #1A1715;      /* Ristretto Black — headings           */
   --cafe-body: #3A3532;         /* Dark warm brown — body text          */
   --cafe-muted: #7A7370;        /* Muted warm grey                      */
   --cafe-border: #1A1715;       /* Hard black — default border          */
   --cafe-ink: #1A1715;          /* Canonical ink / border token         */
-  --cafe-surface-accent: #E5E2DA; /* Warm Concrete alias                */
+  --cafe-surface-accent: #D4E2EC; /* Light Blue concrete alias           */
   --cafe-open-bg: #d4edda;
   --cafe-open-text: #1A1715;
-  --cafe-negative-bg: #E5E2DA;
+  --cafe-negative-bg: #D4E2EC;
   --cafe-negative-text: #7A7370;
 }
 
