@@ -135,3 +135,11 @@
 .animate-fade-up {
   animation: fade-up 0.6s ease-out both;
 }
+
+.font-handwritten {
+  font-family: 'Caveat', cursive;
+}
+
+.font-serif-editorial {
+  font-family: 'Playfair Display', serif;
+}

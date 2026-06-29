@@ -466,6 +466,28 @@ function Admin() {
     }
   };
 
+  const handleToggleFeatured = async (cafe: Cafe) => {
+    const willFeature = !cafe.is_featured;
+    if (willFeature) {
+      const featuredCount = cafes.filter((c) => c.is_featured && c.dbId !== cafe.dbId).length;
+      if (featuredCount >= 6) {
+        toast.error("All 6 featured slots are full. Unfeature a cafe first.");
+        return;
+      }
+    }
+    try {
+      const { error } = await supabase
+        .from("cafes")
+        .update({ is_featured: willFeature })
+        .eq("id", cafe.dbId);
+      if (error) throw error;
+      toast.success(willFeature ? `"${cafe.name}" is now featured.` : `"${cafe.name}" removed from featured.`);
+      void loadCafes();
+    } catch (err: any) {
+      toast.error("Failed to update featured status: " + err.message);
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.neighborhood || !form.address || !form.cityId) {
@@ -1225,9 +1247,14 @@ function Admin() {
           {/* Existing Cafes List (Right Side Sidebar) */}
           <div className="lg:col-span-1">
             <div className="bg-white border border-[#F5EBE9] rounded-[2rem] p-6 shadow-sm sticky top-[150px]">
-              <h3 className="text-lg font-outfit text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-4">
-                Directory Registry ({cafes.length})
-              </h3>
+              <div className="flex items-center justify-between border-b border-[#F5EBE9] pb-3 mb-4">
+                <h3 className="text-lg font-outfit text-[#2D2422]">
+                  Directory Registry ({cafes.length})
+                </h3>
+                <span className="text-[10px] font-semibold font-work-sans px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700">
+                  ★ {cafes.filter((c) => c.is_featured).length} / 6 featured
+                </span>
+              </div>
               
               {loadingCafes ? (
                 <div className="py-12 text-center text-[#A3938F] font-work-sans flex flex-col items-center gap-2">
@@ -1256,11 +1283,27 @@ function Admin() {
                           className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
                         />
                         <div className="truncate">
-                          <p className="text-xs font-semibold text-[#2D2422] truncate">{c.name}</p>
+                          <p className="text-xs font-semibold text-[#2D2422] truncate flex items-center gap-1">
+                            {c.name}
+                            {c.is_featured && <span className="text-amber-500 text-[10px]">★</span>}
+                          </p>
                           <p className="text-[10px] text-[#A3938F] font-medium">{c.neighborhood}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {/* Featured toggle */}
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleFeatured(c)}
+                          title={c.is_featured ? "Unfeature this cafe" : "Feature on homepage"}
+                          className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+                            c.is_featured
+                              ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                              : "text-[#A3938F] hover:text-amber-500 hover:bg-amber-50"
+                          }`}
+                        >
+                          <span className="text-sm leading-none">★</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => startEdit(c)}

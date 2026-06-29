@@ -1,18 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { Search, ArrowRight, Compass } from "lucide-react";
 import { Header, Footer } from "@/components/site-chrome";
-import { CafeCard } from "@/components/cafe-card";
-import { fetchCafes } from "@/lib/cafes";
-import { z } from "zod";
-
-const indexSearchSchema = z.object({
-  page: z.coerce.number().catch(1),
-});
+import { MagazineCard } from "@/components/magazine-card";
+import { fetchFeaturedCafes } from "@/lib/cafes";
 
 export const Route = createFileRoute("/")({
-  validateSearch: indexSearchSchema,
   loader: async () => {
-    const cafes = await fetchCafes();
+    const cafes = await fetchFeaturedCafes();
     return { cafes };
   },
   head: () => ({
@@ -47,10 +42,16 @@ const tickerItems = [
 
 function Index() {
   const { cafes } = Route.useLoaderData();
-  const { page } = Route.useSearch();
-  const currentPage = page || 1;
-  const paginatedCafes = cafes.slice((currentPage - 1) * 6, currentPage * 6);
-  const totalPages = Math.ceil(cafes.length / 6);
+  const [searchVal, setSearchVal] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void navigate({
+      to: "/directory",
+      search: { query: searchVal, page: 1 }
+    });
+  };
 
   return (
     <div
@@ -63,84 +64,19 @@ function Index() {
       <Header />
 
       {/* ────────────────────────────────────────────────────────────
-          SECTION 1 — FEATURED PRECISION CAFES (TOP)
-      ──────────────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-6 pt-14 pb-0">
-        {/* Section header */}
-        <div className="flex items-end justify-between flex-wrap gap-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#1A1715]/60">
-            Featured Precision Cafes // This Month
-          </p>
-          <Link
-            to="/directory"
-            data-testid="featured-see-all-link"
-            className="font-mono text-[10px] uppercase tracking-widest text-[#1A1715] hover:underline underline-offset-4"
-          >
-            See all →
-          </Link>
-        </div>
-
-        {/* Cafe card grid — 2-column layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {paginatedCafes.map((cafe, index) => (
-            <CafeCard
-              key={cafe.id}
-              cafe={cafe}
-              index={(currentPage - 1) * 6 + index}
-            />
-          ))}
-        </div>
-
-        {/* Brutalist Pagination controls */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-2 border-[#1A1715] p-4 bg-[#E5E2DA] font-mono text-xs uppercase tracking-widest mt-12">
-            {currentPage > 1 ? (
-              <Link
-                to="/"
-                search={{ page: currentPage - 1 }}
-                className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] px-4 py-2 hover:bg-transparent hover:text-[#1A1715] transition-colors font-bold"
-              >
-                PREV
-              </Link>
-            ) : (
-              <span className="opacity-40 border-2 border-transparent px-4 py-2">
-                PREV
-              </span>
-            )}
-
-            <span>
-              PAGE {currentPage} OF {totalPages}
-            </span>
-
-            {currentPage < totalPages ? (
-              <Link
-                to="/"
-                search={{ page: currentPage + 1 }}
-                className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] px-4 py-2 hover:bg-transparent hover:text-[#1A1715] transition-colors font-bold"
-              >
-                NEXT
-              </Link>
-            ) : (
-              <span className="opacity-40 border-2 border-transparent px-4 py-2">
-                NEXT
-              </span>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* ────────────────────────────────────────────────────────────
-          SECTION 2 — MAIN HERO (MIDDLE)
+          SECTION 2 — MAIN HERO (TOP)
       ──────────────────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-6 py-20 sm:py-28">
-        <h1 className="font-space-grotesk text-6xl sm:text-7xl lg:text-8xl font-light tracking-tighter text-[#1A1715] max-w-4xl leading-[0.95]">
-          Your city's best indie cafes, found.
-        </h1>
+        <div className="bg-[#F5F2EB]/85 backdrop-blur-sm border-2 border-[#1A1715] p-6 sm:p-8 max-w-4xl shadow-[4px_4px_0px_#1A1715]">
+          <h1 className="font-space-grotesk text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#1A1715] leading-[0.95]">
+            Your city's best indie cafes, found.
+          </h1>
+        </div>
 
         {/* Search row */}
         <form
-          className="mt-12 max-w-2xl flex flex-col sm:flex-row"
-          onSubmit={(e) => e.preventDefault()}
+          className="mt-12 max-w-2xl flex flex-col sm:flex-row gap-3 sm:gap-0"
+          onSubmit={handleSearchSubmit}
         >
           <div className="relative flex-1">
             <Search
@@ -152,24 +88,71 @@ function Index() {
               type="search"
               placeholder="Search by city, neighborhood, or name..."
               data-testid="hero-search-input"
-              className="w-full border-2 border-[#1A1715] border-r-0 rounded-none bg-white font-mono text-sm text-[#1A1715] placeholder:text-[#1A1715]/40 pl-10 pr-4 py-4 outline-none focus:ring-2 focus:ring-[#1A1715] focus:ring-inset"
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="w-full border-2 sm:border-r-0 border-[#1A1715] rounded-none bg-white font-mono text-sm text-[#1A1715] placeholder:text-[#1A1715]/40 pl-10 pr-4 py-4 outline-none focus:ring-2 focus:ring-[#1A1715] focus:ring-inset"
             />
           </div>
+          <button
+            type="submit"
+            data-testid="hero-browse-button"
+            className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] hover:bg-[#F5F2EB] hover:text-[#1A1715] font-mono text-[11px] uppercase tracking-widest px-8 py-4 transition-colors duration-150 whitespace-nowrap inline-flex items-center justify-center gap-2 cursor-pointer"
+          >
+            Search Directory <ArrowRight size={14} strokeWidth={1.5} />
+          </button>
+        </form>
+      </section>
+
+      {/* ────────────────────────────────────────────────────────────
+          SECTION 1 — FEATURED CAFES
+      ──────────────────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-6 pt-14 pb-0">
+        {/* Section header */}
+        <div className="flex items-end justify-between flex-wrap gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#1A1715]/60">
+            Featured Cafes // Handpicked
+          </p>
           <Link
             to="/directory"
-            data-testid="hero-browse-button"
-            className="border-2 border-[#1A1715] bg-[#1A1715] text-[#F5F2EB] hover:bg-transparent hover:text-[#1A1715] font-mono text-[11px] uppercase tracking-widest px-8 py-4 transition-colors duration-150 whitespace-nowrap inline-flex items-center justify-center gap-2"
+            data-testid="featured-see-all-link"
+            className="font-mono text-[10px] uppercase tracking-widest text-[#1A1715] hover:underline underline-offset-4"
           >
-            Browse directory <ArrowRight size={14} strokeWidth={1.5} />
+            See all →
           </Link>
-        </form>
+        </div>
+
+        {/* Empty state */}
+        {cafes.length === 0 ? (
+          <div className="mt-6 border-2 border-dashed border-[#1A1715]/20 py-20 text-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-[#1A1715]/40">
+              No featured cafes yet
+            </p>
+            <p className="mt-2 font-mono text-[9px] uppercase tracking-widest text-[#1A1715]/25">
+              Admins can feature cafes from the dashboard
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4 mt-8 flex flex-col">
+            {cafes.map((cafe, index) => {
+              const alignClass = index % 2 === 0 ? "self-start" : "self-end";
+              return (
+                <div key={cafe.id} className={`w-full lg:w-[65%] ${alignClass}`}>
+                  <MagazineCard
+                    cafe={cafe}
+                    index={index}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* ────────────────────────────────────────────────────────────
           SECTION 3 — BREW COMPASS CTA (BOTTOM)
       ──────────────────────────────────────────────────────────── */}
-      <section className="border-t-2 border-[#1A1715] max-w-7xl mx-auto px-6 py-16">
-        <div className="border-2 border-[#1A1715] bg-[#E5E2DA] p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <div className="border-2 border-[#1A1715] bg-cafe-surface p-8 md:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           {/* Left block */}
           <div>
             <Compass size={22} strokeWidth={1} className="text-[#1A1715] mb-5" />

@@ -54,6 +54,9 @@ export type Cafe = {
     saturday?: string;
     sunday?: string;
   };
+
+  // Featured
+  is_featured?: boolean;
 };
 
 export const neighborhoods = [
@@ -127,6 +130,9 @@ export function mapDbCafeToUiCafe(dbCafe: any): Cafe {
         sunday: dbCafe.opening_hours.sunday || undefined,
       }
       : undefined,
+
+    // Featured
+    is_featured: dbCafe.is_featured ?? false,
   };
 }
 
@@ -237,6 +243,20 @@ export async function fetchCafes(): Promise<Cafe[]> {
   }
 
   return cafes;
+}
+
+export async function fetchFeaturedCafes(): Promise<Cafe[]> {
+  const { data, error } = await supabase
+    .from("cafes")
+    .select("*, cities(name, countries(name))")
+    .eq("is_featured", true)
+    .order("created_at", { ascending: false })
+    .limit(6);
+  if (error) {
+    console.error("Error fetching featured cafes:", error);
+    throw error;
+  }
+  return (data || []).map(mapDbCafeToUiCafe);
 }
 
 export async function fetchCafesByCity(cityId: string): Promise<Cafe[]> {

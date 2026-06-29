@@ -87,6 +87,28 @@ function CafeDetail() {
   return (
     <div className="min-h-screen bg-cafe-bg">
       <Header />
+
+      {/* JSON-LD Structured Data for Cafe / Coffee Shop */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CafeOrCoffeeShop",
+            "name": cafe.name,
+            "description": cafe.blurb,
+            "image": cafe.image,
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": cafe.address || "",
+              "addressLocality": cafe.city_name || "",
+              "addressCountry": cafe.country_name || ""
+            },
+            "servesCuisine": "Specialty Coffee",
+            "openingHours": cafe.hours
+          })
+        }}
+      />
       
       {/* Lightbox Zoom Modal */}
       {activeImage && (

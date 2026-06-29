@@ -101,7 +101,7 @@ function Directory() {
       if (wifiOnly && !c.wifi) return false;
       if (
         query &&
-        !`${c.name} ${c.neighborhood} ${c.blurb}`.toLowerCase().includes(query.toLowerCase())
+        !`${c.name} ${c.neighborhood} ${c.blurb} ${c.city_name || ""} ${c.country_name || ""}`.toLowerCase().includes(query.toLowerCase())
       )
         return false;
       return true;
