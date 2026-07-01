@@ -14,6 +14,12 @@ This document details the technologies, frameworks, and libraries used to build 
 
 ---
 
+## 🗄️ Backend & Database
+
+- **Backend-as-a-Service (BaaS):** [Supabase](https://supabase.com/) — Database, Authentication, and client SDK (`@supabase/supabase-js`).
+
+---
+
 ## 🧭 Routing & State Management
 
 - **Routing:** [TanStack Router](https://tanstack.com/router) — Type-safe, client-side & server-side routing for React.
@@ -35,6 +41,9 @@ This document details the technologies, frameworks, and libraries used to build 
   - [Vaul](https://github.com/emilkowalski/vaul) — Drawer components.
   - [Embla Carousel React](https://www.embla-carousel.com/) — Lightweight carousel/slider.
   - `input-otp` — One-time password inputs.
+  - `cmdk` — Command menu dialog search primitive.
+  - `react-resizable-panels` — For resizable layout panels.
+  - `react-day-picker` & `date-fns` — Date picker calendar component and date helpers.
 
 ---
 
@@ -46,9 +55,10 @@ This document details the technologies, frameworks, and libraries used to build 
 
 ---
 
-## 📊 Data Visualization
+## 📊 Data Visualization & Mapping
 
 - **Charting:** [Recharts](https://recharts.org/) — Redefined chart library built with React components.
+- **Mapping:** [React Simple Maps](https://www.react-simple-maps.com/) — SVG-based map component.
 
 ---
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Send, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
@@ -18,7 +18,7 @@ function formatDate(d: Date) {
 function mapDbCommentToUiComment(c: any): Comment {
   return {
     id: c.id,
-    name: c.author_name,
+    name: c.is_guest ? (c.author_name || "Guest") : (c.author_name || "Member"),
     date: formatDate(new Date(c.created_at)),
     text: c.content,
     isGuest: c.is_guest,
@@ -32,6 +32,9 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
   const [polling, setPolling] = useState(false);
   const [text, setText] = useState("");
   const [guestName, setGuestName] = useState("");
+  const [guestNameError, setGuestNameError] = useState("");
+  // Honeypot — bots fill this in, humans leave it empty
+  const [honeypot, setHoneypot] = useState("");
 
   const fetchComments = async (isBackground = false) => {
     try {
@@ -43,7 +46,37 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setComments((data || []).map(mapDbCommentToUiComment));
+
+      // Separately fetch profiles to avoid auth-schema cross-join cache issues in PostgREST
+      const authorIds = (data || [])
+        .map((c: any) => c.author_id)
+        .filter((id): id is string => !!id);
+
+      const profilesMap: Record<string, string> = {};
+      if (authorIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", authorIds);
+
+        if (profiles) {
+          profiles.forEach((p: any) => {
+            profilesMap[p.id] = p.full_name;
+          });
+        }
+      }
+
+      const mapped = (data || []).map((c: any) => ({
+        id: c.id,
+        name: c.is_guest
+          ? (c.author_name || "Guest")
+          : (profilesMap[c.author_id] || c.author_name || "Member"),
+        date: formatDate(new Date(c.created_at)),
+        text: c.content,
+        isGuest: c.is_guest,
+      }));
+
+      setComments(mapped);
     } catch (err) {
       console.error("Error loading comments:", err);
     } finally {
@@ -69,33 +102,65 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
     e.preventDefault();
     const body = text.trim();
     if (!body) return;
-    const name = user?.name || guestName.trim() || "Guest";
+
+    // Honeypot check — if a bot filled in the hidden field, silently abort
+    if (honeypot) return;
+
+    // Guest name is required for unauthenticated users
+    if (!user) {
+      const trimmedName = guestName.trim();
+      if (!trimmedName) {
+        setGuestNameError("Please enter a display name to post as a guest.");
+        return;
+      }
+      setGuestNameError("");
+    }
 
     try {
-      let authorId = null;
+      let payload: Record<string, any>;
+
       if (user) {
-        const { data: userData } = await supabase.auth.getUser();
-        authorId = userData?.user?.id || null;
+        // Authenticated: submit with author_id and their name
+        payload = {
+          cafe_id: cafeId,
+          author_id: user.id,
+          author_name: user.name || "Member",
+          is_guest: false,
+          content: body,
+        };
+      } else {
+        // Guest: submit with null author_id and guest name
+        payload = {
+          cafe_id: cafeId,
+          author_id: null,
+          author_name: guestName.trim(),
+          is_guest: true,
+          content: body,
+        };
       }
 
       const { data, error } = await supabase
         .from("comments")
-        .insert({
-          cafe_id: cafeId,
-          author_id: authorId,
-          author_name: name,
-          content: body,
-          is_guest: !user,
-        })
+        .insert(payload)
         .select()
         .single();
 
       if (error) throw error;
       if (data) {
-        setComments((cs) => [mapDbCommentToUiComment(data), ...cs]);
+        const newComment: Comment = {
+          id: data.id,
+          name: data.is_guest
+            ? (data.author_name || "Guest")
+            : (user?.name || data.author_name || "Member"),
+          date: formatDate(new Date(data.created_at)),
+          text: data.content,
+          isGuest: data.is_guest,
+        };
+        setComments((cs) => [newComment, ...cs]);
       }
       setText("");
       setGuestName("");
+      setGuestNameError("");
     } catch (err) {
       console.error("Error submitting comment:", err);
       alert("Failed to submit comment.");
@@ -110,7 +175,7 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
             Community
           </p>
           <h2 className="mt-2 text-3xl sm:text-4xl tracking-tight font-medium text-cafe-heading font-outfit">
-            Notes & Reviews
+            Notes &amp; Reviews
           </h2>
         </div>
         <div className="flex items-center gap-2">
@@ -130,6 +195,18 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
         data-testid="comment-form"
         className="mt-8 bg-cafe-surface border border-cafe-border rounded-[2rem] p-6 sm:p-8"
       >
+        {/* Hidden honeypot field — invisible to humans, filled by bots */}
+        <input
+          type="text"
+          name="website_url"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ display: "none" }}
+        />
+
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-cafe-primary-light text-cafe-primary inline-flex items-center justify-center font-medium font-work-sans shrink-0">
             {user ? (
@@ -140,14 +217,25 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
           </div>
           <div className="flex-1 space-y-3">
             {!user && (
-              <input
-                type="text"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                placeholder="Display Name (Optional)"
-                data-testid="comment-guest-name-input"
-                className="w-full bg-cafe-surface border border-cafe-border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted px-4 py-2.5 outline-none font-work-sans text-sm"
-              />
+              <div>
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => {
+                    setGuestName(e.target.value);
+                    if (e.target.value.trim()) setGuestNameError("");
+                  }}
+                  placeholder="Display Name"
+                  required
+                  data-testid="comment-guest-name-input"
+                  className={`w-full bg-cafe-surface border rounded-xl focus:ring-2 focus:ring-cafe-primary/30 focus:border-cafe-primary placeholder:text-cafe-muted px-4 py-2.5 outline-none font-work-sans text-sm ${
+                    guestNameError ? "border-red-400" : "border-cafe-border"
+                  }`}
+                />
+                {guestNameError && (
+                  <p className="mt-1 text-xs text-red-500 font-work-sans">{guestNameError}</p>
+                )}
+              </div>
             )}
             <textarea
               value={text}
@@ -159,7 +247,7 @@ export function CommentsSection({ cafeId }: { cafeId: string }) {
             />
             {!user && (
               <p className="text-xs text-cafe-muted font-work-sans">
-                Posting as a guest. Log in to save your cafe history.
+                Posting as a guest. <a href="/login" className="text-cafe-primary hover:underline">Sign in</a> to link comments to your account.
               </p>
             )}
             <div className="flex justify-end">

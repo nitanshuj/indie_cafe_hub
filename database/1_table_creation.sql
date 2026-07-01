@@ -1,92 +1,134 @@
--- ========================================================
--- Consolidated Database Schema & Seeding Script (Indie Coffee Hub)
--- ========================================================
+-- Enable UUID extension for secure, unique identifiers
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Enable Required Extensions
-create extension if not exists "uuid-ossp";
+-- Create the approval status ENUM
+CREATE TYPE public.approval_status AS ENUM ('pending', 'approved', 'rejected');
 
--- 2. Drop existing triggers and tables to ensure clean installation (in correct dependency order)
-drop trigger if exists on_auth_user_created on auth.users;
-drop function if exists public.handle_new_user() cascade;
+-- ==========================================
+-- 1. PROFILES TABLE
+-- ==========================================
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  full_name text NULL,
+  avatar_url text NULL,
+  is_admin boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  updated_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
 
-drop table if exists public.comments cascade;
-drop table if exists public.cafes cascade;
-drop table if exists public.cities cascade;
-drop table if exists public.countries cascade;
-drop table if exists public.profiles cascade;
+-- ==========================================
+-- 2. COUNTRIES TABLE
+-- ==========================================
+CREATE TABLE public.countries (
+  id uuid NOT NULL DEFAULT gen_random_uuid (),
+  name text NOT NULL,
+  code text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  CONSTRAINT countries_pkey PRIMARY KEY (id),
+  CONSTRAINT countries_code_key UNIQUE (code),
+  CONSTRAINT countries_name_key UNIQUE (name)
+) TABLESPACE pg_default;
 
--- ========================================================
--- Tables Creation
--- ========================================================
+-- ==========================================
+-- 3. CITIES TABLE
+-- ==========================================
+CREATE TABLE public.cities (
+  id uuid NOT NULL DEFAULT gen_random_uuid (),
+  name text NOT NULL,
+  slug text NOT NULL,
+  country_id uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  CONSTRAINT cities_pkey PRIMARY KEY (id),
+  CONSTRAINT cities_country_id_name_key UNIQUE (country_id, name),
+  CONSTRAINT cities_slug_key UNIQUE (slug),
+  CONSTRAINT cities_country_id_fkey FOREIGN KEY (country_id) REFERENCES public.countries (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
 
--- 1. Profiles Table (Extends Supabase Auth users)
-create table public.profiles (
-    id uuid references auth.users on delete cascade primary key,
-    full_name text,
-    avatar_url text,
-    is_admin boolean default false not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+-- ==========================================
+-- 4. CAFES TABLE
+-- ==========================================
+CREATE TABLE public.cafes (
+  id uuid NOT NULL DEFAULT gen_random_uuid (),
+  name text NOT NULL,
+  slug text NOT NULL,
+  description text NULL,
+  neighborhood text NOT NULL,
+  address text NOT NULL,
+  google_maps_url text NULL,
+  has_wifi boolean NOT NULL DEFAULT false,
+  has_plug_points boolean NOT NULL DEFAULT false,
+  has_ac boolean NOT NULL DEFAULT false,
+  is_pet_friendly boolean NOT NULL DEFAULT false,
+  hero_image_url text NULL,
+  gallery_image_urls text[] NULL DEFAULT '{}'::text[],
+  opening_hours jsonb NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  updated_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  city_id uuid NULL,
+  specialty_focus text NULL,
+  noise_level text NULL,
+  created_by uuid NULL,
+  is_featured boolean NOT NULL DEFAULT false,
+  status public.approval_status NOT NULL DEFAULT 'pending',
+  CONSTRAINT cafes_pkey PRIMARY KEY (id),
+  CONSTRAINT cafes_slug_key UNIQUE (slug),
+  CONSTRAINT cafes_city_id_fkey FOREIGN KEY (city_id) REFERENCES public.cities (id) ON DELETE SET NULL,
+  CONSTRAINT cafes_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users (id) ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT cafes_noise_level_check CHECK (
+    (
+      noise_level = ANY (
+        ARRAY['quiet'::text, 'moderate'::text, 'bustling'::text]
+      )
+    )
+  )
+) TABLESPACE pg_default;
 
--- 2. Countries Table
-create table public.countries (
-    id uuid default gen_random_uuid() primary key,
-    name text not null unique,
-    code text not null unique, -- ISO code, e.g., 'IN', 'US'
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+-- ==========================================
+-- 5. COMMENTS TABLE
+-- ==========================================
+CREATE TABLE public.comments (
+  id uuid NOT NULL DEFAULT gen_random_uuid (),
+  cafe_id uuid NOT NULL,
+  author_id uuid NULL,
+  author_name text NOT NULL,
+  content text NOT NULL,
+  is_guest boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT timezone ('utc'::text, now()),
+  CONSTRAINT comments_pkey PRIMARY KEY (id),
+  CONSTRAINT comments_author_id_fkey FOREIGN KEY (author_id) REFERENCES auth.users (id) ON DELETE SET NULL,
+  CONSTRAINT comments_cafe_id_fkey FOREIGN KEY (cafe_id) REFERENCES public.cafes (id) ON DELETE CASCADE,
+  CONSTRAINT chk_comment_author CHECK (
+    (
+      (is_guest = false AND author_id IS NOT NULL) OR 
+      (is_guest = true AND author_id IS NULL)
+    )
+  )
+) TABLESPACE pg_default;
 
--- 3. Cities Table
-create table public.cities (
-    id uuid default gen_random_uuid() primary key,
-    name text not null,
-    slug text not null unique,
-    country_id uuid references public.countries(id) on delete cascade not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    unique (country_id, name)
-);
+-- ==========================================
+-- INDEX OPTIMIZATION
+-- ==========================================
+CREATE INDEX IF NOT EXISTS cafes_neighborhood_idx ON public.cafes USING btree (neighborhood) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS cafes_has_wifi_idx ON public.cafes USING btree (has_wifi) TABLESPACE pg_default WHERE (has_wifi = true);
+CREATE INDEX IF NOT EXISTS cafes_status_idx ON public.cafes USING btree (status) TABLESPACE pg_default;
 
--- 4. Cafes Table (with nomad amenities and city relationship)
-create table public.cafes (
-    id uuid default gen_random_uuid() primary key,
-    name text not null,
-    slug text not null unique,
-    description text,
-    neighborhood text not null,
-    address text not null,
-    google_maps_url text,
-    
-    -- Amenities
-    has_wifi boolean default false not null,
-    has_plug_points boolean default false not null,
-    has_ac boolean default false not null,
-    is_pet_friendly boolean default false not null,
-    
-    -- Media (Cloudinary URLs)
-    hero_image_url text not null,
-    gallery_image_urls text[] default '{}'::text[],
-    
-    -- Operational & Nomad details
-    opening_hours jsonb,
-    specialty_focus text,
-    noise_level text check (noise_level in ('quiet', 'moderate', 'bustling')),
-    
-    -- Relations
-    city_id uuid references public.cities(id) on delete set null,
-    
-    -- Metadata
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+-- ==========================================
+-- SEED DATA
+-- ==========================================
+INSERT INTO public.countries (name, code)
+VALUES 
+    ('India', 'IN'),
+    ('USA', 'US')
+ON CONFLICT (name) DO UPDATE SET code = EXCLUDED.code;
 
--- 5. Comments Table
-create table public.comments (
-    id uuid default gen_random_uuid() primary key,
-    cafe_id uuid references public.cafes(id) on delete cascade not null,
-    author_id uuid references auth.users(id) on delete set null,
-    author_name text not null,
-    content text not null,
-    is_guest boolean default true not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+INSERT INTO public.cities (name, slug, country_id)
+VALUES
+    ('Bengaluru', 'bengaluru', (SELECT id FROM public.countries WHERE code = 'IN')),
+    ('Haldwani', 'haldwani', (SELECT id FROM public.countries WHERE code = 'IN')),
+    ('Seattle, WA', 'seattle', (SELECT id FROM public.countries WHERE code = 'US')),
+    ('San Jose, CA', 'san-jose', (SELECT id FROM public.countries WHERE code = 'US')),
+    ('San Francisco, CA', 'san-francisco', (SELECT id FROM public.countries WHERE code = 'US')),
+    ('Bloomington, IN', 'bloomington', (SELECT id FROM public.countries WHERE code = 'US'))
+ON CONFLICT (slug) DO NOTHING;

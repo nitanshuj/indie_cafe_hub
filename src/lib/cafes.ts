@@ -33,6 +33,10 @@ export type Cafe = {
   has_ac?: boolean;
   is_pet_friendly?: boolean;
 
+  // Approval pipeline
+  status?: "pending" | "approved" | "rejected";
+  created_by?: string;
+
   // Creator attribution
   created_by_name?: string;
 
@@ -133,6 +137,10 @@ export function mapDbCafeToUiCafe(dbCafe: any): Cafe {
 
     // Featured
     is_featured: dbCafe.is_featured ?? false,
+
+    // Approval pipeline
+    status: dbCafe.status,
+    created_by: dbCafe.created_by,
   };
 }
 
@@ -229,6 +237,7 @@ export async function fetchCafes(): Promise<Cafe[]> {
   const { data, error } = await supabase
     .from("cafes")
     .select("*, cities(name, countries(name))")
+    .eq("status", "approved")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("Error fetching cafes:", error);
@@ -249,6 +258,7 @@ export async function fetchFeaturedCafes(): Promise<Cafe[]> {
   const { data, error } = await supabase
     .from("cafes")
     .select("*, cities(name, countries(name))")
+    .eq("status", "approved")
     .eq("is_featured", true)
     .order("created_at", { ascending: false })
     .limit(6);
@@ -264,6 +274,7 @@ export async function fetchCafesByCity(cityId: string): Promise<Cafe[]> {
     .from("cafes")
     .select("*")
     .eq("city_id", cityId)
+    .eq("status", "approved")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("Error fetching cafes by city:", error);

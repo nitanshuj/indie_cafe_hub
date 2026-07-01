@@ -2,8 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Coffee, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { z } from "zod";
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: z.object({
+    returnTo: z.string().optional().catch(""),
+  }),
   head: () => ({
     meta: [
       { title: "Join Free — Indie Coffee Hub" },
@@ -14,6 +18,7 @@ export const Route = createFileRoute("/signup")({
 });
 function SignUp() {
   const { signUp } = useAuth();
+  const { returnTo } = Route.useSearch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,6 +86,7 @@ function SignUp() {
               </p>
               <Link
                 to="/login"
+                search={returnTo ? { returnTo } : {}}
                 className="mt-8 w-full bg-cafe-primary text-white hover:bg-cafe-primary-hover px-6 py-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 font-medium inline-flex items-center justify-center gap-2"
               >
                 Go to Login

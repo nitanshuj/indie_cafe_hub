@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { supabase } from "./supabase";
 
 export type AuthUser = {
+  id: string;
   email: string;
   name: string;
   isAdmin: boolean;
@@ -39,8 +40,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleSession = async (session: any) => {
     if (session?.user) {
-      const profile = await fetchProfile(session.user.id);
+      let profile = await fetchProfile(session.user.id);
+      if (!profile) {
+        // Create the profile row if it does not exist (e.g. bypass trigger / manual users)
+        const nameVal = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Friend";
+        const { error: insErr } = await supabase.from("profiles").insert({
+          id: session.user.id,
+          full_name: nameVal,
+          is_admin: false,
+        });
+        if (!insErr) {
+          profile = { full_name: nameVal, is_admin: false };
+        }
+      }
       setUser({
+        id: session.user.id,
         email: session.user.email || "",
         name:
           profile?.full_name ||
@@ -77,8 +91,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn: async (email, password) => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      const profile = await fetchProfile(data.user.id);
+      let profile = await fetchProfile(data.user.id);
+      if (!profile) {
+        const nameVal = data.user.user_metadata?.full_name || data.user.email?.split("@")[0] || "Friend";
+        const { error: insErr } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          full_name: nameVal,
+          is_admin: false,
+        });
+        if (!insErr) {
+          profile = { full_name: nameVal, is_admin: false };
+        }
+      }
       const u = {
+        id: data.user.id,
         email: data.user.email || "",
         name:
           profile?.full_name ||
@@ -102,8 +128,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
       if (!data.user) throw new Error("No user returned from signup");
 
-      const profile = await fetchProfile(data.user.id);
+      let profile = await fetchProfile(data.user.id);
+      if (!profile) {
+        const nameVal = data.user.user_metadata?.full_name || data.user.email?.split("@")[0] || "Friend";
+        const { error: insErr } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          full_name: nameVal,
+          is_admin: false,
+        });
+        if (!insErr) {
+          profile = { full_name: nameVal, is_admin: false };
+        }
+      }
       const u = {
+        id: data.user.id,
         email: data.user.email || "",
         name:
           profile?.full_name ||

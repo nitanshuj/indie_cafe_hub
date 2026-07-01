@@ -55,8 +55,12 @@ indie_cafe_hub/
     ├── components/
     │   ├── ui/                           # Radix-based primitives (button, dialog, carousel, etc.)
     │   ├── accessibility-context.tsx     # Color-blindness theme context provider
-    │   ├── cafe-card.tsx                 # Reusable cafe card (uniform image, city/country display)
+    │   ├── cafe-card.tsx                 # Reusable cafe card (alternating horizontal layout, tag badges)
     │   ├── comments-section.tsx          # Comment thread with background polling
+    │   ├── diptych-card.tsx              # Editorial layout card with full-bleed image and metadata lists
+    │   ├── index-card.tsx                # Classic index-style cafe card variant
+    │   ├── label-card.tsx                # Tag/label layout cafe card variant
+    │   ├── magazine-card.tsx             # Magazine style layout used on the homepage
     │   └── site-chrome.tsx              # Global Header, Footer, and Profile Modal
     ├── hooks/
     │   └── use-mobile.tsx               # Responsive breakpoint listener
@@ -113,9 +117,8 @@ graph TD
 ## 5. Pages and Routes
 
 ### Homepage (`/`) — `src/routes/index.tsx`
-- Loader calls `fetchCafes()` and slices the first 5 results as `featured`.
-- **Featured grid:** `grid-cols-1 md:grid-cols-2 gap-6 auto-rows-stretch`. Each `CafeCard` is `flex flex-col h-full`, ensuring all cards in a row share identical height with DETAILS bars aligned at the same baseline.
-- **Odd-count guard:** If `featured.length % 2 !== 0`, a "/// DISCOVER MORE SPACES ///" CTA block fills the empty grid slot, linking to `/directory`.
+- Loader calls `fetchFeaturedCafes()` to retrieve handpicked featured cafes.
+- **Featured layout:** Renders cards using `MagazineCard` in a vertical list layout with alternating self-start and self-end alignments (width `w-full lg:w-[65%]`).
 - Sections: Featured Cafes → Hero Search → Brew Compass CTA → Monospace ticker marquee.
 
 ### Directory (`/directory`) — `src/routes/directory.tsx`
@@ -131,15 +134,18 @@ graph TD
 - Role-gated: renders locked state card for non-admins (`data-testid="admin-locked-state"`).
 - **Cafe CRUD:** Create, edit, delete cafes with image upload pipeline (Cloudinary → Supabase).
 - **`created_by` capture:** On **create**, `supabase.auth.getUser()` is called at insert time and the admin's UUID is written to `cafes.created_by`. Not overwritten on update.
+- **Pending Approvals Pipeline (latest changes):** A dedicated moderation queue section displays all cafes with `status === 'pending'`. Admins can review details and click "Approve" to update the cafe's status in the database to `'approved'`.
 - **Country & City Registries:** Separate forms for managing geographical data.
 - **Pipeline Tracker:** Visualizes write stages — Serialize → Media CDN → Supabase Write → Webhook.
 
 ### Sign Up (`/signup`) — `src/routes/signup.tsx`
 - On successful `supabase.auth.signUp()`, displays **"Sign Up Successful!"** with "Your account has been created. You can now sign in."
 - No email verification copy shown. A **"Go to Login"** button links to `/login`.
+- **Redirection (latest changes):** Supports the `returnTo` search query parameter to persist the user flow after signup and login.
 
 ### Sign In (`/login`) — `src/routes/login.tsx`
 - Authenticates via `supabase.auth.signInWithPassword()`. Admins redirect to `/admin`; standard users to `/`.
+- **Redirection (latest changes):** Supports the `returnTo` search query parameter to redirect the user back to their original page (e.g., redirecting to `/admin` after attempting to "Submit a Cafe" as a guest).
 
 ### Brew Compass (`/brew-compass`) — `src/routes/brew-compass/`
 Sub-modules: `menu-decoder`, `chilled-bar`, `black-coffee`, `global-specialties`, `connoisseur`, `bean-roast-spectrum`, `coffee-atlas`, `milk-types`.
@@ -152,12 +158,12 @@ The primary display unit across the homepage, directory, and city pages.
 
 | Feature | Implementation |
 | :--- | :--- |
-| **Image** | Fixed `h-48 object-cover object-center` on `<img>` — identical crop on every card |
-| **Card wrapper** | `flex flex-col h-full` — pairs with `auto-rows-stretch` grid so row heights are uniform |
-| **Body** | `flex flex-col flex-1 justify-between p-4` — pushes DETAILS bar to the absolute bottom |
-| **Description** | `line-clamp-3` — truncates with `…` to cap text height variance |
+| **Image** | Fixed `h-64 md:h-full w-full md:w-1/2 object-cover object-center` — alternating left/right side based on even/odd index |
+| **Card wrapper** | `flex flex-col md:flex-row w-full h-auto md:h-80 border-2 border-[#1A1715] rounded-none overflow-hidden` — dynamic layout direction |
+| **Body** | `flex flex-col justify-between p-6 flex-grow` — with dynamic background gradients based on the index |
+| **Description / Blurb** | `line-clamp-3` — truncates with `…` to cap text height variance |
 | **Location row** | `MapPin` (neighborhood) + `Clock` (hours) + `Globe` (city, country) — Globe row only renders if `city_name` or `country_name` is present |
-| **Props** | `cafe: Cafe`, `className?: string`, `to?: string` — `imageHeightClass` prop removed |
+| **Props** | `cafe: Cafe`, `className?: string`, `to?: string`, `index: number` — `index` is required to alternate layout and gradients |
 
 ---
 
@@ -183,14 +189,17 @@ type Cafe = {
   noise_level?: "quiet" | "moderate" | "bustling";
   opening_hours?: { monday?: string; ... sunday?: string };
   google_maps_url?: string;
+  status?: "pending" | "approved" | "rejected"; // (latest changes) Approval state
+  created_by?: string;                          // (latest changes) Author user UUID
 };
 ```
 
 ### Key Functions
 | Function | Supabase Query | Notes |
 | :--- | :--- | :--- |
-| `fetchCafes()` | `select("*, cities(name, countries(name))")` | Joins city + country names; serves ISR localStorage cache if strategy = `isr` |
-| `fetchCafesByCity(cityId)` | `select("*").eq("city_id", cityId)` | City detail pages |
+| `fetchCafes()` | `select("*, cities(name, countries(name))")` | Joins city + country names; serves ISR localStorage cache. (latest changes) Filtered to status = 'approved'. |
+| `fetchCafesByCity(cityId)` | `select("*").eq("city_id", cityId)` | City detail pages. (latest changes) Filtered to status = 'approved'. |
+| `fetchFeaturedCafes()` | `select("*, cities(name, countries(name))")` | (latest changes) Returns up to 6 featured cafes filtered to status = 'approved'. |
 | `fetchCafeByIdOrSlug(id)` | `select("*")` + separate profiles query | Resolves `created_by_name`; always bypasses ISR cache |
 | `fetchCities()` | `select("*, countries(*)")` | Falls back to hardcoded list on DB error |
 | `fetchCountries()` | `select("*")` | Ordered by name |
@@ -225,17 +234,20 @@ type Cafe = {
 Unique compound: `(country_id, name)`
 
 ### `cafes`
-`id` (uuid, PK) | `name` | `slug` (unique) | `description` | `neighborhood` | `address` | `google_maps_url` | `has_wifi` | `has_plug_points` | `has_ac` | `is_pet_friendly` | `hero_image_url` | `gallery_image_urls` (text[]) | `opening_hours` (jsonb) | `specialty_focus` | `noise_level` (check: quiet/moderate/bustling) | `city_id` (FK → cities, set null) | **`created_by`** (FK → auth.users, set null) | `created_at` / `updated_at`
+`id` (uuid, PK) | `name` | `slug` (unique) | `description` | `neighborhood` | `address` | `google_maps_url` | `has_wifi` | `has_plug_points` | `has_ac` | `is_pet_friendly` | `hero_image_url` | `gallery_image_urls` (text[]) | `opening_hours` (jsonb) | `specialty_focus` | `noise_level` (check: quiet/moderate/bustling) | `city_id` (FK → cities, set null) | `created_by` (FK → auth.users, set null) | `status` (approval_status: pending/approved/rejected, default pending) (latest changes) | `is_featured` (boolean, default false) (latest changes) | `created_at` / `updated_at`
 
 > `created_by` is written on **insert only** using the admin's live UUID from `supabase.auth.getUser()`. It is not modified on subsequent updates.
 
-### `comments`
-`id` (uuid, PK) | `cafe_id` (FK → cafes, cascade delete) | `author_id` (FK → auth.users, set null) | `author_name` | `content` | `is_guest` (bool) | `created_at`
+### `comments` (latest changes)
+`id` (uuid, PK) | `cafe_id` (FK → cafes, cascade delete) | `user_id` (FK → auth.users, set null) | `guest_name` (varchar 100, nullable) | `content` | `created_at`
+
+> **Note (latest changes):** Comments support guest commenting. The table contains a constraint ensuring exactly one of `user_id` or `guest_name` is non-null.
 
 ### Indexes
 - `cafes_neighborhood_idx` on `cafes(neighborhood)`
 - `cafes_city_id_idx` on `cafes(city_id)`
 - `cafes_has_wifi_idx` on `cafes(has_wifi)` where `has_wifi = true` (partial)
+- `idx_cafes_status` on `cafes(status)` (latest changes)
 - `cities_slug_idx` on `cities(slug)`
 - `comments_cafe_id_idx` on `comments(cafe_id)`
 
@@ -248,8 +260,9 @@ All tables have RLS enabled. `public.is_admin()` is a security-definer function 
 | Table | Read | Write |
 | :--- | :--- | :--- |
 | `profiles` | Public | Own record only (`auth.uid() = id`) |
-| `countries` / `cities` / `cafes` | Public | Admins only via `is_admin()` |
-| `comments` | Public | Any user (guest comments supported) |
+| `countries` / `cities` | Public | Admins only via `is_admin()` |
+| `cafes` | (latest changes) Public reads approved only; admins read all | Admins write all; authenticated users insert pending only (latest changes) |
+| `comments` | Public | Anyone can insert (including guests) (latest changes) |
 
 **Profile trigger:** `on_auth_user_created` fires `AFTER INSERT ON auth.users` → auto-populates `public.profiles`. `is_admin` defaults to `false`.
 
@@ -259,6 +272,7 @@ All tables have RLS enabled. `public.is_admin()` is a security-definer function 
 
 - **RLS:** Prevents unauthorized DB writes at the database layer.
 - **Admin route guarding:** `admin.tsx` checks `user.isAdmin` before rendering any form or CRUD control.
+- **Guest comment protection (latest changes):** Forms implement a hidden honeypot field (`website_url`) to silently filter bot spam.
 - **Signed Cloudinary uploads:** Signature generated server-side via Nitro `createServerFn` using `CLOUDINARY_API_SECRET`; client only receives the signed payload — secret never reaches the browser.
 - **Secret management:** Sensitive keys loaded from `.env`; Vite `VITE_` prefix exposes only safe client vars.
 

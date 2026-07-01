@@ -134,7 +134,7 @@ function CafeDetailGlobal() {
             },
             "servesCuisine": "Specialty Coffee",
             "openingHours": cafe.hours
-          })
+          }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e")
         }}
       />
 

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { supabase } from "./supabase";
 
 export type DeliveryStrategy = "dynamic" | "isr";
 
@@ -13,8 +14,18 @@ const getServerDeliveryStrategy = createServerFn({ method: "GET" })
   });
 
 const setServerDeliveryStrategy = createServerFn({ method: "POST" })
-  .validator((strategy: unknown) => strategy as DeliveryStrategy)
-  .handler(async ({ data: strategy }) => {
+  .validator((data: { strategy: DeliveryStrategy; token: string }) => data)
+  .handler(async ({ data: { strategy, token } }) => {
+    if (!token) throw new Error("Unauthorized");
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) throw new Error("Unauthorized");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!profile?.is_admin) throw new Error("Forbidden");
+
     serverStrategy = strategy;
     return serverStrategy;
   });
@@ -25,14 +36,35 @@ const getServerIsrCache = createServerFn({ method: "GET" })
   });
 
 const setServerIsrCache = createServerFn({ method: "POST" })
-  .validator((cafes: unknown) => cafes as any[])
-  .handler(async ({ data: cafes }) => {
+  .validator((data: { cafes: any[]; token: string }) => data)
+  .handler(async ({ data: { cafes, token } }) => {
+    if (!token) throw new Error("Unauthorized");
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) throw new Error("Unauthorized");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!profile?.is_admin) throw new Error("Forbidden");
+
     serverIsrCache = cafes;
     return serverIsrCache;
   });
 
 const clearServerIsrCache = createServerFn({ method: "POST" })
-  .handler(async () => {
+  .validator((token: string) => token)
+  .handler(async ({ data: token }) => {
+    if (!token) throw new Error("Unauthorized");
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) throw new Error("Unauthorized");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!profile?.is_admin) throw new Error("Forbidden");
+
     serverIsrCache = null;
     return null;
   });
@@ -45,7 +77,13 @@ export async function getDeliveryStrategy(): Promise<DeliveryStrategy> {
 
 export async function setDeliveryStrategy(strategy: DeliveryStrategy) {
   if (typeof window === "undefined") return;
-  await setServerDeliveryStrategy(strategy);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? "";
+    await setServerDeliveryStrategy({ data: { strategy, token } });
+  } catch (err) {
+    console.error("Could not set delivery strategy:", err);
+  }
   // Dispatch custom event to notify components
   window.dispatchEvent(new Event("delivery-strategy-change"));
 }
@@ -57,12 +95,24 @@ export async function getIsrCache(): Promise<any[] | null> {
 
 export async function setIsrCache(cafes: any[]) {
   if (typeof window === "undefined") return;
-  await setServerIsrCache(cafes);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? "";
+    await setServerIsrCache({ data: { cafes, token } });
+  } catch (err) {
+    console.warn("Could not update server ISR cache:", err);
+  }
   window.dispatchEvent(new Event("isr-cache-updated"));
 }
 
 export async function clearIsrCache() {
   if (typeof window === "undefined") return;
-  await clearServerIsrCache();
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token ?? "";
+    await clearServerIsrCache({ data: token });
+  } catch (err) {
+    console.error("Could not clear server ISR cache:", err);
+  }
   window.dispatchEvent(new Event("isr-cache-updated"));
 }

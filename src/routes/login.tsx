@@ -2,8 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Coffee, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { z } from "zod";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: z.object({
+    returnTo: z.string().optional().catch(""),
+  }),
   head: () => ({
     meta: [
       { title: "Sign In — Indie Coffee Hub" },
@@ -53,6 +57,7 @@ function AuthSplit({ side, children }: { side: "left" | "right"; children: React
 function Login() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const { returnTo } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -65,7 +70,9 @@ function Login() {
     setError(null);
     try {
       const loggedInUser = await signIn(email, password);
-      if (loggedInUser.isAdmin) {
+      if (returnTo) {
+        navigate({ to: returnTo as any });
+      } else if (loggedInUser.isAdmin) {
         navigate({ to: "/admin" });
       } else {
         navigate({ to: "/" });

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Coffee, MapPin, User, LayoutDashboard, LogOut, Zap, Globe, RefreshCw, Layers, Compass, Eye, EyeOff, Sparkles, Menu, X, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/lib/supabase";
 import { getDeliveryStrategy, setDeliveryStrategy, DeliveryStrategy } from "@/lib/cache";
 import { useAccessibility } from "./accessibility-context";
 
@@ -78,6 +79,16 @@ function AuthArea({ onOpenProfile }: { onOpenProfile: () => void }) {
           >
             <User size={14} strokeWidth={1.5} /> Profile
           </button>
+           <Link
+            to="/my-submissions"
+            onClick={() => setOpen(false)}
+            data-testid="header-my-submissions-link"
+            className="block px-4 py-2 text-sm text-cafe-body hover:bg-cafe-bg font-work-sans"
+          >
+            <span className="inline-flex items-center gap-2">
+              <Coffee size={14} strokeWidth={1.5} /> Submitted Cafes
+            </span>
+          </Link>
           {user.isAdmin && (
             <Link
               to="/admin"
@@ -123,6 +134,30 @@ export function Header() {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [newProfileName, setNewProfileName] = useState(user?.name || "");
   const [savingProfile, setSavingProfile] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your account? This action is permanent. Your submitted cafes and comments will remain, but will be unattributed."
+    );
+    if (!confirmed) return;
+
+    setDeletingAccount(true);
+    try {
+      const { error } = await supabase.rpc("delete_current_user");
+      if (error) throw error;
+
+      toast.success("Account successfully deleted.");
+      setProfileModalOpen(false);
+      await signOut();
+      void navigate({ to: "/" });
+    } catch (err: any) {
+      console.error("Account deletion failed:", err);
+      toast.error(err.message || "Failed to delete account");
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
 
   useEffect(() => {
     if (user?.name) {
@@ -384,6 +419,13 @@ export function Header() {
         </div>
       </div>
       <div className="space-y-2">
+        <Link
+          to="/my-submissions"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="flex items-center gap-2 text-xs text-cafe-body hover:text-cafe-heading py-1 font-medium font-work-sans"
+        >
+          <Coffee size={13} strokeWidth={1.5} /> Submitted Cafes
+        </Link>
         {user.isAdmin && (
           <Link
             to="/admin"
@@ -435,7 +477,7 @@ export function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 bg-transparent border-b border-[#1A1715] backdrop-blur-sm"
+      className="sticky top-0 z-50 bg-cafe-bg border-b border-[#1A1715]"
       data-testid="site-header"
     >
       {/* Geolocation first-visit prompt bar */}
@@ -662,6 +704,22 @@ export function Header() {
             New to Coffee?
           </Link>
           <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
+          {/* Submit a Cafe — auth-aware CTA */}
+          <button
+            type="button"
+            data-testid="nav-submit-cafe-btn"
+            onClick={() => {
+              if (user) {
+                navigate({ to: "/submit" });
+              } else {
+                navigate({ to: "/login", search: { returnTo: "/submit" } });
+              }
+            }}
+            className="hidden sm:inline-flex items-center gap-1.5 bg-cafe-primary text-white hover:bg-cafe-primary-hover px-4 py-2 rounded-xl text-sm font-work-sans font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+          >
+            + Submit a Cafe
+          </button>
+          <span className="hidden sm:inline-block w-px h-5 bg-cafe-border" />
           <AuthArea onOpenProfile={() => setProfileModalOpen(true)} />
         </nav>
 
@@ -708,6 +766,22 @@ export function Header() {
             >
               New to Coffee?
             </Link>
+            {/* Submit a Cafe — auth-aware CTA (mobile) */}
+            <button
+              type="button"
+              data-testid="nav-mobile-submit-cafe-btn"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                if (user) {
+                  navigate({ to: "/submit" });
+                } else {
+                  navigate({ to: "/login", search: { returnTo: "/submit" } });
+                }
+              }}
+              className="w-full text-left py-1 text-sm font-semibold font-work-sans text-cafe-primary hover:text-cafe-primary-hover transition-colors cursor-pointer"
+            >
+              + Submit a Cafe
+            </button>
           </div>
 
           <div className="border-t border-cafe-border/70 my-3" />
@@ -891,21 +965,31 @@ export function Header() {
                   className="w-full bg-cafe-bg border border-cafe-border rounded-xl px-3 py-2 text-sm text-cafe-heading outline-none focus:border-cafe-primary transition-colors"
                 />
               </div>
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-between pt-2 border-t border-cafe-border mt-4">
                 <button
                   type="button"
-                  onClick={() => setProfileModalOpen(false)}
-                  className="px-4 py-2 border border-cafe-border rounded-xl text-sm font-medium text-cafe-body hover:bg-cafe-bg transition-colors cursor-pointer bg-transparent"
+                  disabled={deletingAccount}
+                  onClick={handleDeleteAccount}
+                  className="text-xs text-rose-600 hover:text-rose-700 font-semibold font-work-sans cursor-pointer hover:underline disabled:opacity-50"
                 >
-                  Cancel
+                  {deletingAccount ? "Deleting account..." : "Delete Account"}
                 </button>
-                <button
-                  type="submit"
-                  disabled={savingProfile}
-                  className="px-4 py-2 bg-cafe-primary text-white hover:bg-cafe-primary-hover disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer border-0 flex items-center gap-1.5"
-                >
-                  {savingProfile ? "Saving..." : "Save Changes"}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setProfileModalOpen(false)}
+                    className="px-4 py-2 border border-cafe-border rounded-xl text-sm font-medium text-cafe-body hover:bg-cafe-bg transition-colors cursor-pointer bg-transparent"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingProfile}
+                    className="px-4 py-2 bg-cafe-primary text-white hover:bg-cafe-primary-hover disabled:opacity-50 rounded-xl text-sm font-medium transition-colors cursor-pointer border-0 flex items-center gap-1.5"
+                  >
+                    {savingProfile ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

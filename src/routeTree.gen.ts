@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as MySubmissionsRouteImport } from './routes/my-submissions'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DirectoryRouteImport } from './routes/directory'
@@ -32,6 +34,11 @@ import { Route as BrewCompassBeanRoastSpectrumRouteImport } from './routes/brew-
 import { Route as CountryCityRouteImport } from './routes/$country.$city'
 import { Route as CountryCityCafeSlugRouteImport } from './routes/$country.$city.$cafeSlug'
 
+const SubmitRoute = SubmitRouteImport.update({
+  id: '/submit',
+  path: '/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -40,6 +47,11 @@ const SignupRoute = SignupRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MySubmissionsRoute = MySubmissionsRouteImport.update({
+  id: '/my-submissions',
+  path: '/my-submissions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -154,8 +166,10 @@ export interface FileRoutesByFullPath {
   '/directory': typeof DirectoryRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/my-submissions': typeof MySubmissionsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/submit': typeof SubmitRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
   '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
   '/brew-compass/black-coffee': typeof BrewCompassBlackCoffeeRoute
@@ -177,8 +191,10 @@ export interface FileRoutesByTo {
   '/directory': typeof DirectoryRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/my-submissions': typeof MySubmissionsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/submit': typeof SubmitRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
   '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
   '/brew-compass/black-coffee': typeof BrewCompassBlackCoffeeRoute
@@ -202,8 +218,10 @@ export interface FileRoutesById {
   '/directory': typeof DirectoryRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/my-submissions': typeof MySubmissionsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/submit': typeof SubmitRoute
   '/$country/$city': typeof CountryCityRouteWithChildren
   '/brew-compass/bean-roast-spectrum': typeof BrewCompassBeanRoastSpectrumRoute
   '/brew-compass/black-coffee': typeof BrewCompassBlackCoffeeRoute
@@ -228,8 +246,10 @@ export interface FileRouteTypes {
     | '/directory'
     | '/forgot-password'
     | '/login'
+    | '/my-submissions'
     | '/reset-password'
     | '/signup'
+    | '/submit'
     | '/$country/$city'
     | '/brew-compass/bean-roast-spectrum'
     | '/brew-compass/black-coffee'
@@ -251,8 +271,10 @@ export interface FileRouteTypes {
     | '/directory'
     | '/forgot-password'
     | '/login'
+    | '/my-submissions'
     | '/reset-password'
     | '/signup'
+    | '/submit'
     | '/$country/$city'
     | '/brew-compass/bean-roast-spectrum'
     | '/brew-compass/black-coffee'
@@ -275,8 +297,10 @@ export interface FileRouteTypes {
     | '/directory'
     | '/forgot-password'
     | '/login'
+    | '/my-submissions'
     | '/reset-password'
     | '/signup'
+    | '/submit'
     | '/$country/$city'
     | '/brew-compass/bean-roast-spectrum'
     | '/brew-compass/black-coffee'
@@ -300,14 +324,23 @@ export interface RootRouteChildren {
   DirectoryRoute: typeof DirectoryRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  MySubmissionsRoute: typeof MySubmissionsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SubmitRoute: typeof SubmitRoute
   CountryCityRoute: typeof CountryCityRouteWithChildren
   CafesCafeIdRoute: typeof CafesCafeIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/submit': {
+      id: '/submit'
+      path: '/submit'
+      fullPath: '/submit'
+      preLoaderRoute: typeof SubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -320,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-submissions': {
+      id: '/my-submissions'
+      path: '/my-submissions'
+      fullPath: '/my-submissions'
+      preLoaderRoute: typeof MySubmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -514,8 +554,10 @@ const rootRouteChildren: RootRouteChildren = {
   DirectoryRoute: DirectoryRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  MySubmissionsRoute: MySubmissionsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SubmitRoute: SubmitRoute,
   CountryCityRoute: CountryCityRouteWithChildren,
   CafesCafeIdRoute: CafesCafeIdRoute,
 }

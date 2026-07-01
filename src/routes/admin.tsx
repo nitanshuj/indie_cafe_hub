@@ -22,7 +22,7 @@ import { Header, Footer } from "@/components/site-chrome";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { Cafe, fetchCafes, neighborhoods, City, fetchCities, Country, fetchCountries } from "@/lib/cafes";
+import { Cafe, fetchCafes, mapDbCafeToUiCafe, neighborhoods, City, fetchCities, Country, fetchCountries } from "@/lib/cafes";
 import { getDeliveryStrategy, getIsrCache, setIsrCache, clearIsrCache } from "@/lib/cache";
 
 
@@ -46,8 +46,13 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-const getCloudinarySignature = createServerFn({ method: "GET" })
-  .handler(async () => {
+const getCloudinarySignature = createServerFn({ method: "POST" })
+  .validator((token: string) => token)
+  .handler(async ({ data: token }) => {
+    if (!token) throw new Error("Unauthorized");
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) throw new Error("Unauthorized");
+
     const apiSecret = process.env.CLOUDINARY_API_SECRET || import.meta.env.CLOUDINARY_API_SECRET;
     const apiKey = process.env.CLOUDINARY_API_KEY || import.meta.env.CLOUDINARY_API_KEY;
     const cloudName = process.env.VITE_CLOUDINARY_CLOUD_NAME || import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -73,7 +78,11 @@ const getCloudinarySignature = createServerFn({ method: "GET" })
   });
 
 async function handleImageUpload(file: File) {
-  const { signature, timestamp, apiKey, cloudName, uploadPreset } = await getCloudinarySignature();
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  if (!token) throw new Error("Unauthenticated");
+
+  const { signature, timestamp, apiKey, cloudName, uploadPreset } = await getCloudinarySignature({ data: token });
 
   const formData = new FormData();
   formData.append("file", file);
@@ -142,6 +151,10 @@ function Admin() {
   const [cafes, setCafes] = useState<Cafe[]>([]);
   const [loadingCafes, setLoadingCafes] = useState(true);
 
+  // Pending Approvals State
+  const [pendingCafes, setPendingCafes] = useState<Cafe[]>([]);
+  const [loadingPending, setLoadingPending] = useState(true);
+
   // Cities List State
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(true);
@@ -181,6 +194,7 @@ function Admin() {
   const [pipelineStage, setPipelineStage] = useState<number>(0);
 
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [previewCafe, setPreviewCafe] = useState<Cafe | null>(null);
 
   // Strategy simulation state
   const [activeStrategy, setActiveStrategy] = useState("dynamic");
@@ -271,11 +285,46 @@ function Admin() {
     }
   };
 
+  const loadPendingCafes = async () => {
+    try {
+      setLoadingPending(true);
+      const { data, error } = await supabase
+        .from("cafes")
+        .select("*, cities(name, countries(name))")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setPendingCafes((data || []).map(mapDbCafeToUiCafe));
+    } catch (err: any) {
+      toast.error("Failed to load pending submissions");
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  const handleApprove = async (cafe: Cafe) => {
+    try {
+      const { error } = await supabase
+        .from("cafes")
+        .update({ status: "approved" })
+        .eq("id", cafe.dbId);
+      if (error) throw error;
+      // Remove from pending list immediately (optimistic update)
+      setPendingCafes((prev) => prev.filter((c) => c.dbId !== cafe.dbId));
+      // Refresh the main approved list
+      void loadCafes();
+      toast.success(`"${cafe.name}" approved and is now live!`);
+    } catch (err: any) {
+      toast.error("Failed to approve cafe: " + err.message);
+    }
+  };
+
   useEffect(() => {
     if (user && user.isAdmin) {
       void loadCafes();
       void loadCities();
       void loadCountries();
+      void loadPendingCafes();
     }
   }, [user]);
 
@@ -490,8 +539,8 @@ function Admin() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.neighborhood || !form.address || !form.cityId) {
-      toast.error("Please fill in Name, Neighborhood, Address, and Select City.");
+    if (!form.name || !form.address || !form.cityId) {
+      toast.error("Please fill in Name, Address, and Select City.");
       return;
     }
 
@@ -530,13 +579,13 @@ function Admin() {
         noise_level: form.noiseLevel || null,
         google_maps_url: form.googleMapsUrl || null,
         opening_hours: {
-          monday: form.hoursMonday || null,
-          tuesday: form.hoursTuesday || null,
-          wednesday: form.hoursWednesday || null,
-          thursday: form.hoursThursday || null,
-          friday: form.hoursFriday || null,
-          saturday: form.hoursSaturday || null,
-          sunday: form.hoursSunday || null,
+          monday: form.hoursMonday || "8am - 6pm",
+          tuesday: form.hoursTuesday || "8am - 6pm",
+          wednesday: form.hoursWednesday || "8am - 6pm",
+          thursday: form.hoursThursday || "8am - 6pm",
+          friday: form.hoursFriday || "8am - 6pm",
+          saturday: form.hoursSaturday || "8am - 6pm",
+          sunday: form.hoursSunday || "8am - 6pm",
         },
       };
 
@@ -552,6 +601,7 @@ function Admin() {
           .from("cafes")
           .insert({
             ...cafeData,
+            status: "pending",
             created_at: new Date().toISOString(),
             created_by: authUser?.id ?? null,
           });
@@ -640,11 +690,39 @@ function Admin() {
     }
     setBusyCity(true);
     try {
+      // 1. Check if a city with the same name and country already exists
+      const { data: duplicateCity } = await supabase
+        .from("cities")
+        .select("*")
+        .eq("country_id", cityForm.countryId)
+        .eq("name", cityForm.name.trim())
+        .maybeSingle();
+
+      if (duplicateCity) {
+        toast.error(`City "${cityForm.name.trim()}" already exists in the selected country.`);
+        setBusyCity(false);
+        return;
+      }
+
+      // 2. Check if slug matches
+      const generatedSlug = slugify(cityForm.slug);
+      const { data: slugCheck } = await supabase
+        .from("cities")
+        .select("id")
+        .eq("slug", generatedSlug)
+        .maybeSingle();
+
+      if (slugCheck) {
+        toast.error(`Slug "${generatedSlug}" is already taken by another city.`);
+        setBusyCity(false);
+        return;
+      }
+
       const { error: insertError } = await supabase
         .from("cities")
         .insert({
           name: cityForm.name,
-          slug: slugify(cityForm.slug),
+          slug: generatedSlug,
           country_id: cityForm.countryId,
         });
       if (insertError) throw insertError;
@@ -665,6 +743,156 @@ function Admin() {
   return (
     <div className="min-h-screen bg-[#FFF7F5]">
       <Header />
+
+      {/* Preview Submissions Modal */}
+      {previewCafe && (
+        <div className="fixed inset-0 z-[990] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white border border-[#F5EBE9] rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden my-8 animate-scale-in relative">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setPreviewCafe(null)}
+              className="absolute right-4 top-4 z-10 bg-black/50 hover:bg-black/75 text-white p-2 rounded-full transition-all cursor-pointer border-0"
+              type="button"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Cover image */}
+            <div className="h-52 w-full relative bg-gray-100">
+              <img
+                src={previewCafe.image || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb"}
+                alt={previewCafe.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end p-6">
+                <div>
+                  <span className="text-[10px] bg-[#E67E6B] text-white px-2 py-0.5 rounded-full font-work-sans font-bold uppercase tracking-wider">
+                    Pending Approval
+                  </span>
+                  <h3 className="text-2xl font-outfit text-white font-medium mt-1.5">{previewCafe.name}</h3>
+                  <p className="text-white/80 text-xs font-work-sans mt-0.5">{previewCafe.neighborhood}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto font-work-sans text-sm text-[#6B5C58]">
+              
+              {/* Address & Description */}
+              <div>
+                <h4 className="text-xs uppercase tracking-wider font-bold text-[#2D2422] mb-1.5 font-outfit">About</h4>
+                <p className="italic mb-3 leading-relaxed text-[#2D2422]">"{previewCafe.blurb}"</p>
+                <div className="flex gap-2 items-start text-xs">
+                  <span className="font-semibold text-[#2D2422] shrink-0">📍 Address:</span>
+                  <span>{previewCafe.address}</span>
+                </div>
+              </div>
+
+              {/* Specialty & Noise */}
+              <div className="grid grid-cols-2 gap-4 border-t border-[#F5EBE9] pt-4">
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider font-bold text-[#2D2422] mb-1 font-outfit">Specialty Focus</h4>
+                  <p className="text-xs text-[#2D2422] font-semibold">{previewCafe.specialty_focus || "Not specified"}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider font-bold text-[#2D2422] mb-1 font-outfit">Noise Level</h4>
+                  <p className="text-xs text-[#2D2422] font-semibold capitalize">{previewCafe.noise_level || "Moderate"}</p>
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className="border-t border-[#F5EBE9] pt-4">
+                <h4 className="text-xs uppercase tracking-wider font-bold text-[#2D2422] mb-3 font-outfit">Nomad Amenities</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs text-[#2D2422]">
+                  <div className="flex items-center gap-2">
+                    <span className={previewCafe.wifi ? "text-emerald-600" : "text-gray-300"}>●</span>
+                    <span>Free Wi-Fi: <strong>{previewCafe.wifi ? "Yes" : "No"}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={previewCafe.has_plug_points ? "text-emerald-600" : "text-gray-300"}>●</span>
+                    <span>Power Plugs: <strong>{previewCafe.has_plug_points ? "Yes" : "No"}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={previewCafe.has_ac ? "text-emerald-600" : "text-gray-300"}>●</span>
+                    <span>Air Conditioning: <strong>{previewCafe.has_ac ? "Yes" : "No"}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={previewCafe.is_pet_friendly ? "text-emerald-600" : "text-gray-300"}>●</span>
+                    <span>Pet Friendly: <strong>{previewCafe.is_pet_friendly ? "Yes" : "No"}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timing details */}
+              {previewCafe.opening_hours && (
+                <div className="border-t border-[#F5EBE9] pt-4">
+                  <h4 className="text-xs uppercase tracking-wider font-bold text-[#2D2422] mb-3 font-outfit">Opening Hours</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    {Object.entries(previewCafe.opening_hours).map(([day, hrs]) => (
+                      <div key={day} className="bg-[#FFF7F5] border border-[#F5EBE9] p-2 rounded-xl">
+                        <span className="block font-semibold capitalize text-[#2D2422]">{day}</span>
+                        <span className="text-[11px] text-[#6B5C58]">{hrs || "Closed"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery Grid */}
+              {previewCafe.gallery && previewCafe.gallery.length > 0 && (
+                <div className="border-t border-[#F5EBE9] pt-4">
+                  <h4 className="text-xs uppercase tracking-wider font-bold text-[#2D2422] mb-3 font-outfit">Gallery Photos</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {previewCafe.gallery.map((url, i) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt="Gallery"
+                        className="w-full h-24 object-cover rounded-xl border border-[#F5EBE9]"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="border-t border-[#F5EBE9] bg-[#FFF7F5] p-5 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setPreviewCafe(null)}
+                className="px-5 py-2.5 rounded-xl border border-[#F5EBE9] text-[#6B5C58] hover:text-[#2D2422] text-sm font-medium font-work-sans cursor-pointer bg-white"
+              >
+                Close Preview
+              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    startEdit(previewCafe);
+                    setPreviewCafe(null);
+                  }}
+                  className="px-5 py-2.5 rounded-xl border border-[#F5EBE9] text-[#6B5C58] hover:text-[#2D2422] text-sm font-medium font-work-sans cursor-pointer bg-white flex items-center gap-1"
+                >
+                  <Edit3 size={13} /> Edit Submission
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleApprove(previewCafe);
+                    setPreviewCafe(null);
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium font-work-sans cursor-pointer flex items-center gap-1"
+                >
+                  <Check size={13} /> Approve
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* Lightbox Zoom Modal */}
       {activeImage && (
@@ -699,7 +927,9 @@ function Admin() {
             </h1>
           </div>
           <div className="text-sm text-[#6B5C58] font-work-sans flex flex-col items-end gap-1">
-            <span className="text-sm font-semibold text-[#E67E6B] font-outfit" data-testid="welcome-admin-text">Welcome Admin</span>
+            <span className="text-sm font-semibold text-[#E67E6B] font-outfit" data-testid="welcome-admin-text">
+              Welcome Admin
+            </span>
             <div className="flex items-center gap-3 text-xs">
               <span>Signed in as: <span className="text-[#2D2422] font-medium">{user.email}</span></span>
               <span className={`text-[10px] px-2 py-0.5 rounded-full border ${
@@ -709,6 +939,91 @@ function Admin() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* ── Pending Approvals Section ────────────────────────── */}
+        <div className="mt-10 bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm">
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">Moderation Queue</p>
+              <h2 className="mt-1 text-2xl font-outfit tracking-tight text-[#2D2422]">
+                Pending Approvals
+                {pendingCafes.length > 0 && (
+                  <span className="ml-2.5 inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#E67E6B] text-white text-xs font-bold font-work-sans">
+                    {pendingCafes.length}
+                  </span>
+                )}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadPendingCafes()}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 border border-[#F5EBE9] text-[#6B5C58] hover:text-[#2D2422] rounded-xl text-xs font-medium cursor-pointer transition-colors"
+            >
+              <RefreshCw size={12} strokeWidth={1.5} /> Refresh
+            </button>
+          </div>
+
+          {loadingPending ? (
+            <p className="text-sm text-[#A3938F] font-work-sans text-center py-8">Loading pending submissions…</p>
+          ) : pendingCafes.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="inline-flex w-12 h-12 rounded-full bg-emerald-50 items-center justify-center text-emerald-600 mb-3">
+                <CheckCircle2 strokeWidth={1.5} size={22} />
+              </div>
+              <p className="text-sm font-medium text-[#2D2422] font-outfit">All clear — no pending submissions</p>
+              <p className="mt-1 text-xs text-[#A3938F] font-work-sans">New community submissions will appear here for review.</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-[#F5EBE9]" data-testid="pending-approvals-list">
+              {pendingCafes.map((cafe) => (
+                <li key={cafe.dbId} className="flex items-center justify-between gap-4 py-4 flex-wrap">
+                  <div className="flex items-center gap-4 min-w-0">
+                    {cafe.image && (
+                      <img
+                        src={cafe.image}
+                        alt={cafe.name}
+                        className="w-14 h-14 rounded-xl object-cover shrink-0 border border-[#F5EBE9]"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#2D2422] font-outfit truncate">{cafe.name}</p>
+                      <p className="text-xs text-[#6B5C58] font-work-sans mt-0.5">
+                        {cafe.neighborhood}{cafe.city_name ? ` · ${cafe.city_name}` : ""}
+                      </p>
+                      <span className="mt-1 inline-block text-[10px] px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-work-sans font-semibold uppercase tracking-wider">
+                        Pending Review
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => void handleApprove(cafe)}
+                      data-testid={`approve-btn-${cafe.dbId}`}
+                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-work-sans font-medium transition-colors cursor-pointer"
+                    >
+                      <Check size={14} strokeWidth={2} /> Approve
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewCafe(cafe)}
+                      className="flex items-center gap-1.5 border border-[#F5EBE9] text-[#6B5C58] hover:text-[#2D2422] px-4 py-2 rounded-xl text-sm font-work-sans font-medium transition-colors cursor-pointer"
+                    >
+                      <ZoomIn size={14} strokeWidth={1.5} /> Preview
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(cafe)}
+                      className="flex items-center gap-1.5 border border-[#F5EBE9] text-[#6B5C58] hover:text-[#2D2422] px-4 py-2 rounded-xl text-sm font-work-sans font-medium transition-colors cursor-pointer"
+                    >
+                      <Edit3 size={14} strokeWidth={1.5} /> Edit
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Dashboard Stat Cards */}
@@ -1244,216 +1559,221 @@ function Admin() {
             </form>
           </div>
 
-          {/* Existing Cafes List (Right Side Sidebar) */}
-          <div className="lg:col-span-1">
-            <div className="bg-white border border-[#F5EBE9] rounded-[2rem] p-6 shadow-sm sticky top-[150px]">
-              <div className="flex items-center justify-between border-b border-[#F5EBE9] pb-3 mb-4">
-                <h3 className="text-lg font-outfit text-[#2D2422]">
-                  Directory Registry ({cafes.length})
-                </h3>
-                <span className="text-[10px] font-semibold font-work-sans px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700">
-                  ★ {cafes.filter((c) => c.is_featured).length} / 6 featured
-                </span>
-              </div>
-              
-              {loadingCafes ? (
-                <div className="py-12 text-center text-[#A3938F] font-work-sans flex flex-col items-center gap-2">
-                  <RefreshCw className="animate-spin text-[#E67E6B]" size={20} />
-                  <span className="text-xs">Fetching registry...</span>
+          {/* Existing Cafes List (Right Side Sidebar) (Admin only) */}
+          {user.isAdmin && (
+            <div className="lg:col-span-1">
+              <div className="bg-white border border-[#F5EBE9] rounded-[2rem] p-6 shadow-sm sticky top-[150px]">
+                <div className="flex items-center justify-between border-b border-[#F5EBE9] pb-3 mb-4">
+                  <h3 className="text-lg font-outfit text-[#2D2422]">
+                    Directory Registry ({cafes.length})
+                  </h3>
+                  <span className="text-[10px] font-semibold font-work-sans px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700">
+                    ★ {cafes.filter((c) => c.is_featured).length} / 6 featured
+                  </span>
                 </div>
-              ) : cafes.length === 0 ? (
-                <div className="py-12 text-center text-[#A3938F] font-work-sans text-xs">
-                  No cafes in directory.
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                  {cafes.map((c) => (
-                    <div
-                      key={c.dbId}
-                      className={`flex items-center justify-between p-3 border rounded-2xl transition-all ${
-                        editingCafe?.dbId === c.dbId
-                          ? "border-[#E67E6B] bg-[#FFF7F5]"
-                          : "border-[#F5EBE9] hover:bg-[#FFF7F5]/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 truncate">
-                        <img
-                          src={c.image}
-                          alt={c.name}
-                          className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
-                        />
-                        <div className="truncate">
-                          <p className="text-xs font-semibold text-[#2D2422] truncate flex items-center gap-1">
-                            {c.name}
-                            {c.is_featured && <span className="text-amber-500 text-[10px]">★</span>}
-                          </p>
-                          <p className="text-[10px] text-[#A3938F] font-medium">{c.neighborhood}</p>
+                
+                {loadingCafes ? (
+                  <div className="py-12 text-center text-[#A3938F] font-work-sans flex flex-col items-center gap-2">
+                    <RefreshCw className="animate-spin text-[#E67E6B]" size={20} />
+                    <span className="text-xs">Fetching registry...</span>
+                  </div>
+                ) : cafes.length === 0 ? (
+                  <div className="py-12 text-center text-[#A3938F] font-work-sans text-xs">
+                    No cafes in directory.
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                    {cafes.map((c) => (
+                      <div
+                        key={c.dbId}
+                        className={`flex items-center justify-between p-3 border rounded-2xl transition-all ${
+                          editingCafe?.dbId === c.dbId
+                            ? "border-[#E67E6B] bg-[#FFF7F5]"
+                            : "border-[#F5EBE9] hover:bg-[#FFF7F5]/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 truncate">
+                          <img
+                            src={c.image}
+                            alt={c.name}
+                            className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+                          />
+                          <div className="truncate">
+                            <p className="text-xs font-semibold text-[#2D2422] truncate flex items-center gap-1">
+                              {c.name}
+                              {c.is_featured && <span className="text-amber-500 text-[10px]">★</span>}
+                            </p>
+                            <p className="text-[10px] text-[#A3938F] font-medium">{c.neighborhood}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {/* Featured toggle */}
+                          <button
+                            type="button"
+                            onClick={() => void handleToggleFeatured(c)}
+                            title={c.is_featured ? "Unfeature this cafe" : "Feature on homepage"}
+                            className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+                              c.is_featured
+                                ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                                : "text-[#A3938F] hover:text-amber-500 hover:bg-amber-50"
+                            }`}
+                          >
+                            <span className="text-sm leading-none">★</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => startEdit(c)}
+                            title="Edit details"
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
+                          >
+                            <Edit3 size={13} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(c)}
+                            title="Delete cafe"
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        {/* Featured toggle */}
-                        <button
-                          type="button"
-                          onClick={() => void handleToggleFeatured(c)}
-                          title={c.is_featured ? "Unfeature this cafe" : "Feature on homepage"}
-                          className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
-                            c.is_featured
-                              ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
-                              : "text-[#A3938F] hover:text-amber-500 hover:bg-amber-50"
-                          }`}
-                        >
-                          <span className="text-sm leading-none">★</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => startEdit(c)}
-                          title="Edit details"
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
-                        >
-                          <Edit3 size={13} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleDelete(c)}
-                          title="Delete cafe"
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* Geographic Directory Management Section (Admin only) */}
+        {user.isAdmin && (
+          <div className="mt-16 border-t border-[#F5EBE9] pt-12">
+            <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">
+              Global Hierarchy
+            </p>
+            <h2 className="mt-2 text-3xl tracking-tight font-light text-[#2D2422] font-outfit">
+              Geographic Directory Management
+            </h2>
+            <p className="mt-1 text-sm text-[#6B5C58] font-work-sans mb-8">
+              Add countries and cities to support listings in new regions.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Add Country Card */}
+              <form
+                onSubmit={submitCountry}
+                className="bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  <h3 className="text-xl font-outfit font-semibold text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-6">
+                    Add New Country
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                        Country Name
+                      </label>
+                      <input
+                        type="text"
+                        value={countryForm.name}
+                        onChange={(e) => setCountryForm((s) => ({ ...s, name: e.target.value }))}
+                        placeholder="e.g., United States"
+                        className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
+                      />
                     </div>
-                  ))}
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                        ISO Code (2-letter)
+                      </label>
+                      <input
+                        type="text"
+                        value={countryForm.code}
+                        maxLength={2}
+                        onChange={(e) => setCountryForm((s) => ({ ...s, code: e.target.value }))}
+                        placeholder="e.g., US"
+                        className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans uppercase"
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
+                <button
+                  type="submit"
+                  disabled={busyCountry}
+                  className="w-full mt-6 bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 py-3 rounded-xl font-work-sans font-medium transition-all"
+                >
+                  {busyCountry ? "Adding Country..." : "Add Country"}
+                </button>
+              </form>
+
+              {/* Add City Card */}
+              <form
+                onSubmit={submitCity}
+                className="bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  <h3 className="text-xl font-outfit font-semibold text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-6">
+                    Add New City
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                        Select Country
+                      </label>
+                      <select
+                        value={cityForm.countryId}
+                        onChange={(e) => setCityForm((s) => ({ ...s, countryId: e.target.value }))}
+                        className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
+                      >
+                        {loadingCountries ? (
+                          <option>Loading countries...</option>
+                        ) : (
+                          countries.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name} ({c.code.toUpperCase()})
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                        City Name
+                      </label>
+                      <input
+                        type="text"
+                        value={cityForm.name}
+                        onChange={(e) => setCityForm((s) => ({ ...s, name: e.target.value }))}
+                        placeholder="e.g., Seattle"
+                        className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
+                        URL Slug
+                      </label>
+                      <input
+                        type="text"
+                        value={cityForm.slug}
+                        onChange={(e) => setCityForm((s) => ({ ...s, slug: e.target.value }))}
+                        placeholder="e.g., seattle"
+                        className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={busyCity}
+                  className="w-full mt-6 bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 py-3 rounded-xl font-work-sans font-medium transition-all"
+                >
+                  {busyCity ? "Adding City..." : "Add City"}
+                </button>
+              </form>
             </div>
           </div>
-
-        </div>
-
-        {/* Geographic Directory Management Section */}
-        <div className="mt-16 border-t border-[#F5EBE9] pt-12">
-          <p className="text-xs uppercase tracking-[0.2em] font-semibold text-[#E67E6B] font-work-sans">
-            Global Hierarchy
-          </p>
-          <h2 className="mt-2 text-3xl tracking-tight font-light text-[#2D2422] font-outfit">
-            Geographic Directory Management
-          </h2>
-          <p className="mt-1 text-sm text-[#6B5C58] font-work-sans mb-8">
-            Add countries and cities to support listings in new regions.
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Add Country Card */}
-            <form
-              onSubmit={submitCountry}
-              className="bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm flex flex-col justify-between"
-            >
-              <div>
-                <h3 className="text-xl font-outfit font-semibold text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-6">
-                  🏳️ Add Country
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
-                      Country Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Canada, Germany"
-                      value={countryForm.name}
-                      onChange={(e) => setCountryForm((s) => ({ ...s, name: e.target.value }))}
-                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
-                      Country Code
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. ca, de"
-                      value={countryForm.code}
-                      onChange={(e) => setCountryForm((s) => ({ ...s, code: e.target.value }))}
-                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
-                    />
-                  </div>
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={busyCountry}
-                className="mt-8 bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 px-6 py-2.5 rounded-xl font-work-sans font-medium transition-all shadow-sm align-self-start"
-              >
-                {busyCountry ? "Creating..." : "Add Country"}
-              </button>
-            </form>
-
-            {/* Add City Card */}
-            <form
-              onSubmit={submitCity}
-              className="bg-white border border-[#F5EBE9] rounded-[2rem] p-8 shadow-sm flex flex-col justify-between"
-            >
-              <div>
-                <h3 className="text-xl font-outfit font-semibold text-[#2D2422] border-b border-[#F5EBE9] pb-3 mb-6">
-                  🏙️ Add City
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
-                      Select Country
-                    </label>
-                    <select
-                      value={cityForm.countryId}
-                      onChange={(e) => setCityForm((s) => ({ ...s, countryId: e.target.value }))}
-                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
-                    >
-                      {loadingCountries ? (
-                        <option>Loading countries...</option>
-                      ) : (
-                        countries.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name} ({c.code.toUpperCase()})
-                          </option>
-                        ))
-                      )}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
-                      City Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Toronto, Berlin"
-                      value={cityForm.name}
-                      onChange={(e) => setCityForm((s) => ({ ...s, name: e.target.value }))}
-                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs uppercase tracking-[0.15em] font-semibold text-[#6B5C58] font-work-sans mb-2">
-                      City Slug
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. toronto, berlin"
-                      value={cityForm.slug}
-                      onChange={(e) => setCityForm((s) => ({ ...s, slug: e.target.value }))}
-                      className="w-full bg-white border border-[#F5EBE9] rounded-xl focus:ring-2 focus:ring-[#E67E6B]/30 focus:border-[#E67E6B] placeholder:text-[#A3938F] px-4 py-2.5 outline-none font-work-sans text-[#2D2422]"
-                    />
-                  </div>
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={busyCity}
-                className="mt-8 bg-[#E67E6B] text-white hover:bg-[#D96C5A] disabled:opacity-60 px-6 py-2.5 rounded-xl font-work-sans font-medium transition-all shadow-sm align-self-start"
-              >
-                {busyCity ? "Creating..." : "Add City"}
-              </button>
-            </form>
-          </div>
-        </div>
+        )}
 
       </div>
       <Footer />

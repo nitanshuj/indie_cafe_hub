@@ -1,56 +1,90 @@
--- ========================================================
--- Row Level Security (RLS) & Policies
--- ========================================================
-
 -- Enable RLS on all tables
-alter table public.profiles enable row level security;
-alter table public.countries enable row level security;
-alter table public.cities enable row level security;
-alter table public.cafes enable row level security;
-alter table public.comments enable row level security;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.countries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cafes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
--- Admin helper check function to reduce redundancy in policies
-create or replace function public.is_admin()
-returns boolean as $$
-begin
-  return exists (
-    select 1 from public.profiles
-    where id = auth.uid() and is_admin = true
+-- ==========================================
+-- PROFILES POLICIES
+-- ==========================================
+CREATE POLICY "Allow public read access to profiles"
+  ON public.profiles FOR SELECT USING (true);
+
+CREATE POLICY "Allow users to update their own profile"
+  ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- ==========================================
+-- COUNTRIES & CITIES POLICIES
+-- ==========================================
+CREATE POLICY "Allow public read access to countries" 
+  ON public.countries FOR SELECT USING (true);
+
+CREATE POLICY "Allow admin changes to countries" 
+  ON public.countries FOR ALL USING (
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()) = true
   );
-end;
-$$ language plpgsql security definer;
 
--- 1. Profiles Policies
-create policy "Allow public read access to profiles"
-  on public.profiles for select using (true);
+CREATE POLICY "Allow public read access to cities" 
+  ON public.cities FOR SELECT USING (true);
 
-create policy "Allow users to update their own profile"
-  on public.profiles for update using (auth.uid() = id);
+CREATE POLICY "Allow admin changes to cities" 
+  ON public.cities FOR ALL USING (
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()) = true
+  );
 
--- 2. Countries Policies
-create policy "Allow public read access to countries" 
-  on public.countries for select using (true);
+CREATE POLICY "Members can insert cities" 
+  ON public.cities FOR INSERT WITH CHECK (
+    auth.uid() IS NOT NULL
+  );
 
-create policy "Allow admin write access to countries" 
-  on public.countries for all using (public.is_admin());
+-- ==========================================
+-- CAFES POLICIES
+-- ==========================================
+CREATE POLICY "Public can view approved cafes" 
+  ON public.cafes FOR SELECT USING (status = 'approved');
 
--- 3. Cities Policies
-create policy "Allow public read access to cities" 
-  on public.cities for select using (true);
+CREATE POLICY "Admins can view all cafes" 
+  ON public.cafes FOR SELECT USING (
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()) = true
+  );
 
-create policy "Allow admin write access to cities" 
-  on public.cities for all using (public.is_admin());
+CREATE POLICY "Users can view their own submissions"
+  ON public.cafes FOR SELECT USING (auth.uid() = created_by);
 
--- 4. Cafes Policies
-create policy "Allow public read access to cafes" 
-  on public.cafes for select using (true);
+CREATE POLICY "Members can submit pending cafes" 
+  ON public.cafes FOR INSERT WITH CHECK (
+    auth.uid() IS NOT NULL AND status = 'pending' AND created_by = auth.uid()
+  );
 
-create policy "Allow admin write access to cafes" 
-  on public.cafes for all using (public.is_admin());
+CREATE POLICY "Only admins can update cafes" 
+  ON public.cafes FOR UPDATE USING (
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()) = true
+  );
 
--- 5. Comments Policies
-create policy "Allow public read access to comments"
-  on public.comments for select using (true);
+CREATE POLICY "Users can update their own submissions"
+  ON public.cafes FOR UPDATE USING (auth.uid() = created_by)
+  WITH CHECK (status = 'pending' AND created_by = auth.uid());
 
-create policy "Allow anyone to insert comments"
-  on public.comments for insert with check (true);
+CREATE POLICY "Allow admin delete access to cafes" 
+  ON public.cafes FOR DELETE USING (
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()) = true
+  );
+
+-- ==========================================
+-- COMMENTS POLICIES
+-- ==========================================
+CREATE POLICY "Public can view comments" 
+  ON public.comments FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can insert comments" 
+  ON public.comments FOR INSERT WITH CHECK (
+    (is_guest = true AND author_id IS NULL) OR 
+    (is_guest = false AND author_id = auth.uid())
+  );
+
+CREATE POLICY "Authors and admins can delete comments" 
+  ON public.comments FOR DELETE USING (
+    auth.uid() = author_id OR 
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()) = true
+  );
