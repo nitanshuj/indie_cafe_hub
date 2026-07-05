@@ -353,6 +353,9 @@ function Admin() {
   }
 
   const onHeroFile = async (file: File) => {
+    if (!window.confirm("Is this an image clicked and owned by you?")) {
+      return;
+    }
     try {
       setBusy(true);
       const origSize = (file.size / (1024 * 1024)).toFixed(2) + " MB";
@@ -376,7 +379,10 @@ function Admin() {
     }
   };
 
-  const onGalleryFile = async (file: File) => {
+  const onGalleryFile = async (file: File, skipConfirm = false) => {
+    if (!skipConfirm && !window.confirm("Is this an image clicked and owned by you?")) {
+      return;
+    }
     try {
       setBusy(true);
       const origSize = (file.size / (1024 * 1024)).toFixed(2) + " MB";
@@ -1450,7 +1456,13 @@ function Admin() {
                       className="hidden"
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
-                        files.forEach(f => void onGalleryFile(f));
+                        if (files.length > 0) {
+                          const msg = files.length === 1 
+                            ? "Is this an image clicked and owned by you?" 
+                            : "Are these images clicked and owned by you?";
+                          if (!window.confirm(msg)) return;
+                          files.forEach(f => void onGalleryFile(f, true));
+                        }
                       }}
                     />
                   </div>

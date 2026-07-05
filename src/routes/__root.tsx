@@ -121,6 +121,8 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { AiBaristaChat } from "@/components/ai-barista-chat";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -129,6 +131,7 @@ function RootComponent() {
       <AccessibilityProvider>
         <AuthProvider>
           <Outlet />
+          <AiBaristaChat />
           <Toaster position="top-right" closeButton richColors />
         </AuthProvider>
       </AccessibilityProvider>

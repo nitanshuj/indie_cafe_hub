@@ -296,21 +296,50 @@ All tables have RLS enabled. `public.is_admin()` is a security-definer function 
 
 ---
 
-## 14. Accessibility — Color-Blindness Themes
+## 14. Accessibility & UI Enhancements
 
-`AccessibilityContext` writes a `data-accessibility` attribute to `<html>`. CSS variables in `src/styles.css` override for each mode:
+The application implements a comprehensive accessibility design centering on color-blindness correction and clear navigation:
 
-| Mode | Attribute value | Primary color |
-| :--- | :--- | :--- |
-| Default | *(none)* | `#e67e6b` |
-| Protanopia | `protanopia` | `#059669` |
-| Deuteranopia | `deuteranopia` | `#2563eb` |
-| Tritanopia | `tritanopia` | `#db2777` |
-| Monochromacy | `monochromacy` | `#1f2937` |
+### Color-Blindness & Daltonization Themes
+`AccessibilityContext` writes a `data-accessibility` attribute to the `<html>` element. Along with custom CSS overrides for each mode, system-wide **SVG Daltonization (color correction) filters** are dynamically applied via matrix filters to shift colors to a distinguishable range for affected users:
+
+| Mode | Attribute value | Primary color | SVG Color Correction Filter |
+| :--- | :--- | :--- | :--- |
+| Default | *(none)* | `#1A1715` | None |
+| Protanopia | `protanopia` | `#059669` | `url(#protanopia-correction)` |
+| Deuteranopia | `deuteranopia` | `#2563eb` | `url(#deuteranopia-correction)` |
+| Tritanopia | `tritanopia` | `#db2777` | `url(#tritanopia-correction)` |
+| Monochromacy | `monochromacy` | `#1f2937` | None (grayscale override) |
+
+### Global Accessibility Style Overrides
+When any `data-accessibility` mode is active, the following strict visual enhancements apply:
+- **Link Indicators:** Text anchors (`a`) are forced to have permanent underlines (`text-decoration: underline !important`) to prevent relying on color shifts alone.
+- **Focus Rings:** All keyboard-focused elements display a thick, high-contrast focus outline (`outline: 3px solid #1A1715 !important`, with offset) for optimal keyboard navigability.
+
+### Image Ownership Verification
+To prevent copyright infringement, all image upload pipelines (Cover Photos and Gallery Photos on the Cafe Submit, Submissions Edit, and Admin pages) enforce a confirmation modal:
+- **Prompt:** *"Is this an image clicked and owned by you?"* (prompts once per batch for multiple files).
+- **Execution:** Upload proceeds to Cloudinary only if the user confirms with **Yes**.
+
+
+## 15. AI Coffee Expert Chatbot
+
+The application integrates a context-aware **AI Coffee Expert chatbot** ("AI Barista") globally in the user interface.
+
+### Features & Quotas
+- **Gated Access:** Guests see a lockscreen overlay prompting them to register or sign in. Members get **4 free queries per week**.
+- **Admin Bypass:** Users with `is_admin = true` bypass all quota limits and display `Admin (Unlimited)` balance states.
+- **Rollback / Reset Engine:** Tracks quotas inside `public.profiles` using `llm_query_count` and `llm_reset_date`. Resets on a rolling 7-day basis.
+- **Text Wrapping & Markdown Rendering:** Custom parsing renders bold phrases, headers, and bulleted lists safely while maintaining textual wraps.
+
+### API Architecture
+- **Server Guard:** TanStack Start server function `askAiBarista` in `src/lib/ai-chat.ts` receives client requests, validates JWT tokens, calls Supabase for quota enforcement, and invokes the generative model securely on the backend.
+- **Model:** Leverages the `gemini-2.5-flash` model. The model selection is loaded dynamically from `process.env.GEMINI_MODEL`.
+- **System instruction:** Imposes strict barista behaviors. The model only addresses coffee brewing, bean origins, machinery, recipes, and cafe culture.
 
 ---
 
-## 15. Configuration and Deployment
+## 16. Configuration and Deployment
 
 ### Environment Variables
 | Variable | Purpose |
@@ -321,6 +350,8 @@ All tables have RLS enabled. `public.is_admin()` is a security-definer function 
 | `VITE_CLOUDINARY_UPLOAD_PRESET` | Upload preset for transformations |
 | `CLOUDINARY_API_KEY` | Server-side signed upload key |
 | `CLOUDINARY_API_SECRET` | Server-side signing secret (never exposed to client) |
+| `GEMINI_API_KEY` | Server-only Google Generative AI access key (no VITE_ prefix) |
+| `GEMINI_MODEL` | Server-only Gemini model name configuration (no VITE_ prefix, defaults to `gemini-2.5-flash`) |
 
 ### Scripts
 | Command | Action |
@@ -336,7 +367,7 @@ All tables have RLS enabled. `public.is_admin()` is a security-definer function 
 
 ---
 
-## 16. Known Limitations
+## 17. Known Limitations
 
 1. **ISR simulation is browser-local:** Cache runs in `localStorage`, not real edge CDN handlers. Production ISR would require Netlify/Vercel edge functions.
 2. **No automated test coverage:** No unit, integration, or E2E tests — regression risk on updates.

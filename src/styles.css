@@ -31,6 +31,7 @@
   --cafe-open-text: #065f46;
   --cafe-negative-bg: #ffedd5;
   --cafe-negative-text: #b45309;
+  filter: url(#protanopia-correction);
 }
 
 [data-accessibility="deuteranopia"] {
@@ -42,6 +43,7 @@
   --cafe-open-text: #1e40af;
   --cafe-negative-bg: #fef3c7;
   --cafe-negative-text: #b45309;
+  filter: url(#deuteranopia-correction);
 }
 
 [data-accessibility="tritanopia"] {
@@ -53,6 +55,7 @@
   --cafe-open-text: #0369a1;
   --cafe-negative-bg: #fee2e2;
   --cafe-negative-text: #b91c1c;
+  filter: url(#tritanopia-correction);
 }
 
 [data-accessibility="monochromacy"] {
@@ -64,6 +67,16 @@
   --cafe-open-text: #374151;
   --cafe-negative-bg: #f3f4f6;
   --cafe-negative-text: #4b5563;
+}
+
+/* Global accessibility overrides when any accessibility theme is enabled */
+[data-accessibility] *:focus-visible {
+  outline: 3px solid #1A1715 !important;
+  outline-offset: 3px !important;
+}
+
+[data-accessibility] a {
+  text-decoration: underline !important;
 }
 
 @theme {

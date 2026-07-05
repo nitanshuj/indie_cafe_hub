@@ -20,6 +20,12 @@ This document details the technologies, frameworks, and libraries used to build 
 
 ---
 
+## 🤖 Artificial Intelligence
+
+- **LLM Integration:** [@google/generative-ai](https://www.npmjs.com/package/@google/generative-ai) — Google Generative AI SDK to interface with Gemini 2.5 Flash for the embedded AI Coffee Expert chatbot.
+
+---
+
 ## 🧭 Routing & State Management
 
 - **Routing:** [TanStack Router](https://tanstack.com/router) — Type-safe, client-side & server-side routing for React.

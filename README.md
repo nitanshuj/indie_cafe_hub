@@ -29,3 +29,8 @@ Indie Coffee Hub is a premium, beautifully curated web directory designed specif
 ### 💬 Community Notes & Reviews
 * **Nomad Discussions:** Guest and member-supported comment boards allowing users to post their remote working experiences, tips, and reviews.
 * **Dynamic Background Updates:** Seamless background polling to sync new community notes without requiring page refreshes, keeping the conversation up-to-date.
+
+### 🤖 AI Coffee Expert Chatbot
+* **Interactive AI Barista:** A floating chat interface available globally that answers user questions about coffee origins, brewing techniques, recipes, and cafe culture.
+* **Secure Quota Management:** Built-in weekly limits (4 queries/week, rolling reset) securely validated on the server using TanStack Start server functions and Supabase. Admins bypass the quota automatically.
+* **Markdown & Word-wrap Support:** Renders rich lists, headers, and bold text formats directly inside a responsive, word-wrapped chat widget.

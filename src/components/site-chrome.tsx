@@ -480,6 +480,45 @@ export function Header() {
       className="sticky top-0 z-50 bg-cafe-bg border-b border-[#1A1715]"
       data-testid="site-header"
     >
+      {/* SVG Daltonization correction filters */}
+      <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true">
+        <defs>
+          <filter id="protanopia-correction">
+            <feColorMatrix
+              type="matrix"
+              values="
+                0.567 0.433 0.000 0.000 0.000
+                0.558 0.442 0.000 0.000 0.000
+                0.000 0.242 0.758 0.000 0.000
+                0.000 0.000 0.000 1.000 0.000
+              "
+            />
+          </filter>
+          <filter id="deuteranopia-correction">
+            <feColorMatrix
+              type="matrix"
+              values="
+                0.625 0.375 0.000 0.000 0.000
+                0.700 0.300 0.000 0.000 0.000
+                0.000 0.300 0.700 0.000 0.000
+                0.000 0.000 0.000 1.000 0.000
+              "
+            />
+          </filter>
+          <filter id="tritanopia-correction">
+            <feColorMatrix
+              type="matrix"
+              values="
+                0.950 0.050 0.000 0.000 0.000
+                0.000 0.433 0.567 0.000 0.000
+                0.000 0.475 0.525 0.000 0.000
+                0.000 0.000 0.000 1.000 0.000
+              "
+            />
+          </filter>
+        </defs>
+      </svg>
+
       {/* Geolocation first-visit prompt bar */}
       {showLocationPrompt && (
         <div className="bg-cafe-bg border-b border-cafe-border py-3 px-6 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3 text-sm z-[110] relative">
@@ -766,6 +805,7 @@ export function Header() {
             >
               New to Coffee?
             </Link>
+
             {/* Submit a Cafe — auth-aware CTA (mobile) */}
             <button
               type="button"
@@ -1002,7 +1042,7 @@ export function Header() {
 export function Footer() {
   return (
     <footer className="bg-[#2D2422] text-white/80 mt-24" data-testid="site-footer">
-      <div className="max-w-7xl mx-auto px-6 py-16 grid gap-10 md:grid-cols-2">
+      <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 text-white font-outfit text-xl font-medium">
             <Coffee strokeWidth={1.5} className="text-cafe-primary" />
@@ -1015,13 +1055,13 @@ export function Footer() {
         <div className="text-sm font-work-sans flex flex-col gap-3 md:text-right md:items-end">
           <Link
             to="/about"
-            className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary hover:text-cafe-primary-hover transition-colors block"
+            className="text-xs uppercase tracking-[0.2em] font-semibold text-white hover:text-white/80 transition-colors block"
           >
             About
           </Link>
           <Link
             to="/contact"
-            className="text-xs uppercase tracking-[0.2em] font-semibold text-cafe-primary hover:text-cafe-primary-hover transition-colors block"
+            className="text-xs uppercase tracking-[0.2em] font-semibold text-white hover:text-white/80 transition-colors block"
           >
             Contact Us
           </Link>

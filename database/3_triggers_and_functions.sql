@@ -30,7 +30,8 @@ CREATE OR REPLACE FUNCTION public.prevent_self_privilege_escalation()
 RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.is_admin IS DISTINCT FROM OLD.is_admin THEN
-    IF NOT EXISTS (
+    -- Only enforce the check if the role is a standard authenticated user (i.e. not the Dashboard/Postgres/Service role)
+    IF current_setting('role', true) = 'authenticated' AND NOT EXISTS (
       SELECT 1 FROM public.profiles 
       WHERE id = auth.uid() AND is_admin = true
     ) THEN
@@ -68,4 +69,4 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE TRIGGER tr_ensure_profile_exists
   BEFORE INSERT OR UPDATE ON public.cafes
   FOR EACH ROW EXECUTE FUNCTION public.ensure_profile_exists();
-
+

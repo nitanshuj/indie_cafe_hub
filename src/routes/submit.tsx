@@ -225,6 +225,9 @@ function SubmitCafe() {
   // ─── Image handlers ──────────────────────────────────────────────────────
 
   const onHeroFile = async (file: File) => {
+    if (!window.confirm("Is this an image clicked and owned by you?")) {
+      return;
+    }
     try {
       setUploadingHero(true);
       const { url } = await handleImageUpload(file);
@@ -238,6 +241,9 @@ function SubmitCafe() {
   };
 
   const onGalleryFile = async (file: File) => {
+    if (!window.confirm("Is this an image clicked and owned by you?")) {
+      return;
+    }
     try {
       setBusy(true);
       const { url } = await handleImageUpload(file);
