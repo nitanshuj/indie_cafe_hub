@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
-import { askAiBarista } from "@/lib/ai-chat";
+import { askAiBarista, getGeminiModelName } from "@/lib/ai-chat";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Coffee, Send, Sparkles, Lock, ArrowRight, Bot, User } from "lucide-react";
 import { toast } from "sonner";
@@ -43,8 +43,25 @@ export function AiBaristaChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [queryCount, setQueryCount] = useState<number>(0);
+  const [activeModel, setActiveModel] = useState("Gemini");
   const [quotaExceeded, setQuotaExceeded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch active Gemini model name from the server
+  useEffect(() => {
+    getGeminiModelName()
+      .then((modelName) => {
+        if (modelName) {
+          // Format model name nicely for UI presentation: "gemini-2.5-flash" -> "Gemini 2.5 Flash"
+          const formatted = modelName
+            .split("-")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+          setActiveModel(formatted);
+        }
+      })
+      .catch(err => console.error("Failed to fetch Gemini model name:", err));
+  }, []);
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -169,7 +186,7 @@ export function AiBaristaChat() {
               </div>
               <div>
                 <h3 className="font-outfit font-semibold text-sm tracking-wide">AI Coffee Expert</h3>
-                <p className="text-[10px] text-white/70">Powered by Gemini 2.5 Flash</p>
+                <p className="text-[10px] text-white/70">Powered by {activeModel}</p>
               </div>
             </div>
             {user && (

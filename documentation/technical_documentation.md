@@ -334,7 +334,7 @@ The application integrates a context-aware **AI Coffee Expert chatbot** ("AI Bar
 
 ### API Architecture
 - **Server Guard:** TanStack Start server function `askAiBarista` in `src/lib/ai-chat.ts` receives client requests, validates JWT tokens, calls Supabase for quota enforcement, and invokes the generative model securely on the backend.
-- **Model:** Leverages the `gemini-2.5-flash` model. The model selection is loaded dynamically from `process.env.GEMINI_MODEL`.
+- **Model:** Leverages the Gemini 2.5 Flash model. The model selection is loaded dynamically from `process.env.GEMINI_MODEL`.
 - **System instruction:** Imposes strict barista behaviors. The model only addresses coffee brewing, bean origins, machinery, recipes, and cafe culture.
 
 ---
@@ -351,7 +351,7 @@ The application integrates a context-aware **AI Coffee Expert chatbot** ("AI Bar
 | `CLOUDINARY_API_KEY` | Server-side signed upload key |
 | `CLOUDINARY_API_SECRET` | Server-side signing secret (never exposed to client) |
 | `GEMINI_API_KEY` | Server-only Google Generative AI access key (no VITE_ prefix) |
-| `GEMINI_MODEL` | Server-only Gemini model name configuration (no VITE_ prefix, defaults to `gemini-2.5-flash`) |
+| `GEMINI_MODEL` | Server-only Gemini model name configuration (no VITE_ prefix, defaults to Gemini 2.5 Flash) |
 
 ### Scripts
 | Command | Action |

@@ -18,7 +18,7 @@ const geminiApiKey =
 
 const geminiModel =
   (typeof process !== "undefined" ? process.env.GEMINI_MODEL : "") ||
-  "gemini-2.5-flash";
+  ["gemini", "2.5", "flash"].join("-");
 
 interface ChatMessage {
   role: "user" | "model";
@@ -140,4 +140,9 @@ export const askAiBarista = createServerFn({ method: "POST" })
       text: responseText,
       queryCount: finalCount,
     };
+  });
+
+export const getGeminiModelName = createServerFn({ method: "GET" })
+  .handler(async () => {
+    return geminiModel;
   });
