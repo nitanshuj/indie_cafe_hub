@@ -40,7 +40,8 @@ interface ColdDrink {
   layers: ColdLayer[];
   accentColor: string;
   textAccent: string;
-  imageUrl: string;
+  imageUrl?: string;
+  videoUrl?: string;
   isDark?: boolean;
 }
 
@@ -54,7 +55,7 @@ const COLD_DRINKS: ColdDrink[] = [
     animation: "pour",
     accentColor: "from-[#FFF8F0] to-[#FFE4CC]",
     textAccent: "text-amber-800",
-    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142290/Iced-Cappucino_le8u7r.jpg",
+    videoUrl: "https://res.cloudinary.com/daon1coiv/video/upload/q_auto,f_auto/v1783622452/Iced_Latte_aoq4x5.mp4",
     layers: [
       { name: "Ice", height: "15%", bg: "bg-white/40", hoverBg: "bg-white/60" },
       { name: "Cold Milk", height: "60%", bg: "bg-[#FFF3E0]" },
@@ -70,7 +71,7 @@ const COLD_DRINKS: ColdDrink[] = [
     animation: "pour",
     accentColor: "from-[#292524] to-[#1C1917]",
     textAccent: "text-amber-400",
-    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142290/Cold-Brew-Coffee_xjgswt.jpg",
+    videoUrl: "https://res.cloudinary.com/daon1coiv/video/upload/q_auto,f_auto/v1783623590/Lets_generate_another_video_of_kps5ef.mp4",
     isDark: true,
     layers: [
       { name: "Ice", height: "15%", bg: "bg-white/20" },
@@ -86,7 +87,7 @@ const COLD_DRINKS: ColdDrink[] = [
     animation: "shake",
     accentColor: "from-[#FEF3C7] to-[#FDE68A]",
     textAccent: "text-amber-800",
-    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142290/Shaken_Espresso_g4icgg.jpg",
+    videoUrl: "https://res.cloudinary.com/daon1coiv/video/upload/q_auto,f_auto/v1783619289/Iced_Shaken_Espresso_xwe91m.mp4",
     layers: [
       { name: "Ice", height: "15%", bg: "bg-white/50" },
       { name: "Oat Milk", height: "40%", bg: "bg-amber-50" },
@@ -108,7 +109,7 @@ const COLD_DRINKS: ColdDrink[] = [
     animation: "pour",
     accentColor: "from-[#F0F9FF] to-[#E0F2FE]",
     textAccent: "text-blue-800",
-    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142290/Iced-Cappucino_le8u7r.jpg",
+    videoUrl: "https://res.cloudinary.com/daon1coiv/video/upload/q_auto,f_auto/v1783624568/Iced_Cappucino_gyxip5.mp4",
     layers: [
       { name: "Ice", height: "15%", bg: "bg-white/50" },
       { name: "Steamed Milk", height: "30%", bg: "bg-[#FFF3E0]" },
@@ -240,14 +241,26 @@ function GlassCard({ drink }: { drink: ColdDrink }) {
         </div>
       </div>
 
-      {/* Right side: Photo */}
+      {/* Right side: Photo or Video */}
       <div className="w-full md:w-[45%] h-64 md:h-auto min-h-[300px] relative overflow-hidden border-t md:border-t-0 md:border-l border-white/20">
-        <img
-          src={drink.imageUrl}
-          alt={drink.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-          loading="lazy"
-        />
+        {drink.videoUrl ? (
+          <video
+            src={drink.videoUrl}
+            preload="metadata"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : (
+          <img
+            src={drink.imageUrl}
+            alt={drink.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/40 via-transparent to-transparent pointer-events-none" />
 
         {/* Animation badges */}

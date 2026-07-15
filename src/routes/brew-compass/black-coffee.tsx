@@ -37,7 +37,8 @@ interface BrewMethod {
   description: string;
   specs: BrewSpec[];
   steps: BrewStep[];
-  imageUrl: string;
+  imageUrl?: string;
+  videoUrl?: string;
   cupProfile: string;
 }
 
@@ -135,7 +136,7 @@ const METHODS: BrewMethod[] = [
       { step: 4, title: "Listen and watch", body: "Coffee will gurgle up through the spout. Remove from heat when the sound becomes sputtery." },
       { step: 5, title: "Serve immediately", body: "Stir the coffee in the upper chamber before pouring." },
     ],
-    imageUrl: "https://res.cloudinary.com/daon1coiv/image/upload/v1782142057/Moka-pot_wltqqh.jpg",
+    videoUrl: "https://res.cloudinary.com/daon1coiv/video/upload/q_auto,f_auto/v1783626742/Moka_Pot_Brewing_eyfmpa.mp4",
     cupProfile: "Bold, bittersweet, espresso-adjacent. Heavy-bodied with roasty intensity.",
   },
   {
@@ -347,14 +348,26 @@ function MethodCard({ method }: { method: BrewMethod }) {
         </div>
       </div>
 
-      {/* Right side: Photo */}
+      {/* Right side: Photo or Video */}
       <div className="w-full md:w-[45%] h-64 md:h-auto min-h-[350px] relative overflow-hidden border-t md:border-t-0 md:border-l border-cafe-border">
-        <img
-          src={method.imageUrl}
-          alt={method.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-          loading="lazy"
-        />
+        {method.videoUrl ? (
+          <video
+            src={method.videoUrl}
+            preload="metadata"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : (
+          <img
+            src={method.imageUrl}
+            alt={method.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-l from-black/40 via-transparent to-transparent pointer-events-none" />
       </div>
     </div>
